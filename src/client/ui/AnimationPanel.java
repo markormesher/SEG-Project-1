@@ -5,14 +5,17 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.HashMap;
 
 public class AnimationPanel extends JLayeredPane {
 
+    HashMap<String , BufferedImage> Cache = new HashMap<String, BufferedImage>();
+    public Point position = new Point();
 	// theme settings
 	private String theme = "default";
 
 	// layers
-	private JLabel background = new JLabel();
+	public JLabel background = new JLabel();
 	private JLabel object = new JLabel();
 	private JLabel effect = new JLabel();
 
@@ -20,6 +23,7 @@ public class AnimationPanel extends JLayeredPane {
 		super();
 		setPreferredSize(new Dimension(width, height));
 
+        setBackground(Color.red);
 		// position labels
 		background.setLocation(0, 0);
 		background.setSize(width, height);
@@ -41,7 +45,10 @@ public class AnimationPanel extends JLayeredPane {
 		} else {
 			try {
 				// read the image from resources
-				final BufferedImage image = ImageIO.read(AnimationPanel.class.getResource("/images/" + theme + "/" + icon + ".png"));
+				final BufferedImage image =
+                        (Cache.containsKey(icon)) ? Cache.get(icon) :
+                        ImageIO.read(AnimationPanel.class.getResource("/images/" + theme + "/" + icon + ".png"));
+                Cache.put(icon,image);
 				// set the label to a new icon
 				label.setIcon(new ImageIcon() {
 					@Override
@@ -82,5 +89,6 @@ public class AnimationPanel extends JLayeredPane {
 	public void setEffect(String newEffect, int angle) {
 		setIcon(effect, newEffect, angle);
 	}
+
 
 }

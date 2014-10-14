@@ -32,7 +32,7 @@ public class ClientUI extends JFrame implements BattleClientGuiInterface {
     public ClientUI(){
 
 
-        this.setSize(600, 500);
+        this.setSize(700, 500);
         this.setVisible(true);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -63,22 +63,22 @@ public class ClientUI extends JFrame implements BattleClientGuiInterface {
         Border margin = new EmptyBorder(10,10,10,10);
         CompoundBorder compoundBorder = new CompoundBorder(new LineBorder(Color.darkGray , 1), margin);
 
-        JPanel inner = new JPanel(new GridLayout(0,3,10,10));
+        JPanel inner = new JPanel(new GridLayout(0,2,10,10));
         add(inner , BorderLayout.CENTER);
 
-        JPanel leftPanel = new JPanel();
-        leftPanel.setBorder(compoundBorder);
+        JPanel leftPanel = new JPanel(new FlowLayout());
+        leftPanel.add(new BattleBoard());
         inner.add(leftPanel);
 
         JPanel clockContainer = new JPanel( new FlowLayout());
         CountdownClock clock = new CountdownClock(60);
-        clock.setMaximumSize(new Dimension(100,100));
-        clock.setPreferredSize(new Dimension(100, 100));
+        clock.setMaximumSize(new Dimension(50,50));
+        clock.setPreferredSize(new Dimension(50, 50));
         clockContainer.add(clock);
-        inner.add(clockContainer);
+        //inner.add(clockContainer);
 
-        JPanel rightPanel = new JPanel();
-        rightPanel.setBorder(compoundBorder);
+        JPanel rightPanel = new JPanel(new FlowLayout());
+        rightPanel.add(new BattleBoard());
         inner.add(rightPanel);
 
 
