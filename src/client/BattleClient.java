@@ -67,8 +67,10 @@ public class BattleClient {
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
+					break;
 				} catch (ClassNotFoundException e) {
 					e.printStackTrace();
+					break;
 				}
 			}
 		}

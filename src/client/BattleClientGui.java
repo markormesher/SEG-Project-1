@@ -26,10 +26,11 @@ public class BattleClientGui implements BattleClientGuiInterface {
 			String msg = scanner.nextLine();
 			String[] msgParts = msg.split(":");
 			if (msgParts.length == 2) {
-				Message toSend = new Message(msgParts[0], Message.MESSAGE, msgParts[1]);
+				Message toSend = new Message(msgParts[0], Message.MESSAGE, msgParts[1].trim());
 				try {
 					battleClientGui.sendMessage(toSend);
 				} catch (IOException e) {
+					System.out.println("# Failed to send message");
 					e.printStackTrace();
 				}
 			}
@@ -60,7 +61,11 @@ public class BattleClientGui implements BattleClientGuiInterface {
 		System.out.print("# Enter port number [" + Settings.PORT_NUMBER + "]: ");
 		try {
 			String tempPort = br.readLine();
-			port = Integer.parseInt(tempPort.equals("") ? "" + Settings.PORT_NUMBER : "");
+			if (tempPort.equals("")) {
+				port = Settings.PORT_NUMBER;
+			} else {
+				port = Integer.parseInt(tempPort);
+			}
 			System.out.println("#");
 		} catch (NumberFormatException e) {
 			System.out.println("# You didn't enter a valid port number");

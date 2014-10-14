@@ -40,11 +40,11 @@ public class BattleServer {
 			socket = serverSocket.accept();
 
 			// store the connection
-			System.out.println("Trying to create new client thread...");
+			System.out.println("New client connected");
+			System.out.println("");
 			BattleClientThread thread = new BattleClientThread(socket);
 			connectedClients.add(thread);
 			thread.start();
-			System.out.println("New client thread created: " + thread.username);
 		}
 	}
 
@@ -92,7 +92,6 @@ public class BattleServer {
 		// listen for incoming messages from the client and decide what to do with them
 		@Override
 		public void run() {
-			// run forever (or until we disconnect)
 			while (true) {
 				// try to read from stream
 				Message msg;
@@ -106,8 +105,9 @@ public class BattleServer {
 					break;
 				}
 
-				// setting username?
+				// setting username or sending message?
 				if (msg.getType() == Message.SET_USERNAME) {
+					// set username of this thread
 					username = msg.getMessage();
 				} else {
 					// find recipient by username and send the message to them
@@ -122,7 +122,6 @@ public class BattleServer {
 						}
 					}
 				}
-
 			}
 
 			// finished the loop, so remove this client from the array

@@ -4,9 +4,18 @@ import java.io.Serializable;
 
 public class Message implements Serializable {
 
+	// required by ObjectIO stream serializer
 	protected static final long serialVersionUID = 1112122200L;
 
-	public static final int SET_USERNAME = 1, READY_TO_PLAY = 2, SHOOT = 3, HIT = 4, MISS = 5, MESSAGE = 6;
+	// message types that can be sent
+	public static final int SET_USERNAME = 1,
+			READY_TO_PLAY = 2,
+			SHOOT = 3,
+			HIT = 4,
+			MISS = 5,
+			MESSAGE = 6;
+
+	// details of this message
 	private String recipient;
 	private int type;
 	private String message;
