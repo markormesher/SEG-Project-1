@@ -1,7 +1,10 @@
 package client.ui;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 public class AnimationPanel extends JLayeredPane {
 
@@ -32,13 +35,29 @@ public class AnimationPanel extends JLayeredPane {
 	}
 
 	// set the icon of a given label
-	public void setIcon(JLabel label, String icon) {
-		if (icon == null) {
+	public void setIcon(final JLabel label, String icon, final int angle) {
+		if (theme == null || icon == null) {
 			label.setIcon(null);
 		} else {
 			try {
-				label.setIcon(new ImageIcon(AnimationPanel.class.getResource("/" + theme + "/" + icon)));
+				// read the image from resources
+				final BufferedImage image = ImageIO.read(AnimationPanel.class.getResource("/images/" + theme + "/" + icon + ".png"));
+				// set the label to a new icon
+				label.setIcon(new ImageIcon() {
+					@Override
+					public synchronized void paintIcon(Component c, Graphics g, int x, int y) {
+						super.paintIcon(c, g, x, y);
+						Graphics2D g2 = (Graphics2D) g;
+						Double rotate = angle == 0 ? 0d : Math.PI / (180/angle);
+						g2.rotate(rotate, (label.getWidth() / 2), (label.getHeight() / 2));
+						g2.drawImage(image, 0, 0, null);
+					}
+				});
+			} catch (IOException e) {
+				label.setIcon(null);
 			} catch (NullPointerException e) {
+				label.setIcon(null);
+			} catch (IllegalArgumentException e) {
 				label.setIcon(null);
 			}
 		}
@@ -50,18 +69,18 @@ public class AnimationPanel extends JLayeredPane {
 	}
 
 	// set the background of this panel
-	public void setBackground(String newBackground) {
-		setIcon(background, newBackground);
+	public void setBackground(String newBackground, int angle) {
+		setIcon(background, newBackground, angle);
 	}
 
 	// set the object of this panel
-	public void setObject(String newObject) {
-		setIcon(object, newObject);
+	public void setObject(String newObject, int angle) {
+		setIcon(object, newObject, angle);
 	}
 
 	// set the effect image of this panel
-	public void setEffect(String newEffect) {
-		setIcon(effect, newEffect);
+	public void setEffect(String newEffect, int angle) {
+		setIcon(effect, newEffect, angle);
 	}
 
 }
