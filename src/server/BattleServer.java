@@ -1,5 +1,6 @@
 package server;
 
+import com.sun.xml.internal.ws.api.pipe.Fiber;
 import global.ClientPair;
 import global.Message;
 import global.Settings;
@@ -197,6 +198,7 @@ public class BattleServer {
 					// set username of this thread
 					username = msg.getMessage();
 					checkBothUsernameSet(id);
+                    for(NewConnectionListener listener:listeners)listener.onNewConnection(username);
 				} else {
 					// find recipient by username and send the message to them
 					for (BattleClientThread c : connectedClients) {
@@ -222,5 +224,11 @@ public class BattleServer {
 			}
 		}
 	}
+
+    ArrayList<NewConnectionListener> listeners = new ArrayList<NewConnectionListener>();
+
+    public void addNewConnectionListener(NewConnectionListener listener){
+        listeners.add(listener);
+    }
 
 }
