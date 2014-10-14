@@ -120,10 +120,23 @@ public class ClientUI extends JFrame implements BattleClientGuiInterface {
     @Override
     public void onReceiveMessage(Message msg) {
         //if the opponent is set change the title bar text and save it for chatting , else add message to text area
-        if(msg.getType() == Message.SET_OPPONENT){
-            opponentUsername = msg.getMessage();
-            setTitle(username +" playing against " + opponentUsername);
+        if(msg == null) return;
+        switch (msg.getType()){
+            case Message.SET_OPPONENT:{
+                if(msg.getMessage() == null)return;
+                opponentUsername = msg.getMessage();
+                setTitle(username +" playing against " + opponentUsername);
+                break;
+            }
+            case Message.CHAT_MESSAGE:{
+                if(msg.getMessage() == null)return;
+                messages.append("\n" + opponentUsername +": "+ msg.getMessage());
+                break;
+            }
+            case Message.OPPONENT_DISCONNECTED:{
+                System.exit(0);
+                break;
+            }
         }
-        else messages.append("\n" + opponentUsername +": "+ msg.getMessage());
     }
 }
