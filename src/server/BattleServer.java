@@ -1,6 +1,5 @@
 package server;
 
-import com.sun.xml.internal.ws.api.pipe.Fiber;
 import global.ClientPair;
 import global.Message;
 import global.Settings;
