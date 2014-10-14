@@ -67,4 +67,9 @@ public class BattleAnimationPanel extends AnimationPanel {
 	public void setAsMissPin() {
 		setObject("pin-miss", 0);
 	}
+
+	// run the explosion animation on this panel
+	public void explode() {
+		// TODO
+	}
 }
