@@ -29,9 +29,7 @@ public class BattleClient {
 
 	public void connect() throws IOException {
 		// connect to server
-		System.out.println("# Connecting to " + host + ":" + port + " as " + username);
 		serverSocket = new Socket(host, port);
-		System.out.println("# Connection Established");
 
 		// get object streams
 		inputStream = new ObjectInputStream(serverSocket.getInputStream());
@@ -62,11 +60,10 @@ public class BattleClient {
 			while (true) {
 				try {
 					Message msg = (Message) inputStream.readObject();
-					if (msg.getMessage() != null) {
-						gui.onReceiveMessage(msg);
-					}
+					gui.onReceiveMessage(msg);
 				} catch (IOException e) {
-					e.printStackTrace();
+					Message serverGone = new Message(null, Message.SERVER_GONE);
+					gui.onReceiveMessage(serverGone);
 					break;
 				} catch (ClassNotFoundException e) {
 					e.printStackTrace();
