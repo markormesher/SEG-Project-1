@@ -10,7 +10,6 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.SortedSet;
 
 public class BattleServer {
 
@@ -74,10 +73,10 @@ public class BattleServer {
 	}
 
 	protected synchronized void checkBothUsernameSet(int id) {
-		// find pair where both clients are set AND one of the IDs match
+		// find pair where one of the IDs match
 		ClientPair pair = null;
 		for (ClientPair p : activePairs) {
-			if (p.clientA != null && p.clientB != null && (p.clientA.id == id || p.clientB.id == id)) {
+			if (p.clientA.id == id || p.clientB.id == id) {
 				pair = p;
 			}
 		}
@@ -103,6 +102,40 @@ public class BattleServer {
 		for (BattleClientThread c : connectedClients) {
 			if (c.id == id) {
 				connectedClients.remove(c);
+			}
+		}
+
+		// was this one waiting?
+		if (waitingClient != null && waitingClient.id == id) {
+			waitingClient = null;
+			return;
+		}
+
+		// scan active games and remove this one, and notify the opponent
+		BattleClientThread opponent = null;
+		for (ClientPair p : activePairs) {
+			// find the disconnected client's opponent
+			if (p.clientA.id == id) {
+				opponent = p.clientB;
+			}
+			if (p.clientB.id == id) {
+				opponent = p.clientA;
+			}
+
+			// notify the other client
+			if (opponent != null) {
+				Message sendToOp = new Message(opponent.username, Message.OPPONENT_DISCONNECTED);
+				try {
+					opponent.sendMessage(sendToOp);
+				} catch (IOException e) {
+					System.out.println("Failed to notify " + opponent.username + " that their opponent disconnected");
+				}
+
+				// remove this pair
+				activePairs.remove(p);
+
+				// don't waste time
+				break;
 			}
 		}
 	}
@@ -172,7 +205,6 @@ public class BattleServer {
 								c.sendMessage(msg);
 							} catch (IOException e) {
 								System.out.print("Failed to send message to " + msg.getRecipient());
-								e.printStackTrace();
 							}
 						}
 					}
@@ -187,7 +219,6 @@ public class BattleServer {
 				close();
 			} catch (IOException e) {
 				System.out.println("Failed to close client thread");
-				e.printStackTrace();
 			}
 		}
 	}

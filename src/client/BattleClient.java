@@ -60,9 +60,7 @@ public class BattleClient {
 			while (true) {
 				try {
 					Message msg = (Message) inputStream.readObject();
-					if (msg.getMessage() != null) {
-						gui.onReceiveMessage(msg);
-					}
+					gui.onReceiveMessage(msg);
 				} catch (IOException e) {
 					Message serverGone = new Message(null, Message.SERVER_GONE);
 					gui.onReceiveMessage(serverGone);

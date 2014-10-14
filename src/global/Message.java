@@ -14,8 +14,9 @@ public class Message implements Serializable {
 			SHOOT = 4,
 			HIT = 5,
 			MISS = 6,
-			MESSAGE = 7,
-			SERVER_GONE = 8;
+			CHAT_MESSAGE = 7,
+			SERVER_GONE = 8,
+			OPPONENT_DISCONNECTED = 9;
 
 	// details of this message
 	private String recipient;

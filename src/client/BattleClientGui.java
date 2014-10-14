@@ -6,6 +6,7 @@ import global.Settings;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class BattleClientGui implements BattleClientGuiInterface {
@@ -23,10 +24,15 @@ public class BattleClientGui implements BattleClientGuiInterface {
 		// a message to another client, using the format "username:message"
 		Scanner scanner = new Scanner(System.in);
 		while (true) {
-			String msg = scanner.nextLine();
+			String msg;
+			try {
+				msg = scanner.nextLine();
+			} catch (NoSuchElementException e) {
+				break;
+			}
 			String[] msgParts = msg.split(":");
 			if (msgParts.length == 2) {
-				Message toSend = new Message(msgParts[0], Message.MESSAGE, msgParts[1].trim());
+				Message toSend = new Message(msgParts[0], Message.CHAT_MESSAGE, msgParts[1].trim());
 				try {
 					battleClientGui.sendMessage(toSend);
 				} catch (IOException e) {
@@ -108,6 +114,10 @@ public class BattleClientGui implements BattleClientGuiInterface {
 
 			case Message.SERVER_GONE:
 				System.out.println("# The connection to the server has been lost");
+				break;
+
+			case Message.OPPONENT_DISCONNECTED:
+				System.out.println("# Your opponent has disconnected");
 				break;
 
 			default:
