@@ -9,21 +9,21 @@ import java.util.HashMap;
 
 public class AnimationPanel extends JLayeredPane {
 
+    //caching the images improves performance
     HashMap<String , BufferedImage> Cache = new HashMap<String, BufferedImage>();
     public Point position = new Point();
 	// theme settings
 	private String theme = "default";
 
-	// layers
+	// layers (public for checking the background and if an object exists
 	public JLabel background = new JLabel();
-	private JLabel object = new JLabel();
+	public JLabel object = new JLabel();
 	private JLabel effect = new JLabel();
 
 	public AnimationPanel(int width, int height) {
 		super();
 		setPreferredSize(new Dimension(width, height));
 
-        setBackground(Color.red);
 		// position labels
 		background.setLocation(0, 0);
 		background.setSize(width, height);
@@ -44,7 +44,7 @@ public class AnimationPanel extends JLayeredPane {
 			label.setIcon(null);
 		} else {
 			try {
-				// read the image from resources
+				// read the image from resources if it's not cached
 				final BufferedImage image =
                         (Cache.containsKey(icon)) ? Cache.get(icon) :
                         ImageIO.read(AnimationPanel.class.getResource("/images/" + theme + "/" + icon + ".png"));
