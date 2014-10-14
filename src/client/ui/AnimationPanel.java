@@ -48,7 +48,7 @@ public class AnimationPanel extends JLayeredPane {
 					public synchronized void paintIcon(Component c, Graphics g, int x, int y) {
 						super.paintIcon(c, g, x, y);
 						Graphics2D g2 = (Graphics2D) g;
-						Double rotate = angle == 0 ? 0d : Math.PI / (180/angle);
+						Double rotate = angle * (Math.PI / 180);
 						g2.rotate(rotate, (label.getWidth() / 2), (label.getHeight() / 2));
 						g2.drawImage(image, 0, 0, null);
 					}
