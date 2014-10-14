@@ -37,8 +37,9 @@ public class BattleClientGui implements BattleClientGuiInterface {
 		}
 	}
 
-	// store the client
+	// settings for this game
 	private BattleClient client;
+	private String opponentUsername;
 
 	// start a client and connect to the server
 	public void startClient() throws IOException {
@@ -87,7 +88,10 @@ public class BattleClientGui implements BattleClientGuiInterface {
 		// try to establish a connection to the server
 		client = new BattleClient(host, port, username, this);
 		try {
+			System.out.println("# Connecting to " + host + ":" + port + " as " + username);
 			client.connect();
+			System.out.println("# Connection established");
+			System.out.println("# Waiting for opponent...");
 		} catch (IOException e) {
 			System.out.println("# Cannot establish connection - is the server running?");
 		}
@@ -96,15 +100,22 @@ public class BattleClientGui implements BattleClientGuiInterface {
 	// this method will be called every time a message is sent to this client
 	@Override
 	public void onReceiveMessage(Message msg) {
-		if (msg.getMessage() != null) {
-			System.out.println("# " + msg.getMessage());
-		}
-	}
+		switch (msg.getType()) {
+			case Message.SET_OPPONENT:
+				opponentUsername = msg.getMessage();
+				System.out.println("# You are playing against " + opponentUsername);
+				break;
 
-	// this method will be called at the start of each game to specify the username of the person you are playing against
-	@Override
-	public void onSetOpponent(String opponent) {
-		System.out.println("# playing against " + opponent);
+			case Message.SERVER_GONE:
+				System.out.println("# The connection to the server has been lost");
+				break;
+
+			default:
+				if (msg.getMessage() != null) {
+					System.out.println("# " + msg.getMessage());
+				}
+				break;
+		}
 	}
 
 	// this method can be used to send a message back to the server
