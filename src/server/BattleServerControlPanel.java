@@ -43,6 +43,7 @@ public class BattleServerControlPanel extends JFrame {
 		}).start();
 
 		// list of connected users
+		// TODO: swap for an output of connections, disconnections, server status messages, etc
 		final DefaultListModel<String> users = new DefaultListModel<String>();
 		JList<String> list = new JList<String>(users);
 		serverUI.setLayout(new BorderLayout());

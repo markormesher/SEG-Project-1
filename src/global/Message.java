@@ -18,6 +18,8 @@ public class Message implements Serializable {
 			SERVER_GONE = 8,
 			OPPONENT_DISCONNECTED = 9;
 
+	// TODO: add types for USERNAME_OK, USERNAME_TAKEN, anything else that is needed
+
 	// details of this message
 	private String recipient;
 	private int type;
