@@ -1,7 +1,5 @@
 package client.ui;
 
-import server.NewConnectionListener;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
