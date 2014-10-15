@@ -4,11 +4,11 @@ public class BattleAnimationPanel extends AnimationPanel {
 
 	// constants
 	public static final int NORTH = 1,
-	EAST = 2,
-	SOUTH = 3,
-	WEST = 4,
-	HORIZONTAL = 5,
-	VERTICAL = 6;
+			EAST = 2,
+			SOUTH = 3,
+			WEST = 4,
+			HORIZONTAL = 5,
+			VERTICAL = 6;
 
 	public BattleAnimationPanel(int width, int height) {
 		super(width, height);
@@ -36,8 +36,9 @@ public class BattleAnimationPanel extends AnimationPanel {
 				break;
 		}
 
-		// little hack so rotation choses the right image and angle
-		setObject(angle != 180 && angle != 270 ? "ship-front" : "ship-back", angle == 90 ||angle==270 ? 90 :0);
+		// little hack so rotation chooses the right image and angle
+		// TODO: replace with 4-direction ship
+		setObject(angle != 180 && angle != 270 ? "ship-front" : "ship-back", angle == 90 || angle == 270 ? 90 : 0);
 	}
 
 	// set this panel as a ship middle section
