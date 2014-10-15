@@ -62,7 +62,7 @@ public class BattleBoardOpponent extends JPanel {
 		shotListeners.add(listener);
 	}
 
-	interface ShotListener {
+	public interface ShotListener {
 		void onShotFired(int x, int y);
 	}
 }
