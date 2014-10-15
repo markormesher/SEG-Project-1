@@ -32,6 +32,10 @@ public class BattleServer {
 	private ArrayList<BattleClientThread> connectedClients = new ArrayList<BattleClientThread>();
 	private ArrayList<ClientPair> activePairs = new ArrayList<ClientPair>();
 
+	// list of client connection/disconnection listeners
+	ArrayList<ClientConnectedListener> clientConnectedListeners = new ArrayList<ClientConnectedListener>();
+	ArrayList<ClientDisconnectedListener> clientDisconnectedListeners = new ArrayList<ClientDisconnectedListener>();
+
 	// start server
 	public void startServer() throws IOException {
 		System.out.println("Starting server on localhost:" + Settings.PORT_NUMBER);
@@ -72,6 +76,7 @@ public class BattleServer {
 		}
 	}
 
+	// check whether both usernames are set, and if so start a game
 	protected synchronized void checkBothUsernameSet(int id) {
 		// find pair where one of the IDs match
 		ClientPair pair = null;
@@ -97,10 +102,14 @@ public class BattleServer {
 		}
 	}
 
+	// removes a client thread from all server listings
 	protected synchronized void removeClientThread(int id) {
 		// scan connected clients and remove this one
 		for (BattleClientThread c : connectedClients) {
 			if (c.id == id) {
+				for (ClientDisconnectedListener listener : clientDisconnectedListeners) {
+					listener.onClientDisconnected(c.username);
+				}
 				connectedClients.remove(c);
 			}
 		}
@@ -197,8 +206,10 @@ public class BattleServer {
 					// set username of this thread
 					username = msg.getMessage();
 					checkBothUsernameSet(id);
-					for(NewConnectionListener listener:listeners){
-						listener.onNewConnection(username);
+
+					// notify all clientConnectedListeners
+					for(ClientConnectedListener listener: clientConnectedListeners){
+						listener.onClientConnected(username);
 					}
 				} else {
 					// find recipient by username and send the message to them
@@ -226,10 +237,14 @@ public class BattleServer {
 		}
 	}
 
-	ArrayList<NewConnectionListener> listeners = new ArrayList<NewConnectionListener>();
+	// register a new connection listener
+	public void addClientConnectedListener(ClientConnectedListener listener){
+		clientConnectedListeners.add(listener);
+	}
 
-	public void addNewConnectionListener(NewConnectionListener listener){
-		listeners.add(listener);
+	// register a new disconnection listener
+	public void addClientDisconnectedListener(ClientDisconnectedListener listener){
+		clientDisconnectedListeners.add(listener);
 	}
 
 }
