@@ -54,7 +54,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
 		// collect player username and set it as title
 		playerUsername = JOptionPane.showInputDialog(this, "Enter a username");
-		setTitle(playerUsername + " playing");
+		setTitle(playerUsername + " (you) vs. ???");
 
 		// the client uses while so it must run on a separate thread
 		(new Thread() {
@@ -77,10 +77,10 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 			@Override
 			public void onFinished() {
 				try {
-					//tell the other user , you're ready
+					// tell the other user , you're ready
 					client.sendMessage(new Message(opponentUsername, Message.READY_TO_PLAY));
-					//if the other opponent hasn't finished ,you go first
-					currentPlayer = ME;
+					// if the other opponent hasn't finished yet, you go first
+					if (currentPlayer == 0) currentPlayer = ME;
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -104,8 +104,9 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 				if (currentPlayer == ME) {
 					try {
 						client.sendMessage(new Message(opponentUsername, Message.SHOOT, x, y));
-						//after shooting it's their turn
+						// after shooting it's their turn
 						currentPlayer = OPPONENT;
+						onPlayerChanged();
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -171,14 +172,15 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 				break;
 
 			case Message.READY_TO_PLAY:
-				// TODO: fix first player assignment
-				currentPlayer = OPPONENT;
+				// if you haven't finished yet, they will go first
+				if (currentPlayer == 0) currentPlayer = OPPONENT;
 				appendToLog("\n<strong>" + opponentUsername + " has finished placing ships and is ready to play</strong>");
 				break;
 
 			case Message.SHOOT: {
 				// you've been shot at, so it's your turn
 				currentPlayer = ME;
+				onPlayerChanged();
 
 				// find the tile they shop
 				BattleAnimationPanel shotAt = localBoard.getBoardCells()[msg.getX()][msg.getY()];
@@ -218,7 +220,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		}
 	}
 
-	public void appendToLog(String s) {
+	private void appendToLog(String s) {
 		messages.add(s);
 
 		// this code appends a line as html
@@ -230,6 +232,15 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	private void onPlayerChanged() {
+		// TODO: update status message somewhere when the player changes
+		if (currentPlayer == ME) {
+			setTitle(playerUsername + " (you) vs. " + opponentUsername + " | YOUR MOVE");
+		} else {
+			setTitle(playerUsername + " (you) vs. " + opponentUsername + " | THEIR MOVE");
 		}
 	}
 }
