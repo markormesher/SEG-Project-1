@@ -31,6 +31,10 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 	public static final int ME = 1;
 	public static final int OPPONENT = 2;
 
+	// are both sides ready yet?
+	private boolean opponentReady = false;
+	private boolean playerReady = false;
+
 	// a list of all messages
 	ArrayList<String> messages = new ArrayList<String>();
 
@@ -77,10 +81,14 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 			@Override
 			public void onFinished() {
 				try {
-					// tell the other user , you're ready
+					// tell the other user you're ready
 					client.sendMessage(new Message(opponentUsername, Message.READY_TO_PLAY));
 					// if the other opponent hasn't finished yet, you go first
-					if (currentPlayer == 0) currentPlayer = ME;
+					if (currentPlayer == 0) {
+						currentPlayer = ME;
+					}
+					// we're ready
+					playerReady = true;
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -100,7 +108,13 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		opponentBoard.addShotListener(new BattleBoardOpponent.ShotListener() {
 			@Override
 			public void onShotFired(int x, int y) {
-				//you must be the current player to shoot
+				// both sides must be ready
+				if (!playerReady || !opponentReady) {
+					// TODO: error message: both sides are not ready yet
+					return;
+				}
+
+				// you must be the current player to shoot
 				if (currentPlayer == ME) {
 					try {
 						client.sendMessage(new Message(opponentUsername, Message.SHOOT, x, y));
@@ -110,6 +124,8 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
+				} else {
+					// TODO: error message: "not your turn"
 				}
 			}
 		});
@@ -172,6 +188,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 				break;
 
 			case Message.READY_TO_PLAY:
+				opponentReady = true;
 				// if you haven't finished yet, they will go first
 				if (currentPlayer == 0) currentPlayer = OPPONENT;
 				appendToLog("\n<strong>" + opponentUsername + " has finished placing ships and is ready to play</strong>");
