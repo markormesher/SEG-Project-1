@@ -35,12 +35,6 @@ public class BattleBoardOpponent extends JPanel {
 		// listen for mouse events on the overlay board
 		MouseAdapter mouseAdapter = new MouseAdapter() {
 			@Override
-			public void mouseMoved(MouseEvent e) {
-				super.mouseMoved(e);
-				overlayPanel.setVisible(true);
-			}
-
-			@Override
 			public void mouseClicked(MouseEvent e) {
 				super.mouseClicked(e);
 				// find the cell coordinate of the click
