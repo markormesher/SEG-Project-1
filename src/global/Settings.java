@@ -8,5 +8,6 @@ public class Settings {
 
 	// UI
 	public static final int IMAGE_CELL_SIZE = 36;
+	public static final int[] SHIP_SIZES = {5, 4, 3, 3, 2};
 
 }

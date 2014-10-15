@@ -85,7 +85,7 @@ public class ClientUI extends JFrame implements BattleClientGuiInterface {
 
         JPanel leftPanel = new JPanel(new FlowLayout());
 
-        userBoard.addShipPlacementListener(new ShipPlacementListener() {
+        userBoard.addShipPlacementListener(new BattleBoardLocal.ShipPlacementListener() {
             @Override
             public void onFinished() {
                 try {

@@ -21,23 +21,23 @@ public class BattleBoardOpponent extends JPanel {
 		setPreferredSize(new Dimension(Settings.IMAGE_CELL_SIZE * 10, Settings.IMAGE_CELL_SIZE * 10));
 		setSize(new Dimension(Settings.IMAGE_CELL_SIZE * 10, Settings.IMAGE_CELL_SIZE * 10));
 
-		// add a new layered pane to hold view items
+		// add a new layered pane to hold the board layer and listener panel
 		JLayeredPane layeredPane = new JLayeredPane();
 		layeredPane.setBounds(0, 0, Settings.IMAGE_CELL_SIZE * 10, Settings.IMAGE_CELL_SIZE * 10);
 		add(layeredPane);
 
 		// create panel to lay over the board to listen for events
-		final JPanel panel = new JPanel();
-		panel.setOpaque(false);
-		panel.setPreferredSize(new Dimension(Settings.IMAGE_CELL_SIZE * 10, Settings.IMAGE_CELL_SIZE * 10));
-		panel.setSize(new Dimension(Settings.IMAGE_CELL_SIZE * 10, Settings.IMAGE_CELL_SIZE * 10));
+		final JPanel overlayPanel = new JPanel();
+		overlayPanel.setOpaque(false);
+		overlayPanel.setPreferredSize(new Dimension(Settings.IMAGE_CELL_SIZE * 10, Settings.IMAGE_CELL_SIZE * 10));
+		overlayPanel.setSize(new Dimension(Settings.IMAGE_CELL_SIZE * 10, Settings.IMAGE_CELL_SIZE * 10));
 
 		// listen for mouse events on the overlay board
 		MouseAdapter mouseAdapter = new MouseAdapter() {
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				super.mouseMoved(e);
-				panel.setVisible(true);
+				overlayPanel.setVisible(true);
 			}
 
 			@Override
@@ -55,7 +55,7 @@ public class BattleBoardOpponent extends JPanel {
 
 		// add the listener layer over the board
 		layeredPane.add(board, new Integer(0));
-		layeredPane.add(panel, new Integer(1));
+		layeredPane.add(overlayPanel, new Integer(1));
 	}
 
 	// get the titles of the battle board

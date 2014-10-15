@@ -24,8 +24,8 @@ public class BattleBoard extends JPanel {
 		this.setFocusable(true);
 
 		// create a 10 x 10 grid of cells
-		for (int x = 0; x < 10; ++x) {
-			for (int y = 0; y < 10; ++y) {
+		for (int y = 0; y < 10; ++y) {
+			for (int x = 0; x < 10; ++x) {
 				final BattleAnimationPanel panel = new BattleAnimationPanel(Settings.IMAGE_CELL_SIZE, Settings.IMAGE_CELL_SIZE);
 				panel.setBackground("bg", 0);
 				tiles[x][y] = panel;

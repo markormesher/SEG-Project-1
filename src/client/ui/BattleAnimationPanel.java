@@ -3,60 +3,27 @@ package client.ui;
 public class BattleAnimationPanel extends AnimationPanel {
 
 	// constants
-	public static final int NORTH = 1,
-			EAST = 2,
-			SOUTH = 3,
-			WEST = 4,
-			HORIZONTAL = 5,
-			VERTICAL = 6;
+	public static final int NORTH = 0,
+			EAST = 90,
+			SOUTH = 180,
+			WEST = 270;
 
 	public BattleAnimationPanel(int width, int height) {
 		super(width, height);
 	}
 
 	// set this panel as a ship end section
-	public void setAsShipEnd(int orientation) {
-		// find rotation
-		int angle;
-		switch (orientation) {
-			case NORTH:
-				angle = 0;
-				break;
-			case EAST:
-				angle = 90;
-				break;
-			case SOUTH:
-				angle = 180;
-				break;
-			case WEST:
-				angle = 270;
-				break;
-			default:
-				angle = 0;
-				break;
-		}
+	public void setAsShipFront(int orientation) {
+		setObject("ship-front", orientation);
+	}
 
-		// little hack so rotation chooses the right image and angle
-		// TODO: replace with 4-direction ship
-		setObject(angle != 180 && angle != 270 ? "ship-front" : "ship-back", angle == 90 || angle == 270 ? 90 : 0);
+	public void setAsShipBack(int orientation) {
+		setObject("ship-back", orientation);
 	}
 
 	// set this panel as a ship middle section
 	public void setAsShipMiddle(int orientation) {
-		// find rotation
-		int angle;
-		switch (orientation) {
-			case VERTICAL:
-				angle = 0;
-				break;
-			case HORIZONTAL:
-			default:
-				angle = 90;
-				break;
-		}
-
-		// set image
-		setObject("ship-middle", angle);
+		setObject("ship-middle", orientation);
 	}
 
 	// set this panel as a "hit" pin
