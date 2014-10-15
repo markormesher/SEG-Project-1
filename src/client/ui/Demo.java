@@ -7,8 +7,8 @@ import java.awt.event.ActionEvent;
 public class Demo extends JFrame {
 
 	public static String[] themes = {"default"};
-	public static String[] bgs = {null, "bg1", "bg2"};
-	public static String[] objects = {null, "ship-end", "ship-middle", "pin-miss", "pin-hit"};
+	public static String[] bgs = {null, "bg"};
+	public static String[] objects = {null, "ship-front", "ship-middle", "ship-back", "pin-miss", "pin-hit"};
 	public static int[] rotations = {0, 90, 180, 270};
 
 	int currentTheme = 0;
@@ -39,7 +39,7 @@ public class Demo extends JFrame {
 		buttons.add(rotateObject);
 
 		// create animated panel
-		final AnimationPanel animatedPanel = new AnimationPanel(32, 32);
+		final AnimationPanel animatedPanel = new AnimationPanel(36, 36);
 		animatedPanel.setTheme(themes[currentTheme]);
 		animatedPanel.setBackground(bgs[currentBg], 0);
 		animatedPanel.setObject(objects[currentObject], 0);
