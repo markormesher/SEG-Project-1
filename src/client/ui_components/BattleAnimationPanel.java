@@ -1,4 +1,4 @@
-package client.ui;
+package client.ui_components;
 
 public class BattleAnimationPanel extends AnimationPanel {
 

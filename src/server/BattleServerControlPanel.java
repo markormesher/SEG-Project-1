@@ -1,6 +1,6 @@
 package server;
 
-import client.ui.ClientUI;
+import client.ui_components.ClientUI;
 
 import javax.swing.*;
 import java.awt.*;

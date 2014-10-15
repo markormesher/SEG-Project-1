@@ -1,13 +1,11 @@
-package client.ui;
+package client.ui_components;
 
 import global.Settings;
-import org.omg.CORBA.BAD_CONTEXT;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.Set;
 
 public class BattleBoardLocal extends JPanel implements ActionListener {
 

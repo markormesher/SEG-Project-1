@@ -1,4 +1,4 @@
-package client.ui;
+package client.ui_components;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
