@@ -30,6 +30,7 @@ public class Message implements Serializable {
 		this.type = type;
 	}
 
+
 	public Message(String recipient, int type, String message) {
 		this.recipient = recipient;
 		this.type = type;
