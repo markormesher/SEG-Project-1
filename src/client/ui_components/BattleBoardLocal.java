@@ -131,8 +131,13 @@ public class BattleBoardLocal extends JPanel implements ActionListener {
 						targets[i][1] = y + (orientationVectorY * i);
 					}
 
+					// prevent out-of-bounds ships by checking that every target is on the grid
+					for (int[] t : targets) {
+						if (t[0] < 0 || t[0] >= Settings.GRID_SIZE) return;
+						if (t[1] < 0 || t[1] >= Settings.GRID_SIZE) return;
+					}
+
 					// TODO: collision detection
-					// TODO: prevent overflows
 
 					// set the tile closest to the cursor
 					if (currentOrientation == BattleAnimationPanel.NORTH || currentOrientation == BattleAnimationPanel.WEST) {
