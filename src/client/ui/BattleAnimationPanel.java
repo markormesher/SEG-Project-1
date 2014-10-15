@@ -36,8 +36,8 @@ public class BattleAnimationPanel extends AnimationPanel {
 				break;
 		}
 
-		// set image
-		setObject("ship-end", angle);
+		// little hack so rotation choses the right image and angle
+		setObject(angle != 180 && angle != 270 ? "ship-front" : "ship-back", angle == 90 ||angle==270 ? 90 :0);
 	}
 
 	// set this panel as a ship middle section

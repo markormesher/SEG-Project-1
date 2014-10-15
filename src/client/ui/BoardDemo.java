@@ -6,6 +6,8 @@ import java.awt.*;
 import java.awt.event.*;
 
 
+//TODO delete this
+
 public class BoardDemo extends JFrame {
     //should ships be placed horizontally
     int[] shipSizes = {2,3,3,4,5};
@@ -120,9 +122,6 @@ public class BoardDemo extends JFrame {
 
 
         });
-
-
-
 
         board.addMouseListener(new MouseAdapter() {
             @Override

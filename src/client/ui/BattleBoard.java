@@ -11,16 +11,15 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 public class BattleBoard extends JPanel {
-    static final int unitSize = 32;
+    public static final int unitSize = 36;
 
-    public static String[] bgs = {null, "bg1", "bg2"};
+    //TODO fix this mess
+    public static String[] bgs = {null, "bg", "bg"};
     public static String[] objects = {null, "ship-end", "ship-middle", "pin-miss", "pin-hit"};
 
     //the tiles are in this array
     public BattleAnimationPanel[][] tiles = new BattleAnimationPanel[10][10];
 
-    boolean isHorizontal = false;
-    int c = 0;
     public BattleBoard(){
         setPreferredSize(new Dimension(unitSize * 10, unitSize * 10));
         setSize(new Dimension(unitSize * 10, unitSize * 10));
@@ -30,7 +29,7 @@ public class BattleBoard extends JPanel {
         //a grid that holds the tiles
         JPanel gridHolder = new JPanel();
         gridHolder.setBounds(0,0,getWidth(),getHeight());
-        gridHolder.setLayout(new GridLayout(10,10));
+        gridHolder.setLayout(new GridLayout(10,10,0,0));
         add(gridHolder);
         this.setFocusable(true);
 
@@ -44,7 +43,21 @@ public class BattleBoard extends JPanel {
                 tiles[x][y] = panel;
                 //save the position of the panel
                 panel.position = new Point(x,y);
+                MouseAdapter adapter = new MouseAdapter() {
+                    @Override
+                    public void mouseEntered(MouseEvent e) {
+                        //super.mouseEntered(e);
+                        panel.setBorder(new LineBorder(Color.white , 1));
+                    }
 
+                    @Override
+                    public void mouseExited(MouseEvent e) {
+                        //super.mouseExited(e);
+                        panel.setBorder(null);
+                    }
+                };
+                //panel.addMouseMotionListener(adapter);
+                //panel.addMouseListener(adapter);
                 gridHolder.add(panel);
             }
             repaint();
