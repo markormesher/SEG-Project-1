@@ -38,6 +38,7 @@ public class BattleServer {
 
 	// start server
 	public void startServer() throws IOException {
+		// TODO: swap all Syso.print lines for message shown on server control panel
 		System.out.println("Starting server on localhost:" + Settings.PORT_NUMBER);
 		ServerSocket serverSocket = new ServerSocket(Settings.PORT_NUMBER);
 
@@ -137,6 +138,7 @@ public class BattleServer {
 				try {
 					opponent.sendMessage(sendToOp);
 				} catch (IOException e) {
+					// TODO: handle error
 					System.out.println("Failed to notify " + opponent.username + " that their opponent disconnected");
 				}
 
@@ -203,6 +205,7 @@ public class BattleServer {
 
 				// setting username or sending message?
 				if (msg.getType() == Message.SET_USERNAME) {
+					// TODO: enforce unique usernames (server could send reply to client, either USERNAME_OK or USERNAME_TAKEN)
 					// set username of this thread
 					username = msg.getMessage();
 					checkBothUsernameSet(id);
@@ -246,5 +249,7 @@ public class BattleServer {
 	public void addClientDisconnectedListener(ClientDisconnectedListener listener){
 		clientDisconnectedListeners.add(listener);
 	}
+
+	// TODO: add a third listener for generic messages to be sent to the control panel
 
 }

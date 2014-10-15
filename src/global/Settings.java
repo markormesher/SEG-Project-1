@@ -2,6 +2,12 @@ package global;
 
 public class Settings {
 
+	/*
+	 * IMPORTANT:
+	 *
+	 * Anything that can be considered a constant should go in here.
+	 */
+
 	// server
 	public static final String HOST_NAME = "localhost";
 	public static final int PORT_NUMBER = 9001;

@@ -43,8 +43,10 @@ public class BattleAnimationPanel extends AnimationPanel {
 
 	// run the explosion animation on this panel
 	public void explode() {
-		// TODO
+		// TODO (Mark)
 	}
+
+	// TODO: animation for "miss" (Mark)
 
 	// is this cell still empty?
 	public boolean isEmpty() {

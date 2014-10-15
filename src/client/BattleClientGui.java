@@ -17,6 +17,10 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 
+// TODO: dress up the UI to include logo, current status, etc.
+// TODO: status message (their move, waiting, etc, etc)
+// TODO: add listener for messages from the server (add them to the chat console?)
+
 public class BattleClientGui extends JFrame implements BattleClientGuiInterface {
 
 	// the client handles all communication with server
@@ -51,6 +55,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
 
+		// TODO: countdown clock for placing ships and taking a turn
         /*CountdownClock clock = new CountdownClock(30);
 		clock.setSize(300,300);
         clock.setOpaque(false);
@@ -96,13 +101,13 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		});
 		innerPanel.add(localBoard);
 
-		//TODO finish this clock thing
-		JPanel clockContainer = new JPanel(new FlowLayout());
+		// TODO: countdown clock for placing ships and taking a turn
+		/*JPanel clockContainer = new JPanel(new FlowLayout());
 		CountdownClock clock = new CountdownClock(60);
 		clock.setMaximumSize(new Dimension(50, 50));
 		clock.setPreferredSize(new Dimension(50, 50));
 		clockContainer.add(clock);
-		//inner.add(clockContainer);
+		inner.add(clockContainer);*/
 
 		// set up the opponent board
 		opponentBoard.addShotListener(new BattleBoardOpponent.ShotListener() {
@@ -123,6 +128,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 						onPlayerChanged();
 					} catch (IOException e) {
 						e.printStackTrace();
+						// TODO: handle error
 					}
 				} else {
 					// TODO: error message: "not your turn"
