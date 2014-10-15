@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.Set;
 
 public class BattleBoardLocal extends JPanel implements ActionListener {
 
@@ -27,6 +28,10 @@ public class BattleBoardLocal extends JPanel implements ActionListener {
 	// layered pane to hold the board layer and listener panel
 	final JLayeredPane layeredPane = new JLayeredPane();
 
+	// last cursor position (used to prevent jump when re-drawing the active ship)
+	private int lastCursorX = 0;
+	private int lastCursorY = 0;
+
 	public BattleBoardLocal() {
 		// set up this panel
 		setLayout(null);
@@ -39,6 +44,7 @@ public class BattleBoardLocal extends JPanel implements ActionListener {
 
 		// create panel to lay over the board to listen for events
 		final JPanel overlayPanel = new JPanel();
+		overlayPanel.setLayout(null);
 		overlayPanel.setOpaque(false);
 		overlayPanel.setPreferredSize(new Dimension(Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE));
 		overlayPanel.setSize(new Dimension(Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE));
@@ -60,24 +66,16 @@ public class BattleBoardLocal extends JPanel implements ActionListener {
 			public void mouseMoved(MouseEvent e) {
 				super.mouseMoved(e);
 
-				// get mouse coordinates
+				// get mouse coordinates (adjust to centre image in cell)
 				int x = e.getX() - (Settings.IMAGE_CELL_SIZE / 2);
 				int y = e.getY() - (Settings.IMAGE_CELL_SIZE / 2);
 
-				// position the active ship
-				int shipWidth;
-				int shipHeight;
-				if (currentOrientation == BattleAnimationPanel.NORTH || currentOrientation == BattleAnimationPanel.SOUTH) {
-					shipWidth = Settings.IMAGE_CELL_SIZE;
-					shipHeight = activeShipContainer.getComponentCount() * Settings.IMAGE_CELL_SIZE;
-				} else {
-					shipWidth = activeShipContainer.getComponentCount() * Settings.IMAGE_CELL_SIZE;
-					shipHeight = Settings.IMAGE_CELL_SIZE;
-				}
-				activeShipContainer.setBounds(x, y, shipWidth, shipHeight);
+				// save
+				lastCursorX = x;
+				lastCursorY = y;
 
-				// redraw
-				layeredPane.repaint();
+				// position the active ship
+				repositionActiveShip(x, y);
 			}
 
 			@Override
@@ -225,6 +223,9 @@ public class BattleBoardLocal extends JPanel implements ActionListener {
 		// start afresh
 		activeShipContainer.removeAll();
 
+		// are we finished placing ships?
+		if (currentShipSizeIndex >= Settings.SHIP_SIZES.length) return;
+
 		// set the right orientation
 		if (currentOrientation == BattleAnimationPanel.NORTH || currentOrientation == BattleAnimationPanel.SOUTH) {
 			activeShipContainer.setLayout(new BoxLayout(activeShipContainer, BoxLayout.Y_AXIS));
@@ -260,6 +261,26 @@ public class BattleBoardLocal extends JPanel implements ActionListener {
 		// redraw all of this
 		activeShipContainer.revalidate();
 		activeShipContainer.repaint();
+		layeredPane.repaint();
+
+		// reposition the ship
+		repositionActiveShip(lastCursorX, lastCursorY);
+	}
+
+	private void repositionActiveShip(int x, int y) {
+		// work out ship boundaries
+		int shipWidth;
+		int shipHeight;
+		if (currentOrientation == BattleAnimationPanel.NORTH || currentOrientation == BattleAnimationPanel.SOUTH) {
+			shipWidth = Settings.IMAGE_CELL_SIZE;
+			shipHeight = activeShipContainer.getComponentCount() * Settings.IMAGE_CELL_SIZE;
+		} else {
+			shipWidth = activeShipContainer.getComponentCount() * Settings.IMAGE_CELL_SIZE;
+			shipHeight = Settings.IMAGE_CELL_SIZE;
+		}
+		activeShipContainer.setBounds(x, y, shipWidth, shipHeight);
+
+		// redraw
 		layeredPane.repaint();
 	}
 
