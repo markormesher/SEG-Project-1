@@ -9,11 +9,12 @@ import java.util.HashMap;
 
 public class AnimationPanel extends JLayeredPane {
 
-    //caching the images improves performance
-    HashMap<String , BufferedImage> Cache = new HashMap<String, BufferedImage>();
-    public Point position = new Point();
 	// theme settings
 	private String theme = "default";
+
+	// cache images
+	private HashMap<String, BufferedImage> imageCache = new HashMap<String, BufferedImage>();
+	public Point position = new Point();
 
 	// layers (public for checking the background and if an object exists
 	public JLabel background = new JLabel();
@@ -44,12 +45,8 @@ public class AnimationPanel extends JLayeredPane {
 			label.setIcon(null);
 		} else {
 			try {
-				// read the image from resources if it's not cached
-				final BufferedImage image =
-                        (Cache.containsKey(icon)) ? Cache.get(icon) :
-                        ImageIO.read(AnimationPanel.class.getResource("/images/" + theme + "/" + icon + ".png"));
-                Cache.put(icon,image);
 				// set the label to a new icon
+				final BufferedImage image = getImage(icon);
 				label.setIcon(new ImageIcon() {
 					@Override
 					public synchronized void paintIcon(Component c, Graphics g, int x, int y) {
@@ -60,8 +57,6 @@ public class AnimationPanel extends JLayeredPane {
 						g2.drawImage(image, 0, 0, null);
 					}
 				});
-			} catch (IOException e) {
-				label.setIcon(null);
 			} catch (NullPointerException e) {
 				label.setIcon(null);
 			} catch (IllegalArgumentException e) {
@@ -90,5 +85,19 @@ public class AnimationPanel extends JLayeredPane {
 		setIcon(effect, newEffect, angle);
 	}
 
+	// get image from cache if already loaded, or from resources if not
+	private BufferedImage getImage(String icon) {
+		if (imageCache.containsKey(icon)) {
+			return imageCache.get(icon);
+		} else {
+			try {
+				BufferedImage image = ImageIO.read(AnimationPanel.class.getResource("/images/" + theme + "/" + icon + ".png"));
+				imageCache.put(icon, image);
+				return image;
+			} catch (IOException e) {
+				return null;
+			}
+		}
+	}
 
 }
