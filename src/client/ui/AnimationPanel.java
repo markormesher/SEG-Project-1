@@ -14,7 +14,6 @@ public class AnimationPanel extends JLayeredPane {
 
 	// cache images
 	private HashMap<String, BufferedImage> imageCache = new HashMap<String, BufferedImage>();
-	public Point position = new Point();
 
 	// layers (public for checking the background and if an object exists
 	public JLabel background = new JLabel();
