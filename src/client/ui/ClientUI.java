@@ -111,21 +111,21 @@ public class ClientUI extends JFrame implements BattleClientGuiInterface {
 
         JPanel rightPanel = new JPanel(new FlowLayout());
 
-        boardOpponent.addShipPlacementListener(new BattleBoardOpponent.ShootingListener() {
-            @Override
-            public void onShooting(int x, int y) {
-                //you must be the current player to shoot
-                if(currentPlayer == ME){
-                    try {
-                        client.sendMessage(new Message(opponentUsername,Message.SHOOT,x,y));
-                        //after shooting it's their turn
-                        currentPlayer = OPPONENT;
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
+        boardOpponent.addShotListener(new BattleBoardOpponent.ShotListener() {
+			@Override
+			public void onShotFired(int x, int y) {
+				//you must be the current player to shoot
+				if (currentPlayer == ME) {
+					try {
+						client.sendMessage(new Message(opponentUsername, Message.SHOOT, x, y));
+						//after shooting it's their turn
+						currentPlayer = OPPONENT;
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		});
         rightPanel.add(boardOpponent);
         inner.add(rightPanel);
 
@@ -221,12 +221,12 @@ public class ClientUI extends JFrame implements BattleClientGuiInterface {
 
             //this is triggered when the opponent confirms whether you hit or missed them
             case Message.HIT:{
-                BattleAnimationPanel hitAt = boardOpponent.getTiles()[msg.getX()][msg.getY()];
+                BattleAnimationPanel hitAt = boardOpponent.getBoardTiles()[msg.getX()][msg.getY()];
                 hitAt.setAsHitPin();
                 break;
             }
             case Message.MISS:{
-                BattleAnimationPanel hitAt = boardOpponent.getTiles()[msg.getX()][msg.getY()];
+                BattleAnimationPanel hitAt = boardOpponent.getBoardTiles()[msg.getX()][msg.getY()];
                 hitAt.setAsMissPin();
                 break;
             }

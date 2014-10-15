@@ -1,74 +1,74 @@
 package client.ui;
 
+import global.Settings;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 
-/**
- * This is the opponent's board
- */
 public class BattleBoardOpponent extends JPanel {
-    final BattleBoard board = new BattleBoard();
 
-    public BattleBoardOpponent(){
+	// board to hold all of the cells
+	private BattleBoard board = new BattleBoard();
 
+	// shot listeners for this board
+	ArrayList<ShotListener> shotListeners = new ArrayList<ShotListener>();
 
-        setLayout(null);
-        setBackground(Color.BLUE);
-        final JLayeredPane layeredPane = new JLayeredPane();
+	public BattleBoardOpponent() {
+		// set up this panel
+		setLayout(null);
+		setPreferredSize(new Dimension(Settings.IMAGE_CELL_SIZE * 10, Settings.IMAGE_CELL_SIZE * 10));
+		setSize(new Dimension(Settings.IMAGE_CELL_SIZE * 10, Settings.IMAGE_CELL_SIZE * 10));
 
-        add(layeredPane);
-        layeredPane.setBounds(0,0,360,360);
-        setPreferredSize(new Dimension(360, 360));
-        setSize(new Dimension(360,360));
-        //layeredPane.setPreferredSize(new Dimension(360, 360));
-        //layeredPane.setSize(new Dimension(360,360));
+		// add a new layered pane to hold view items
+		JLayeredPane layeredPane = new JLayeredPane();
+		layeredPane.setBounds(0, 0, Settings.IMAGE_CELL_SIZE * 10, Settings.IMAGE_CELL_SIZE * 10);
+		add(layeredPane);
 
+		// create panel to lay over the board to listen for events
+		final JPanel panel = new JPanel();
+		panel.setOpaque(false);
+		panel.setPreferredSize(new Dimension(Settings.IMAGE_CELL_SIZE * 10, Settings.IMAGE_CELL_SIZE * 10));
+		panel.setSize(new Dimension(Settings.IMAGE_CELL_SIZE * 10, Settings.IMAGE_CELL_SIZE * 10));
 
-        layeredPane.add(board, new Integer(2));
+		// listen for mouse events on the overlay board
+		MouseAdapter mouseAdapter = new MouseAdapter() {
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				super.mouseMoved(e);
+				panel.setVisible(true);
+			}
 
-        //this panel is overlayed on the board for the ship moving
-        final JPanel panel = new JPanel();
-        panel.setOpaque(false);
-        panel.setPreferredSize(new Dimension(360, 360));
-        panel.setSize(new Dimension(360, 360));
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				super.mouseClicked(e);
+				// find the cell coordinate of the click
+				int x = (int) Math.floor(e.getX() / (Settings.IMAGE_CELL_SIZE * 10));
+				int y = (int) Math.floor(e.getY() / (Settings.IMAGE_CELL_SIZE * 10));
+				for (ShotListener listener : shotListeners) {
+					listener.onShotFired(x, y);
+				}
+			}
+		};
+		board.addMouseListener(mouseAdapter);
 
-        MouseAdapter mouseAdapter = new MouseAdapter() {
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                super.mouseMoved(e);
-                panel.setVisible(true);
-            }
+		// add the listener layer over the board
+		layeredPane.add(board, new Integer(0));
+		layeredPane.add(panel, new Integer(1));
+	}
 
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
-                //find the tile and trigger the event
-                int x = (int) Math.floor(e.getX() / 36.0);
-                int y = (int) Math.floor(e.getY() / 36.0);
-                for(ShootingListener listener:listeners) listener.onShooting(x,y);
-            }
-        };
-        board.addMouseListener(mouseAdapter);
+	// get the titles of the battle board
+	public BattleAnimationPanel[][] getBoardTiles() {
+		return board.tiles;
+	}
 
-       // board.addMouseMotionListener(mouseAdapter);
+	// add a shot listener to this board
+	public void addShotListener(ShotListener listener) {
+		shotListeners.add(listener);
+	}
 
-        //the panel is at a higher level than the board.
-        layeredPane.add(panel, new Integer(3));
-    }
-
-    interface ShootingListener{
-        void onShooting(int x , int y);
-    }
-    public BattleAnimationPanel[][] getTiles(){
-        return board.tiles;
-    }
-
-    ArrayList<ShootingListener> listeners = new ArrayList<ShootingListener>();
-
-    public void addShipPlacementListener(ShootingListener listener){
-        listeners.add(listener);
-    }
-
+	interface ShotListener {
+		void onShotFired(int x, int y);
+	}
 }
