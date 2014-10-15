@@ -5,12 +5,9 @@ import client.ui_components.BattleBoardLocal;
 import client.ui_components.BattleBoardOpponent;
 import client.ui_components.CountdownClock;
 import global.Message;
+import global.Settings;
 
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
@@ -21,99 +18,86 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class BattleClientGui extends JFrame implements BattleClientGuiInterface {
-    //this is where the messagesPane you send and receive are shown
-    JTextPane messagesPane;
-    //The client handles all communication with server
-    BattleClient client;
-    //usernames
-    String opponentUsername;
-    String username;
 
-    //contains the messagesPane text area and the input text field
-    JPanel chattingArea = new JPanel(new BorderLayout());
-    //the text area is wrapped in a scroll pane
-    JScrollPane pane = new JScrollPane();
+	// the client handles all communication with server
+	private BattleClient client;
 
+	// usernames
+	private String opponentUsername;
+	private String playerUsername;
 
-    //a list of all messages
-    ArrayList<String> Messages = new ArrayList<String>();
+	// the current player can be either ME or OPPONENT, 0 is unset
+	public int currentPlayer = 0;
+	public static final int ME = 1;
+	public static final int OPPONENT = 2;
 
+	// a list of all messages
+	ArrayList<String> messages = new ArrayList<String>();
 
-    //the current player can be either ME or OPPONENT , 0 is unset
-    public int currentPlayer = 0;
-    public static final int ME=1;
-    public static final int OPPONENT=2;
+	// messaging output
+	private JTextPane messagesPane;
 
-    //the two boards
-    BattleBoardLocal userBoard = new BattleBoardLocal();
-    BattleBoardOpponent boardOpponent = new BattleBoardOpponent();
+	// the two boards
+	private BattleBoardLocal localBoard = new BattleBoardLocal();
+	private BattleBoardOpponent opponentBoard = new BattleBoardOpponent();
 
-    public BattleClientGui(){
-
-
-        this.setSize(750, 600);
-        this.setVisible(true);
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	public BattleClientGui() {
+		// basic setup of frame
+		setSize(750, 600);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setLayout(new BorderLayout());
 
         /*CountdownClock clock = new CountdownClock(30);
-        clock.setSize(300,300);
+		clock.setSize(300,300);
         clock.setOpaque(false);
         this.add(clock);*/
 
-        setLayout(new BorderLayout());
-        username = JOptionPane.showInputDialog(this,"Enter a username");
+		// collect player username and set it as title
+		playerUsername = JOptionPane.showInputDialog(this, "Enter a username");
+		setTitle(playerUsername + " playing");
 
-        //the client uses while so it must run on a separate thread
-        (new Thread() {
-            public void run() {
+		// the client uses while so it must run on a separate thread
+		(new Thread() {
+			public void run() {
+				client = new BattleClient(Settings.HOST_NAME, Settings.PORT_NUMBER, playerUsername, BattleClientGui.this);
+				try {
+					client.connect();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
 
-                client = new BattleClient("localhost" , 9001 , username , BattleClientGui.this);
-                try {
-                    client.connect();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
+		// create an inner panel to hold the two boards
+		JPanel innerPanel = new JPanel(new GridLayout(0, 2, 10, 10));
+		add(innerPanel, BorderLayout.CENTER);
 
-        setTitle(username + " playing");
+		// set up the local board
+		localBoard.addShipPlacementListener(new BattleBoardLocal.ShipPlacementListener() {
+			@Override
+			public void onFinished() {
+				try {
+					//tell the other user , you're ready
+					client.sendMessage(new Message(opponentUsername, Message.READY_TO_PLAY));
+					//if the other opponent hasn't finished ,you go first
+					currentPlayer = ME;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		innerPanel.add(localBoard);
 
-        //dummy container for the actual board
-        Border margin = new EmptyBorder(10,10,10,10);
-        CompoundBorder compoundBorder = new CompoundBorder(new LineBorder(Color.darkGray , 1), margin);
+		//TODO finish this clock thing
+		JPanel clockContainer = new JPanel(new FlowLayout());
+		CountdownClock clock = new CountdownClock(60);
+		clock.setMaximumSize(new Dimension(50, 50));
+		clock.setPreferredSize(new Dimension(50, 50));
+		clockContainer.add(clock);
+		//inner.add(clockContainer);
 
-        JPanel inner = new JPanel(new GridLayout(0,2,10,10));
-        add(inner , BorderLayout.CENTER);
-
-        JPanel leftPanel = new JPanel(new FlowLayout());
-
-        userBoard.addShipPlacementListener(new BattleBoardLocal.ShipPlacementListener() {
-            @Override
-            public void onFinished() {
-                try {
-                    //tell the other user , you're ready
-                    client.sendMessage(new Message(opponentUsername,Message.READY_TO_PLAY));
-                    //if the other opponent hasn't finished ,you go first
-                   currentPlayer = ME;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        leftPanel.add(userBoard);
-        inner.add(leftPanel);
-
-        //TODO finish this clock thing
-        JPanel clockContainer = new JPanel( new FlowLayout());
-        CountdownClock clock = new CountdownClock(60);
-        clock.setMaximumSize(new Dimension(50,50));
-        clock.setPreferredSize(new Dimension(50, 50));
-        clockContainer.add(clock);
-        //inner.add(clockContainer);
-
-        JPanel rightPanel = new JPanel(new FlowLayout());
-
-        boardOpponent.addShotListener(new BattleBoardOpponent.ShotListener() {
+		// set up the opponent board
+		opponentBoard.addShotListener(new BattleBoardOpponent.ShotListener() {
 			@Override
 			public void onShotFired(int x, int y) {
 				//you must be the current player to shoot
@@ -128,135 +112,124 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 				}
 			}
 		});
-        rightPanel.add(boardOpponent);
-        inner.add(rightPanel);
+		innerPanel.add(opponentBoard);
 
+		// set up the chat area
+		JPanel chattingArea = new JPanel(new BorderLayout());
+		chattingArea.setSize(new Dimension(0, 70));
+		chattingArea.setPreferredSize(new Dimension(0, 150));
+		add(chattingArea, BorderLayout.SOUTH);
 
+		// messaging output
+		messagesPane = new JTextPane();
+		messagesPane.setContentType("text/html");
+		messagesPane.setEditable(false);
+		chattingArea.add(new JScrollPane(messagesPane), BorderLayout.CENTER);
 
+		// messaging input
+		final JTextField messageInput = new JTextField();
+		chattingArea.add(messageInput, BorderLayout.SOUTH);
+		messageInput.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// send message when the user presses enter
+				Message toSend = new Message(opponentUsername, Message.CHAT_MESSAGE, messageInput.getText().trim());
+				try {
+					client.sendMessage(toSend);
+					appendToLog("\n<strong>" + playerUsername + ":</strong> " + messageInput.getText());
+					messageInput.setText("");
+				} catch (IOException ex) {
+					appendToLog("\nFailed to send message");
+					ex.printStackTrace();
+				}
 
-        chattingArea.setSize(new Dimension(0, 70));
-        chattingArea.setPreferredSize(new Dimension(0, 150));
-        add(chattingArea, BorderLayout.SOUTH);
+			}
+		});
 
-        messagesPane = new JTextPane();
-        messagesPane.setContentType("text/html");
+		setVisible(true);
+	}
 
-        pane = new JScrollPane(messagesPane);
-        chattingArea.add(pane, BorderLayout.CENTER);
+	@Override
+	public void onReceiveMessage(Message msg) {
+		if (msg == null) return;
 
-        final JTextField input = new JTextField();
-        chattingArea.add(input, BorderLayout.SOUTH);
+		switch (msg.getType()) {
+			case Message.SET_OPPONENT:
+				if (msg.getMessage() == null) return;
+				opponentUsername = msg.getMessage();
+				setTitle(playerUsername + " (you) vs. " + opponentUsername);
+				break;
 
-        input.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                    //when the user presses enter send message
-                    Message toSend = new Message(opponentUsername, Message.CHAT_MESSAGE, input.getText().trim());
-                    try {
-                        client.sendMessage(toSend);
-                        appendToLog( "\n" + username + ": " + input.getText());
-                        input.setText("");
-                    } catch (IOException ex) {
-                        System.out.println("# Failed to send message");
-                        ex.printStackTrace();
-                    }
+			case Message.CHAT_MESSAGE:
+				if (msg.getMessage() == null) return;
+				appendToLog("\n<strong>" + opponentUsername + ":</strong> " + msg.getMessage());
+				break;
 
-            }
-        });
+			case Message.OPPONENT_DISCONNECTED:
+				appendToLog("\n<strong>-- Your opponent disconnected! --");
+				// TODO: automatically win the game here
+				break;
 
+			case Message.READY_TO_PLAY:
+				// TODO: fix first player assignment
+				currentPlayer = OPPONENT;
+				appendToLog("\n<strong>" + opponentUsername + " has finished placing ships and is ready to play</strong>");
+				break;
 
-        this.setVisible(true);
-    }
+			case Message.SHOOT: {
+				// you've been shot at, so it's your turn
+				currentPlayer = ME;
 
-    @Override
-    public void onReceiveMessage(Message msg) {
-        //if the opponent is set change the title bar text and save it for chatting , else add message to text area
-        if(msg == null) return;
-        switch (msg.getType()){
-            case Message.SET_OPPONENT:{
-                if(msg.getMessage() == null)return;
-                opponentUsername = msg.getMessage();
-                setTitle(username +" playing against " + opponentUsername);
-                break;
-            }
-            case Message.CHAT_MESSAGE:{
-                if(msg.getMessage() == null)return;
-                appendToLog( "\n<b>" + opponentUsername + "</b>: " + msg.getMessage());
-                break;
-            }
-            case Message.OPPONENT_DISCONNECTED:{
-                System.exit(0);
-                break;
-            }
-            case Message.READY_TO_PLAY:{
-                currentPlayer = OPPONENT;
-                appendToLog( "\n<b>" + opponentUsername + " has placed his ships and is ready to play</b>");
-                break;
-            }
+				// find the tile they shop
+				BattleAnimationPanel shotAt = localBoard.getBoardCells()[msg.getX()][msg.getY()];
 
-            case Message.SHOOT:{
-                //you've been shot at , so it's your turn
-                currentPlayer = ME;
-                System.out.println("Being shot at "+ msg.getX() +" "+msg.getY());
-                //find the tile they hit
-                BattleAnimationPanel hitAt = userBoard.getBoardCells()[msg.getX()][msg.getY()];
-                //if it's empty it's a miss
-                //notify the other user of which it is
-                if (hitAt.object.getIcon() !=null){
-                    hitAt.setAsHitPin();
-                    try {
-                        client.sendMessage(new Message(opponentUsername, Message.HIT,msg.getX(),msg.getY()));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                else{
-                    hitAt.setAsMissPin();
-                    try {
-                        client.sendMessage(new Message(opponentUsername, Message.MISS,msg.getX(),msg.getY()));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                break;
-            }
+				// notify the opponent whether it was a hit or a miss
+				if (shotAt.isEmpty()) {
+					shotAt.setAsMissPin();
+					try {
+						client.sendMessage(new Message(opponentUsername, Message.MISS, msg.getX(), msg.getY()));
+					} catch (IOException e) {
+						// TODO: handle error
+						e.printStackTrace();
+					}
+				} else {
+					shotAt.setAsHitPin();
+					try {
+						client.sendMessage(new Message(opponentUsername, Message.HIT, msg.getX(), msg.getY()));
+					} catch (IOException e) {
+						// TODO: handle error
+						e.printStackTrace();
+					}
+				}
+				break;
+			}
 
-            //this is triggered when the opponent confirms whether you hit or missed them
-            case Message.HIT:{
-                BattleAnimationPanel hitAt = boardOpponent.getBoardCells()[msg.getX()][msg.getY()];
-                hitAt.setAsHitPin();
-                break;
-            }
-            case Message.MISS:{
-                BattleAnimationPanel hitAt = boardOpponent.getBoardCells()[msg.getX()][msg.getY()];
-                hitAt.setAsMissPin();
-                break;
-            }
-        }
-    }
+			// you hit the opponent
+			case Message.HIT:
+				BattleAnimationPanel hitAt = opponentBoard.getBoardCells()[msg.getX()][msg.getY()];
+				hitAt.setAsHitPin();
+				break;
 
-    public void appendToLog(String s) {
-        /*try {
-            Document doc = messagesPane.getDocument();
-            doc.insertString(doc.getLength(), s, null);
-        } catch(Exception exc) {
-            exc.printStackTrace();
-        }*/
+			// you missed the opponent
+			case Message.MISS:
+				BattleAnimationPanel missAt = opponentBoard.getBoardCells()[msg.getX()][msg.getY()];
+				missAt.setAsMissPin();
+				break;
+		}
+	}
 
-        Messages.add(s);
+	public void appendToLog(String s) {
+		messages.add(s);
 
-        //this code appends a line as hmtl
-        messagesPane.setContentType( "text/html" );
-        messagesPane.setEditable(false);
-        HTMLDocument doc = (HTMLDocument)messagesPane.getDocument();
-        HTMLEditorKit editorKit = (HTMLEditorKit)messagesPane.getEditorKit();
-        String text = s;
-        try {
-            editorKit.insertHTML(doc, doc.getLength(), text, 0, 0, null);
-        } catch (BadLocationException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+		// this code appends a line as html
+		HTMLDocument doc = (HTMLDocument) messagesPane.getDocument();
+		HTMLEditorKit editorKit = (HTMLEditorKit) messagesPane.getEditorKit();
+		try {
+			editorKit.insertHTML(doc, doc.getLength(), s, 0, 0, null);
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
