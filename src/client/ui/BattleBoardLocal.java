@@ -32,18 +32,18 @@ public class BattleBoardLocal extends JPanel implements ActionListener {
 	public BattleBoardLocal() {
 		// set up this panel
 		setLayout(null);
-		setPreferredSize(new Dimension(Settings.IMAGE_CELL_SIZE * 10, Settings.IMAGE_CELL_SIZE * 10));
-		setSize(new Dimension(Settings.IMAGE_CELL_SIZE * 10, Settings.IMAGE_CELL_SIZE * 10));
+		setPreferredSize(new Dimension(Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE));
+		setSize(new Dimension(Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE));
 
 		// add a new layered pane to hold the board layer and listener panel
-		layeredPane.setBounds(0, 0, Settings.IMAGE_CELL_SIZE * 10, Settings.IMAGE_CELL_SIZE * 10);
+		layeredPane.setBounds(0, 0, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE);
 		add(layeredPane);
 
 		// create panel to lay over the board to listen for events
 		final JPanel overlayPanel = new JPanel();
 		overlayPanel.setOpaque(false);
-		overlayPanel.setPreferredSize(new Dimension(Settings.IMAGE_CELL_SIZE * 10, Settings.IMAGE_CELL_SIZE * 10));
-		overlayPanel.setSize(new Dimension(Settings.IMAGE_CELL_SIZE * 10, Settings.IMAGE_CELL_SIZE * 10));
+		overlayPanel.setPreferredSize(new Dimension(Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE));
+		overlayPanel.setSize(new Dimension(Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE));
 
 		// container to hold the ship the user is currently placing
 		activeShipContainer = new JPanel();
