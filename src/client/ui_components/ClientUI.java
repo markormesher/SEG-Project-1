@@ -197,7 +197,7 @@ public class ClientUI extends JFrame implements BattleClientGuiInterface {
                 currentPlayer = ME;
                 System.out.println("Being shot at "+ msg.getX() +" "+msg.getY());
                 //find the tile they hit
-                BattleAnimationPanel hitAt = userBoard.getTiles()[msg.getX()][msg.getY()];
+                BattleAnimationPanel hitAt = userBoard.getBoardCells()[msg.getX()][msg.getY()];
                 //if it's empty it's a miss
                 //notify the other user of which it is
                 if (hitAt.object.getIcon() !=null){
@@ -221,12 +221,12 @@ public class ClientUI extends JFrame implements BattleClientGuiInterface {
 
             //this is triggered when the opponent confirms whether you hit or missed them
             case Message.HIT:{
-                BattleAnimationPanel hitAt = boardOpponent.getBoardTiles()[msg.getX()][msg.getY()];
+                BattleAnimationPanel hitAt = boardOpponent.getBoardCells()[msg.getX()][msg.getY()];
                 hitAt.setAsHitPin();
                 break;
             }
             case Message.MISS:{
-                BattleAnimationPanel hitAt = boardOpponent.getBoardTiles()[msg.getX()][msg.getY()];
+                BattleAnimationPanel hitAt = boardOpponent.getBoardCells()[msg.getX()][msg.getY()];
                 hitAt.setAsMissPin();
                 break;
             }

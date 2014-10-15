@@ -6,9 +6,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.Set;
 
-public class BattleBoardLocal extends JPanel implements ActionListener {
+public class BattleBoardLocal extends JPanel {
 
 	// size of the ship currently being place (nb. array pointer, NOT actual size)
 	private int currentShipSizeIndex = 0;
@@ -137,25 +136,28 @@ public class BattleBoardLocal extends JPanel implements ActionListener {
 						if (t[1] < 0 || t[1] >= Settings.GRID_SIZE) return;
 					}
 
-					// TODO: collision detection
+					// collision detection
+					for (int[] t : targets) {
+						if (!board.cells[t[0]][t[1]].isEmpty()) return;
+					}
 
 					// set the tile closest to the cursor
 					if (currentOrientation == BattleAnimationPanel.NORTH || currentOrientation == BattleAnimationPanel.WEST) {
-						board.tiles[targets[0][0]][targets[0][1]].setAsShipFront(currentOrientation);
+						board.cells[targets[0][0]][targets[0][1]].setAsShipFront(currentOrientation);
 					} else {
-						board.tiles[targets[0][0]][targets[0][1]].setAsShipBack(currentOrientation);
+						board.cells[targets[0][0]][targets[0][1]].setAsShipBack(currentOrientation);
 					}
 
 					// set the middle tiles
 					for (int i = 1; i < currentShipSize - 1; ++i) {
-						board.tiles[targets[i][0]][targets[i][1]].setAsShipMiddle(currentOrientation);
+						board.cells[targets[i][0]][targets[i][1]].setAsShipMiddle(currentOrientation);
 					}
 
 					// set the tile furthest from the cursor
 					if (currentOrientation == BattleAnimationPanel.NORTH || currentOrientation == BattleAnimationPanel.WEST) {
-						board.tiles[targets[currentShipSize - 1][0]][targets[currentShipSize - 1][1]].setAsShipBack(currentOrientation);
+						board.cells[targets[currentShipSize - 1][0]][targets[currentShipSize - 1][1]].setAsShipBack(currentOrientation);
 					} else {
-						board.tiles[targets[currentShipSize - 1][0]][targets[currentShipSize - 1][1]].setAsShipFront(currentOrientation);
+						board.cells[targets[currentShipSize - 1][0]][targets[currentShipSize - 1][1]].setAsShipFront(currentOrientation);
 					}
 
 					// move to the next ship size
@@ -180,10 +182,6 @@ public class BattleBoardLocal extends JPanel implements ActionListener {
 		addMouseListener(mouseAdapter);
 		addMouseMotionListener(mouseAdapter);
 
-		// DEBUG: rotate every 10 secs
-		Timer t = new Timer(10000, this);
-		t.start();
-
 		// make sure listeners work
 		setFocusable(true);
 		requestFocusInWindow();
@@ -191,11 +189,6 @@ public class BattleBoardLocal extends JPanel implements ActionListener {
 		// add the listener layer over the board
 		layeredPane.add(board, new Integer(0));
 		layeredPane.add(overlayPanel, new Integer(1));
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent actionEvent) {
-		rotateActiveShip();
 	}
 
 	private void rotateActiveShip() {
@@ -289,8 +282,8 @@ public class BattleBoardLocal extends JPanel implements ActionListener {
 		layeredPane.repaint();
 	}
 
-	public BattleAnimationPanel[][] getTiles() {
-		return board.tiles;
+	public BattleAnimationPanel[][] getBoardCells() {
+		return board.cells;
 	}
 
 	public void addShipPlacementListener(ShipPlacementListener listener) {

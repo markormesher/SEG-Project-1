@@ -8,7 +8,7 @@ import java.awt.*;
 public class BattleBoard extends JPanel {
 
 	// all of the cells on this board
-	public BattleAnimationPanel[][] tiles = new BattleAnimationPanel[Settings.GRID_SIZE][Settings.GRID_SIZE];
+	public BattleAnimationPanel[][] cells = new BattleAnimationPanel[Settings.GRID_SIZE][Settings.GRID_SIZE];
 
 	public BattleBoard() {
 		// enforce exactly the right size
@@ -28,7 +28,7 @@ public class BattleBoard extends JPanel {
 			for (int x = 0; x < Settings.GRID_SIZE; ++x) {
 				final BattleAnimationPanel panel = new BattleAnimationPanel(Settings.IMAGE_CELL_SIZE, Settings.IMAGE_CELL_SIZE);
 				panel.setBackground("bg", 0);
-				tiles[x][y] = panel;
+				cells[x][y] = panel;
 				imageCellGrid.add(panel);
 			}
 		}

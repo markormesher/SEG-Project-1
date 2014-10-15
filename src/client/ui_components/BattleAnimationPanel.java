@@ -8,21 +8,26 @@ public class BattleAnimationPanel extends AnimationPanel {
 			SOUTH = 180,
 			WEST = 270;
 
+	private boolean empty = true;
+
 	public BattleAnimationPanel(int width, int height) {
 		super(width, height);
 	}
 
 	// set this panel as a ship end section
 	public void setAsShipFront(int orientation) {
+		empty = false;
 		setObject("ship-front", orientation);
 	}
 
 	public void setAsShipBack(int orientation) {
+		empty = false;
 		setObject("ship-back", orientation);
 	}
 
 	// set this panel as a ship middle section
 	public void setAsShipMiddle(int orientation) {
+		empty = false;
 		setObject("ship-middle", orientation);
 	}
 
@@ -39,5 +44,10 @@ public class BattleAnimationPanel extends AnimationPanel {
 	// run the explosion animation on this panel
 	public void explode() {
 		// TODO
+	}
+
+	// is this cell still empty?
+	public boolean isEmpty() {
+		return empty;
 	}
 }

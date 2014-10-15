@@ -53,8 +53,8 @@ public class BattleBoardOpponent extends JPanel {
 	}
 
 	// get the titles of the battle board
-	public BattleAnimationPanel[][] getBoardTiles() {
-		return board.tiles;
+	public BattleAnimationPanel[][] getBoardCells() {
+		return board.cells;
 	}
 
 	// add a shot listener to this board
