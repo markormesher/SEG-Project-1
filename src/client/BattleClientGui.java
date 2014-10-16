@@ -20,6 +20,7 @@ import java.util.ArrayList;
 // TODO: dress up the UI to include logo, current status, etc.
 // TODO: status message (their move, waiting, etc, etc)
 // TODO: add listener for messages from the server (add them to the chat console?)
+// TODO: prevent re-click on a cell already shot at
 
 public class BattleClientGui extends JFrame implements BattleClientGuiInterface {
 
@@ -218,7 +219,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 						e.printStackTrace();
 					}
 				} else {
-					shotAt.setAsHitPin();
+					shotAt.explode();
 					try {
 						client.sendMessage(new Message(opponentUsername, Message.HIT, msg.getX(), msg.getY()));
 					} catch (IOException e) {

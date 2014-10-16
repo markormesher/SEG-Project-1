@@ -1,6 +1,10 @@
 package client.ui_components;
 
-public class BattleAnimationPanel extends AnimationPanel {
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class BattleAnimationPanel extends AnimationPanel implements ActionListener {
 
 	// constants
 	public static final int NORTH = 0,
@@ -8,7 +12,14 @@ public class BattleAnimationPanel extends AnimationPanel {
 			SOUTH = 180,
 			WEST = 270;
 
+	// is there a ship here?
 	private boolean empty = true;
+
+	// for animations
+	private int animationSpeed = 60;
+	private Timer animationTimer;
+	private int currentExplosion = 0;
+	private int totalExplosions = 14;
 
 	public BattleAnimationPanel(int width, int height) {
 		super(width, height);
@@ -43,7 +54,9 @@ public class BattleAnimationPanel extends AnimationPanel {
 
 	// run the explosion animation on this panel
 	public void explode() {
-		// TODO (Mark)
+		currentExplosion = 1;
+		animationTimer = new Timer(animationSpeed, this);
+		animationTimer.start();
 	}
 
 	// TODO: animation for "miss" (Mark)
@@ -51,5 +64,24 @@ public class BattleAnimationPanel extends AnimationPanel {
 	// is this cell still empty?
 	public boolean isEmpty() {
 		return empty;
+	}
+
+	// animation listener
+
+	@Override
+	public void actionPerformed(ActionEvent actionEvent) {
+		// exploding?
+		if (currentExplosion > 0) {
+			// set the explosion image
+			setEffect("explosion-" + currentExplosion, 0);
+			currentExplosion++;
+			// finished?
+			if (currentExplosion > totalExplosions) {
+				currentExplosion = 0;
+				if (animationTimer != null) animationTimer.stop();
+				setObject("debris", 0);
+				setEffect(null, 0);
+			}
+		}
 	}
 }
