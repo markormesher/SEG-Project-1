@@ -211,7 +211,7 @@ public class BattleServer {
 				if (msg.getType() == Message.SET_USERNAME) {
 					// TODO: enforce unique usernames (server could send reply to client, either USERNAME_OK or USERNAME_TAKEN)
 					// set username of this thread
-					username = msg.getMessage()
+					username = msg.getMessage();
 					checkBothUsernameSet(id);
 
 					// notify all clientConnectedListeners
