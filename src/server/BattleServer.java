@@ -85,7 +85,7 @@ public class BattleServer {
 		for (ClientPair p : activePairs) {
 			if (p.clientA.id == id || p.clientB.id == id) {
 				pair = p;
-				break;
+        break;
 			}
 		}
 
@@ -116,7 +116,7 @@ public class BattleServer {
 					listener.onClientDisconnected(c.username);
 				}
 				connectedClients.remove(c);
-				break;
+        break;
 			}
 		}
 
@@ -228,7 +228,7 @@ public class BattleServer {
 								serverMessageListener.onServerMessageReceived("Failed to send message to " + msg.getRecipient());
 							}
 
-              break;
+              						break;
 						}
 					}
 				}
