@@ -78,6 +78,17 @@ public class BattleServer {
 		}
 	}
 
+	// check if the username is taken
+	protected synchronized boolean usernameIsTaken(String username, int id) {
+		for (BattleClientThread c : connectedClients) {
+			if(c.username == username && c.getId() != id) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	// check whether both usernames are set, and if so start a game
 	protected synchronized void checkBothUsernameSet(int id) {
 		// find pair where one of the IDs match
@@ -212,6 +223,18 @@ public class BattleServer {
 					// TODO: enforce unique usernames (server could send reply to client, either USERNAME_OK or USERNAME_TAKEN)
 					// set username of this thread
 					username = msg.getMessage();
+
+					if(usernameIsTaken(username, id)) {
+						try {
+							sendMessage(new Message(username, Message.USERNAME_TAKEN));
+						}
+						catch (IOException e) {
+							System.out.println("Client disconnected: " + username);
+							break;
+						}
+						continue;
+					}
+
 					checkBothUsernameSet(id);
 
 					// notify all clientConnectedListeners

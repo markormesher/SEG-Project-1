@@ -17,7 +17,8 @@ public class Message implements Serializable {
 			CHAT_MESSAGE = 7,
 			SERVER_GONE = 8,
 			OPPONENT_DISCONNECTED = 9,
-			PLAYER_LOSE = 10;
+			PLAYER_LOSE = 10,
+			USERNAME_TAKEN = 11;
 
 	// details of this message
 	private String recipient;
