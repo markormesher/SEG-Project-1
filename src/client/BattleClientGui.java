@@ -7,6 +7,7 @@ import client.ui_components.CountdownClock;
 import global.Message;
 import global.Settings;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
@@ -14,16 +15,17 @@ import javax.swing.text.html.HTMLEditorKit;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
-// TODO: dress up the UI to include logo, current status, etc.
-// TODO: status message (their move, waiting, etc, etc)
 // TODO: add listener for messages from the server (add them to the chat console?)
-// TODO: prevent re-click on a cell already shot at
 
 public class BattleClientGui extends JFrame implements BattleClientGuiInterface {
 
+    //used for when the clock runs out
+    Random random = new Random();
 	// the client handles all communication with server
 	private BattleClient client;
 
@@ -46,17 +48,23 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 	// messaging output
 	private JTextPane messagesPane;
 
+    //the label that displays the user the current status
+    JLabel statusLabel;
+
+    CountdownClock clock;
+
 	// the two boards
 	private BattleBoardLocal localBoard = new BattleBoardLocal();
 	private BattleBoardOpponent opponentBoard = new BattleBoardOpponent();
 
 	public BattleClientGui() {
+
 		// basic setup of frame
-		setSize(750, 600);
+		setSize(Settings.GRID_SIZE * Settings.IMAGE_CELL_SIZE * 2 + 20, 900);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
 
-		// TODO: countdown clock for placing ships and taking a turn
+
         /*CountdownClock clock = new CountdownClock(30);
 		clock.setSize(300,300);
         clock.setOpaque(false);
@@ -78,10 +86,70 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 			}
 		}).start();
 
-		// create an inner panel to hold the two boards
-		JPanel innerPanel = new JPanel(new GridLayout(0, 2, 10, 10));
-		add(innerPanel, BorderLayout.CENTER);
 
+        //the panel containing the battleship logo
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBackground(Color.white);
+        ImageIcon title ;
+        title = new ImageIcon(this.getClass().getResource("/images/logo.png"));
+        topPanel.add(new JLabel(title) , BorderLayout.NORTH);
+
+        //the panel with the clock
+        JPanel clockPanel = new JPanel(new FlowLayout());
+        clockPanel.setBackground(Color.white);
+        clockPanel.setPreferredSize(new Dimension(150,150));
+        clockPanel.setSize(new Dimension(150, 150));
+
+        clock = new CountdownClock(30);
+        clock.setSize(100,100);
+        clock.setPreferredSize(new Dimension(100,100));
+        clock.setOpaque(false);
+        //triggered when the timer hits 0
+        clock.addTimeoutListener(new CountdownClock.TimeoutListener() {
+            @Override
+            public void onTimeout() {
+                if(currentPlayer == ME){
+                    boolean shot = false;
+                    while(!shot){
+                        //find random tile
+                        int x = random.nextInt(10);
+                        int y = random.nextInt(10);
+                        //if it's a valid move , shoot there
+                        if(opponentBoard.getBoardCells()[x][y].object.getIcon() ==null){
+                            try {
+                                client.sendMessage(new Message(opponentUsername, Message.SHOOT, x, y));
+                                // after shooting it's their turn
+                                currentPlayer = OPPONENT;
+                                onPlayerChanged();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                showError("An error occured  , check your network connection.");
+                            }
+                            shot = true;
+                        }
+                    }
+                }
+            }
+        });
+
+        clockPanel.add(clock);
+        topPanel.add(clockPanel , BorderLayout.CENTER);
+
+
+        //this label is used to show the game state to the user
+        final JPanel statusPanel = new JPanel();
+        statusPanel.setBackground(Color.white);
+        statusLabel = new JLabel("← To begin , place your ships on the left board");
+        statusPanel.add(statusLabel);
+        topPanel.add(statusPanel,BorderLayout.SOUTH);
+
+        add(topPanel, BorderLayout.NORTH);
+
+
+		// create an inner panel to hold the two boards
+		JPanel innerPanel = new JPanel(new GridLayout(0, 2, 20, 0));
+		add(innerPanel, BorderLayout.CENTER);
+        innerPanel.setBackground(Color.white);
 		// set up the local board
 		localBoard.addShipPlacementListener(new BattleBoardLocal.ShipPlacementListener() {
 			@Override
@@ -92,7 +160,9 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 					// if the other opponent hasn't finished yet, you go first
 					if (currentPlayer == 0) {
 						currentPlayer = ME;
+                        statusLabel.setText("Your opponent is not ready yet.");
 					}
+                    else onPlayerChanged();
 					// we're ready
 					playerReady = true;
 				} catch (IOException e) {
@@ -100,15 +170,16 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 				}
 			}
 		});
+        localBoard.setBackground(Color.white);
 		innerPanel.add(localBoard);
 
-		// TODO: countdown clock for placing ships and taking a turn
+
 		/*JPanel clockContainer = new JPanel(new FlowLayout());
 		CountdownClock clock = new CountdownClock(60);
 		clock.setMaximumSize(new Dimension(50, 50));
-		clock.setPreferredSize(new Dimension(50, 50));
-		clockContainer.add(clock);
-		inner.add(clockContainer);*/
+		clock.setPreferredSize(new Dimension(50, 50));*/
+		//clockContainer.add(clock);
+		//innerPanel.add(clockContainer);
 
 		// set up the opponent board
 		opponentBoard.addShotListener(new BattleBoardOpponent.ShotListener() {
@@ -116,9 +187,17 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 			public void onShotFired(int x, int y) {
 				// both sides must be ready
 				if (!playerReady || !opponentReady) {
-					// TODO: error message: both sides are not ready yet
+
+                    showError(!playerReady?
+                            "You haven't placed your ships yet." :
+                            "Your opponent hasn't placed their ships");
 					return;
 				}
+
+                if(opponentBoard.getBoardCells()[x][y].object.getIcon() !=null){
+                    showError("You already shot here.");
+                    return;
+                }
 
 				// you must be the current player to shoot
 				if (currentPlayer == ME) {
@@ -129,17 +208,19 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 						onPlayerChanged();
 					} catch (IOException e) {
 						e.printStackTrace();
-						// TODO: handle error
+						showError("An error occured  , check your network connection.");
 					}
 				} else {
-					// TODO: error message: "not your turn"
+					showError("It's not your turn right now");
 				}
 			}
 		});
+        opponentBoard.setBackground(Color.white);
 		innerPanel.add(opponentBoard);
 
 		// set up the chat area
 		JPanel chattingArea = new JPanel(new BorderLayout());
+        chattingArea.setBackground(Color.white);
 		chattingArea.setSize(new Dimension(0, 70));
 		chattingArea.setPreferredSize(new Dimension(0, 150));
 		add(chattingArea, BorderLayout.SOUTH);
@@ -199,9 +280,11 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 				// if you haven't finished yet, they will go first
 				if (currentPlayer == 0) currentPlayer = OPPONENT;
 				appendToLog("\n<strong>" + opponentUsername + " has finished placing ships and is ready to play</strong>");
+                onPlayerChanged();
 				break;
 
 			case Message.SHOOT: {
+
 				// you've been shot at, so it's your turn
 				currentPlayer = ME;
 				onPlayerChanged();
@@ -215,7 +298,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 					try {
 						client.sendMessage(new Message(opponentUsername, Message.MISS, msg.getX(), msg.getY()));
 					} catch (IOException e) {
-						// TODO: handle error
+                        showError("An error occured  , check your network connection.");
 						e.printStackTrace();
 					}
 				} else {
@@ -223,10 +306,11 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 					try {
 						client.sendMessage(new Message(opponentUsername, Message.HIT, msg.getX(), msg.getY()));
 					} catch (IOException e) {
-						// TODO: handle error
+                        showError("An error occured  , check your network connection.");
 						e.printStackTrace();
 					}
 				}
+                //clock.start();
 				break;
 			}
 
@@ -260,11 +344,27 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 	}
 
 	private void onPlayerChanged() {
-		// TODO: update status message somewhere when the player changes
+
 		if (currentPlayer == ME) {
+            clock.start();
 			setTitle(playerUsername + " (you) vs. " + opponentUsername + " | YOUR MOVE");
 		} else {
+            clock.stop();
 			setTitle(playerUsername + " (you) vs. " + opponentUsername + " | THEIR MOVE");
 		}
+
+        statusLabel.setForeground(Color.black);
+        statusLabel.setText(currentPlayer == ME ?
+                "Now it's your turn.Press a square on the right board to shoot the opponent. →":
+                "It's the opponent's turn now.");
 	}
+
+    private void showError(String msg){
+        statusLabel.setForeground(Color.red);
+        statusLabel.setText(msg);
+    }
+
+    public static void main(String[] arr){
+        new BattleClientGui().setVisible(true);
+    }
 }

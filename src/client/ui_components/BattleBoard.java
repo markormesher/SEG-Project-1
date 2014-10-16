@@ -11,6 +11,7 @@ public class BattleBoard extends JPanel {
 	public BattleAnimationPanel[][] cells = new BattleAnimationPanel[Settings.GRID_SIZE][Settings.GRID_SIZE];
 
 	public BattleBoard() {
+        setBackground(Color.white);
 		// enforce exactly the right size
 		setPreferredSize(new Dimension(Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE));
 		setSize(new Dimension(Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE));
