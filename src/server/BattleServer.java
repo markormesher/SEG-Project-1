@@ -220,7 +220,6 @@ public class BattleServer {
 
 				// setting username or sending message?
 				if (msg.getType() == Message.SET_USERNAME) {
-					// TODO: enforce unique usernames (server could send reply to client, either USERNAME_OK or USERNAME_TAKEN)
 					// set username of this thread
 					username = msg.getMessage();
 
