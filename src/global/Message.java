@@ -19,8 +19,6 @@ public class Message implements Serializable {
 			OPPONENT_DISCONNECTED = 9,
 			PLAYER_LOSE = 10;
 
-	// TODO: add types for USERNAME_OK, USERNAME_TAKEN, anything else that is needed
-
 	// details of this message
 	private String recipient;
 	private int type;

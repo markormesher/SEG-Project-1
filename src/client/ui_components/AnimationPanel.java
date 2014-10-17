@@ -22,9 +22,12 @@ public class AnimationPanel extends JLayeredPane {
 
 	public AnimationPanel(int width, int height) {
 		super();
+        setOpaque(false);
+
+		// set exact size
+		setSize(new Dimension(width, height));
 		setPreferredSize(new Dimension(width, height));
 
-        setOpaque(false);
 		// position labels
 		background.setLocation(0, 0);
 		background.setSize(width, height);
@@ -45,7 +48,7 @@ public class AnimationPanel extends JLayeredPane {
 			label.setIcon(null);
 		} else {
 			try {
-				// set the label to a new icon
+				// set the label to a new icon (use a drawer to allow rotation)
 				final BufferedImage image = getImage(icon);
 				label.setIcon(new ImageIcon() {
 					@Override

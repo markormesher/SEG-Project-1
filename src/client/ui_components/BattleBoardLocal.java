@@ -19,7 +19,7 @@ public class BattleBoardLocal extends JPanel {
 	private BattleBoard board = new BattleBoard();
 
 	// listeners for when placing ships is complete
-	private ArrayList<ShipPlacementListener> shipPlacementListeners = new ArrayList<ShipPlacementListener>();
+	private ArrayList<FinishedPlacingShipsListener> finishedPlacingShipsListeners = new ArrayList<FinishedPlacingShipsListener>();
 
 	// container to hold the ship the user is currently placing
 	private JPanel activeShipContainer = new JPanel();
@@ -30,9 +30,8 @@ public class BattleBoardLocal extends JPanel {
 	// last cursor position (used to prevent jump when re-drawing the active ship)
 	private int lastCursorX = 0;
 	private int lastCursorY = 0;
-	
+
 	public BattleBoardLocal() {
-        setOpaque(false);
 		// set up this panel
 		setLayout(null);
 		setPreferredSize(new Dimension(Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE));
@@ -169,7 +168,7 @@ public class BattleBoardLocal extends JPanel {
 					// have we finished adding ships?
 					if (currentShipSizeIndex == Settings.SHIP_SIZES.length) {
 						activeShipContainer.removeAll();
-						for (ShipPlacementListener listener : shipPlacementListeners) {
+						for (FinishedPlacingShipsListener listener : finishedPlacingShipsListeners) {
 							listener.onFinished();
 						}
 						return;
@@ -296,11 +295,11 @@ public class BattleBoardLocal extends JPanel {
 		return board.cells;
 	}
 
-	public void addShipPlacementListener(ShipPlacementListener listener) {
-		shipPlacementListeners.add(listener);
+	public void addShipPlacementListener(FinishedPlacingShipsListener listener) {
+		finishedPlacingShipsListeners.add(listener);
 	}
 
-	public interface ShipPlacementListener {
+	public interface FinishedPlacingShipsListener {
 
 		public void onFinished();
 	}
