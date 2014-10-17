@@ -106,18 +106,6 @@ public class BattleServer {
 	// removes a client thread from all server listings
 	protected synchronized void removeClientThread(int id) {
 		// scan connected clients and remove this one
-		/*
-		for (BattleClientThread c : connectedClients) {
-			if (c.id == id) {
-				for (ClientDisconnectedListener listener : clientDisconnectedListeners) {
-					listener.onClientDisconnected(c.username);
-				}
-				connectedClients.remove(c);
-			}
-		}
-		*/
-		// steven - fix Exception in thread "Thread-11" Exception in thread "Thread-10" java.util.ConcurrentModificationException
-		// 			cause by above code
 		for( int i = connectedClients.size()-1; i >= 0; --i) {
 			BattleClientThread c =  connectedClients.get(i);
 			if(c.id == id) {

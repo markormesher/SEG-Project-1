@@ -255,17 +255,18 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 			BattleAnimationPanel hitAt = opponentBoard.getBoardCells()[msg
 					.getX()][msg.getY()];
 			hitAt.setAsHitPin();
-			opponentBoard.incDestroyedShips();
+			opponentBoard.incDestroyedShipsPieces();
 			
-			// steven - for now a simple test that checks after each players
+			// A simple test that checks after each players
 			// hits if that is the last remaining ship.
-			if (opponentBoard.getDestroyedShips() == opponentBoard
-					.getTotalNoOfShipsToDestroy()) {
+			if (opponentBoard.getDestroyedShipPieces() == opponentBoard
+					.getTotalNoOfShipPiecesToDestroy()) {
 				try {
-					client.sendMessage(new Message(opponentUsername,Message.PLAYER_LOSE, "You have lost."));
-					client.sendMessage(new Message(playerUsername, Message.PLAYER_WIN, "You have won."));
+					onWin();
+					// send a message to the opponent that they have lost.
+					client.sendMessage(new Message(opponentUsername,Message.PLAYER_LOSE));
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
+					// TODO handle error
 					e.printStackTrace();
 				}
 			}
@@ -277,14 +278,19 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 					.getX()][msg.getY()];
 			missAt.setAsMissPin();
 			break;
-		case Message.PLAYER_WIN:
-			//DEBUG
-			appendToLog(playerUsername + "(you) have won.");
-			break;
 		case Message.PLAYER_LOSE:
-			//DEBUG
-			appendToLog(playerUsername + "(you) have lost.");
+			onLose();
 		}
+	}
+
+	private void onLose() {
+		appendToLog("You have lost.");
+		// TODO: do something when the player loses.
+	}
+
+	private void onWin() {
+		appendToLog("You have won.");
+		// TODO : do something when the player wins.
 	}
 
 	private void appendToLog(String s) {
