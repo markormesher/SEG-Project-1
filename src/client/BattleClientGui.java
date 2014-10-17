@@ -264,9 +264,6 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 				try {
 					client.sendMessage(new Message(opponentUsername,Message.PLAYER_LOSE, "You have lost."));
 					client.sendMessage(new Message(playerUsername, Message.PLAYER_WIN, "You have won."));
-					//DEBUG
-					appendToLog(playerUsername + " has won.");
-					appendToLog(opponentUsername + " has lost.");
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -280,6 +277,13 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 					.getX()][msg.getY()];
 			missAt.setAsMissPin();
 			break;
+		case Message.PLAYER_WIN:
+			//DEBUG
+			appendToLog(playerUsername + "(you) have won.");
+			break;
+		case Message.PLAYER_LOSE:
+			//DEBUG
+			appendToLog(playerUsername + "(you) have lost.");
 		}
 	}
 
