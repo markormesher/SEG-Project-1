@@ -25,11 +25,12 @@ import java.util.Random;
 
 public class BattleClientGui extends JFrame implements BattleClientGuiInterface {
 
+	// the 8-bit font
+	private Font font;
 
-    //the 8bit font
-    private Font font;
-    //used for when the clock runs out
-    private Random random = new Random();
+	// used for random moves when the clock runs out
+	private Random random = new Random();
+
 	// the client handles all communication with server
 	private BattleClient client;
 
@@ -50,70 +51,67 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 	private ArrayList<String> messages = new ArrayList<String>();
 
 	// messaging output
+	private JLabel chatLabel;
 	private JTextPane messagesPane;
 
-    //the label that displays the user the current status
-    private JLabel statusLabel;
+	// the label that displays the user the current status
+	private JLabel statusLabel;
 
-    private CountdownClock clock;
+	// the countdown clock
+	private CountdownClock clock;
 
 	// the two boards
 	private BattleBoardLocal localBoard = new BattleBoardLocal();
 	private BattleBoardOpponent opponentBoard = new BattleBoardOpponent();
 
-    private JLabel chatLabel;
+	// the background tile
+	private BufferedImage backgroundTile;
 
-    private BufferedImage waterTile;
 	public BattleClientGui() {
-        //loading the font from the ttf file
-        try {
-            font = Font.createFont(Font.TRUETYPE_FONT , getClass().getResourceAsStream("/PressStart2P.ttf"));
-            font = font.deriveFont(25f);
-        } catch (FontFormatException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+		// loading the font from the ttf file
+		try {
+			font = Font.createFont(Font.TRUETYPE_FONT, getClass().getResourceAsStream("/fonts/PressStart2P.ttf"));
+			font = font.deriveFont(25f);
+		} catch (FontFormatException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
-        // basic setup of frame
-		setSize(Settings.GRID_SIZE * Settings.IMAGE_CELL_SIZE * 2 + Settings.IMAGE_CELL_SIZE*3, Settings.IMAGE_CELL_SIZE * 24);
-        setResizable(true);
+		// basic setup of frame
+		setSize(Settings.GRID_SIZE * Settings.IMAGE_CELL_SIZE * 2 + Settings.IMAGE_CELL_SIZE * 3, Settings.IMAGE_CELL_SIZE * 24);
+		setResizable(true);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        //The waterBackground is beneath the actual UI
-        //The AnimationPanels no longer use a background but are transparent
-        JPanel waterBackground = new JPanel(){
-            public void paint(Graphics g){
-                super.paint(g);
-                if(waterTile == null){
-                    try {
-                        waterTile = ImageIO.read(this.getClass().getResource("/images/default/bg.png"));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                //cover the surface with water images
-                for(int x =0;x < getWidth()/32.0;x++){
-                    for(int y =0;y < getHeight()/32.0;y++){
-                        g.drawImage(waterTile ,x*Settings.IMAGE_CELL_SIZE , y*Settings.IMAGE_CELL_SIZE, Settings.IMAGE_CELL_SIZE , Settings.IMAGE_CELL_SIZE,null);
-                    }
-                }
-            }
-        };
+		// the background is beneath the actual UI
+		JPanel backgroundImage = new JPanel() {
+			public void paint(Graphics g) {
+				super.paint(g);
+				if (backgroundTile == null) {
+					try {
+						backgroundTile = ImageIO.read(this.getClass().getResource("/images/default/bg.png"));
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
 
-        waterBackground.setSize(new Dimension(getWidth(), getHeight()));
-        waterBackground.setPreferredSize(new Dimension(getWidth(), getHeight()));
-        getLayeredPane().add(waterBackground , new Integer(1));
+				// cover the surface with background tiles
+				for (int x = 0; x < getWidth() / 32.0; x++) {
+					for (int y = 0; y < getHeight() / 32.0; y++) {
+						g.drawImage(backgroundTile, x * Settings.IMAGE_CELL_SIZE, y * Settings.IMAGE_CELL_SIZE, Settings.IMAGE_CELL_SIZE, Settings.IMAGE_CELL_SIZE, null);
+					}
+				}
+			}
+		};
+		backgroundImage.setSize(new Dimension(getWidth(), getHeight()));
+		backgroundImage.setPreferredSize(new Dimension(getWidth(), getHeight()));
+		backgroundImage.repaint();
 
-        waterBackground.repaint();
-
-
-        //this panel contains the actual ui and is overlayed on the water
-        JPanel frameContent = new JPanel();
-        frameContent.setLayout(new BorderLayout());
-        frameContent.setOpaque(false);
-        frameContent.setSize(new Dimension(getWidth(),getHeight()-18));
-        getLayeredPane().add(frameContent, new Integer(100));
+		// this panel contains the actual ui and is over the background
+		JPanel frameContent = new JPanel();
+		frameContent.setLayout(new BorderLayout());
+		frameContent.setOpaque(false);
+		frameContent.setSize(new Dimension(getWidth(), getHeight() - 18));
 
 		// collect player username and set it as title
 		playerUsername = JOptionPane.showInputDialog(this, "Enter a username");
@@ -131,102 +129,102 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 			}
 		}).start();
 
+		// the panel containing the battleship logo
+		JPanel topPanel = new JPanel(new BorderLayout());
+		topPanel.setOpaque(false);
+		JLabel title = new JLabel();
+		title.setIcon(new ImageIcon(this.getClass().getResource("/images/logo.png")));
+		topPanel.add(title, BorderLayout.NORTH);
 
-        //the panel containing the battleship logo
-        JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setOpaque(false);
-        ImageIcon title ;
-        title = new ImageIcon(this.getClass().getResource("/images/logo.png"));
-        topPanel.add(new JLabel(title) , BorderLayout.NORTH);
+		// the panel with the clock
+		JPanel clockPanel = new JPanel(new FlowLayout());
+		clockPanel.setOpaque(false);
+		clockPanel.setPreferredSize(new Dimension(150, 138));
+		clockPanel.setSize(new Dimension(150, 138));
 
-        //the panel with the clock
-        JPanel clockPanel = new JPanel(new FlowLayout());
-        clockPanel.setOpaque(false);
-        clockPanel.setPreferredSize(new Dimension(150,138));
-        clockPanel.setSize(new Dimension(150, 138));
+		// set up the clock
+		clock = new CountdownClock(Settings.MOVE_TIMEOUT);
+		clock.setSize(100, 100);
+		clock.setPreferredSize(new Dimension(100, 100));
+		clock.setOpaque(false);
 
-        clock = new CountdownClock(30);
-        clock.setSize(100,100);
-        clock.setPreferredSize(new Dimension(100,100));
-        clock.setOpaque(false);
-        //triggered when the timer hits 0
-        clock.addTimeoutListener(new CountdownClock.TimeoutListener() {
-            @Override
-            public void onTimeout() {
-                if(currentPlayer == ME){
-                    boolean shot = false;
-                    while(!shot){
-                        //find random tile
-                        int x = random.nextInt(10);
-                        int y = random.nextInt(10);
-                        //if it's a valid move , shoot there
-                        if(opponentBoard.getBoardCells()[x][y].isEmpty()){
-                            try {
-                                client.sendMessage(new Message(opponentUsername, Message.SHOOT, x, y));
-                                // after shooting it's their turn
-                                currentPlayer = OPPONENT;
-                                onPlayerChanged();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                showError("An error occurred, check your network connection.");
-                            }
-                            shot = true;
-                        }
-                    }
-                }
-            }
-        });
-
-        clockPanel.add(clock);
-        topPanel.add(clockPanel , BorderLayout.CENTER);
-
-
-        //this label is used to show the game state to the user
-        final JPanel statusPanel = new JPanel();
-        //statusPanel.setBackground(Color.white);
-        statusPanel.setOpaque(false);
-        statusLabel = new JLabel("← To begin , place your ships on the left board");
-        statusPanel.add(statusLabel);
-        statusLabel.setFont(font.deriveFont(11f));
-        statusLabel.setForeground(Color.white);
-        topPanel.add(statusPanel,BorderLayout.SOUTH);
-
-        frameContent.add(topPanel, BorderLayout.NORTH);
-
-
-        Border boardBoard = new EmptyBorder(new Insets(0,36,0,36));
-		// create an inner panel to hold the two boards
-		JPanel innerPanel = new JPanel(new GridLayout(0, 2, 36, 0));
-        innerPanel.setBorder(boardBoard);
-		frameContent.add(innerPanel, BorderLayout.CENTER);
-        innerPanel.setOpaque(false);
-
-
-		// set up the local board
-		localBoard
-				.addShipPlacementListener(new BattleBoardLocal.FinishedPlacingShipsListener() {
-					@Override
-					public void onFinished() {
-						try {
-							// tell the other user you're ready
-							client.sendMessage(new Message(opponentUsername,
-									Message.READY_TO_PLAY));
-							// if the other opponent hasn't finished yet, you go
-							// first
-							if (currentPlayer == 0) {
-								currentPlayer = ME;
-                        statusLabel.setText("Your opponent is not ready yet.");
+		// triggered when the timer hits 0
+		clock.addTimeoutListener(new CountdownClock.TimeoutListener() {
+			@Override
+			public void onTimeout() {
+				if (currentPlayer == ME) {
+					boolean shot = false;
+					while (!shot) {
+						// find random tile
+						int x = random.nextInt(10);
+						int y = random.nextInt(10);
+						// if it's a valid move, shoot there
+						if (opponentBoard.getBoardCells()[x][y].isEmpty()) {
+							try {
+								client.sendMessage(new Message(opponentUsername, Message.SHOOT, x, y));
+								// after shooting it's their turn
+								currentPlayer = OPPONENT;
+								onPlayerChanged();
+							} catch (IOException e) {
+								e.printStackTrace();
+								showError("An error occurred, check your network connection.");
 							}
-                    else onPlayerChanged();
-							// we're ready
-							playerReady = true;
-						} catch (IOException e) {
-							e.printStackTrace();
+							shot = true;
 						}
 					}
-				});
-        //localBoard.setBackground(Color.white);
-        localBoard.setOpaque(false);
+				}
+			}
+		});
+
+		// add clock
+		clockPanel.add(clock);
+		topPanel.add(clockPanel, BorderLayout.CENTER);
+
+		// this label is used to show the game state to the user
+		JPanel statusPanel = new JPanel();
+		statusPanel.setOpaque(false);
+		statusLabel = new JLabel("← To begin, place your ships on the left board");
+		statusLabel.setFont(font.deriveFont(11f));
+		statusLabel.setForeground(Color.white);
+		statusPanel.add(statusLabel);
+		topPanel.add(statusPanel, BorderLayout.SOUTH);
+
+		// add all of the top panel to the main layout
+		frameContent.add(topPanel, BorderLayout.NORTH);
+
+		// create an inner panel to hold the two boards
+		Border boardBoarder = new EmptyBorder(new Insets(0, 36, 0, 36));
+		JPanel innerPanel = new JPanel(new GridLayout(0, 2, 36, 0));
+		innerPanel.setBorder(boardBoarder);
+		innerPanel.setOpaque(false);
+		frameContent.add(innerPanel, BorderLayout.CENTER);
+
+		// set up the local board
+		localBoard.addShipPlacementListener(new BattleBoardLocal.FinishedPlacingShipsListener() {
+			@Override
+			public void onFinished() {
+				try {
+					// tell the other user you're ready
+					client.sendMessage(new Message(opponentUsername, Message.READY_TO_PLAY));
+
+					// if the other opponent hasn't finished yet, you go first
+					if (currentPlayer == 0) {
+						currentPlayer = ME;
+						statusLabel.setText("Your opponent is not ready yet.");
+					} else {
+						onPlayerChanged();
+					}
+
+					// we're ready
+					playerReady = true;
+				} catch (IOException e) {
+					showError("An error occurred, check your network connection.");
+					e.printStackTrace();
+				}
+			}
+		});
+
+		localBoard.setOpaque(false);
 		innerPanel.add(localBoard);
 
 		// set up the opponent board
@@ -235,100 +233,99 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 			public void onShotFired(int x, int y) {
 				// both sides must be ready
 				if (!playerReady || !opponentReady) {
-
-                    showError(!playerReady?
-                            "You haven't placed your ships yet." :
-                            "Your opponent hasn't placed their ships");
+					showError(!playerReady ? "You haven't placed your ships yet." : "Your opponent hasn't placed their ships");
 					return;
 				}
 
-                if(opponentBoard.getBoardCells()[x][y].object.getIcon() !=null){
-                    showError("You already shot there.");
-                    return;
-                }
+				// check that they're not re-shooting on the same spot
+				if (opponentBoard.getBoardCells()[x][y].object.getIcon() != null) {
+					showError("You already shot there.");
+					return;
+				}
 
 				// you must be the current player to shoot
 				if (currentPlayer == ME) {
 					try {
-						client.sendMessage(new Message(opponentUsername,
-								Message.SHOOT, x, y));
+						client.sendMessage(new Message(opponentUsername, Message.SHOOT, x, y));
+
 						// after shooting it's their turn
 						currentPlayer = OPPONENT;
 						onPlayerChanged();
 					} catch (IOException e) {
-						e.printStackTrace();
 						showError("An error occurred, check your network connection.");
+						e.printStackTrace();
 					}
 				} else {
 					showError("It's not your turn right now");
 				}
 			}
 		});
-        opponentBoard.setOpaque(false);
+
+		opponentBoard.setOpaque(false);
 		innerPanel.add(opponentBoard);
 
-        //to sort of center the chatting panel
-        Border chattingAreaPadding = new EmptyBorder(new Insets(0,36+18,0,36+18));
-        //the chattingContainer is transparent and has a padding
-        //the chattingArea is white and is inside the chattingContainer
-        JPanel chattingContainer = new JPanel(new BorderLayout());
-		// set up the chat area
+		// to center the chatting panel
+		Border chattingAreaPadding = new EmptyBorder(new Insets(0, 36 + 18, 0, 36 + 18));
+
+		// the chattingContainer is transparent and has a padding
+		JPanel chattingContainer = new JPanel(new BorderLayout());
+		// the chattingArea is white and is inside the chattingContainer
 		JPanel chattingArea = new JPanel(new BorderLayout());
-        chattingArea.setBorder(new LineBorder(Color.gray , 1));
-        chattingContainer.setBorder(chattingAreaPadding);
-        chattingArea.setBackground(Color.white);
-        chattingContainer.setOpaque(false);
+
+		// set up the chat area
+		chattingArea.setBorder(new LineBorder(Color.gray, 1));
+		chattingArea.setBackground(Color.white);
 		chattingArea.setSize(new Dimension(0, 70));
 		chattingArea.setPreferredSize(new Dimension(0, 200));
-        chattingContainer.setSize(new Dimension(0, 70));
-        chattingContainer.setPreferredSize(new Dimension(0, 200));
-        chattingContainer.add(chattingArea , BorderLayout.CENTER);
+		chattingContainer.setBorder(chattingAreaPadding);
+		chattingContainer.setOpaque(false);
+		chattingContainer.setSize(new Dimension(0, 70));
+		chattingContainer.setPreferredSize(new Dimension(0, 200));
+		chattingContainer.add(chattingArea, BorderLayout.CENTER);
 		frameContent.add(chattingContainer, BorderLayout.SOUTH);
 
-
-        Border standardPadding = new EmptyBorder(new Insets(10,10,10,10));
-
 		// messaging output
+		Border standardPadding = new EmptyBorder(new Insets(10, 10, 10, 10));
 		messagesPane = new JTextPane();
 		messagesPane.setContentType("text/html");
 		messagesPane.setEditable(false);
-        messagesPane.setBorder(standardPadding);
-        messagesPane.setFont(font.deriveFont(13f));
+		messagesPane.setBorder(standardPadding);
+		messagesPane.setFont(font.deriveFont(13f));
 		chattingArea.add(new JScrollPane(messagesPane), BorderLayout.CENTER);
 
-        chatLabel = new JLabel("Chat");
-        chatLabel.setForeground(Color.darkGray);
-        chatLabel.setBorder(standardPadding);
-        chatLabel.setFont(font.deriveFont(13f));
-        chattingArea.add(chatLabel , BorderLayout.NORTH);
+		chatLabel = new JLabel("Chat");
+		chatLabel.setForeground(Color.darkGray);
+		chatLabel.setBorder(standardPadding);
+		chatLabel.setFont(font.deriveFont(13f));
+		chattingArea.add(chatLabel, BorderLayout.NORTH);
 
 		// messaging input
 		final JTextField messageInput = new JTextField();
-        //not sure if this is a good idea:
-        //messageInput.setFont(font.deriveFont(13f));
-        messageInput.setBorder(standardPadding);
+		messageInput.setBorder(standardPadding);
 		chattingArea.add(messageInput, BorderLayout.SOUTH);
 		messageInput.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// send message when the user presses enter
-				Message toSend = new Message(opponentUsername,
-						Message.CHAT_MESSAGE, messageInput.getText().trim());
+				Message toSend = new Message(opponentUsername, Message.CHAT_MESSAGE, messageInput.getText().trim());
 				try {
 					client.sendMessage(toSend);
-					appendToLog("\n<strong>" + playerUsername + ":</strong> "
-							+ messageInput.getText());
+					appendToLog("\n<strong>" + playerUsername + ":</strong> " + messageInput.getText());
 					messageInput.setText("");
 				} catch (IOException ex) {
 					appendToLog("\nFailed to send message");
 					ex.printStackTrace();
 				}
-
 			}
 		});
 
+		// add layers
+		getLayeredPane().add(backgroundImage, new Integer(1));
+		getLayeredPane().add(frameContent, new Integer(2));
+
+		// showtime!
 		setVisible(true);
-        getLayeredPane().repaint();
+		getLayeredPane().repaint();
 	}
 
 	@Override
@@ -337,111 +334,105 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 			return;
 
 		switch (msg.getType()) {
-		case Message.SET_OPPONENT:
-			if (msg.getMessage() == null)
-				return;
-			opponentUsername = msg.getMessage();
-			setTitle(playerUsername + " (you) vs. " + opponentUsername);
-                //chatLabel.setText("Chat with " + opponentUsername);
-			break;
+			case Message.SET_OPPONENT:
+				if (msg.getMessage() == null) {
+					return;
+				}
+				opponentUsername = msg.getMessage();
+				setTitle(playerUsername + " (you) vs. " + opponentUsername);
+				chatLabel.setText("Chat with " + opponentUsername);
+				break;
 
-		case Message.CHAT_MESSAGE:
-			if (msg.getMessage() == null)
-				return;
-			appendToLog("\n<strong>" + opponentUsername + ":</strong> "
-					+ msg.getMessage());
-			break;
+			case Message.CHAT_MESSAGE:
+				if (msg.getMessage() == null) {
+					return;
+				}
+				appendToLog("\n<strong>" + opponentUsername + ":</strong> " + msg.getMessage());
+				break;
 
-		case Message.OPPONENT_DISCONNECTED:
-			appendToLog("\n<strong>-- Your opponent disconnected! --");
-			// TODO: automatically win the game here
-			break;
+			case Message.OPPONENT_DISCONNECTED:
+				appendToLog("\n<strong>-- Your opponent disconnected! --");
+				// TODO: automatically win the game here
+				break;
 
-		case Message.READY_TO_PLAY:
-			opponentReady = true;
-			// if you haven't finished yet, they will go first
-			if (currentPlayer == 0) {
-				currentPlayer = OPPONENT;
-				onPlayerChanged();
+			case Message.READY_TO_PLAY:
+				opponentReady = true;
+				// if you haven't finished yet, they will go first
+				if (currentPlayer == 0) {
+					currentPlayer = OPPONENT;
+				}
 				appendToLog("\n<strong>" + opponentUsername + " has finished placing ships and is ready to play</strong>");
-			}
-			break;
+				break;
 
-		case Message.SHOOT: {
+			case Message.SHOOT: {
+				// you've been shot at, so it's your turn
+				currentPlayer = ME;
+				onPlayerChanged();
 
-			// you've been shot at, so it's your turn
-			currentPlayer = ME;
-			onPlayerChanged();
+				// find the tile they shot
+				BattleAnimationPanel shotAt = localBoard.getBoardCells()[msg.getX()][msg.getY()];
 
-			// find the tile they shop
-			BattleAnimationPanel shotAt = localBoard.getBoardCells()[msg.getX()][msg
-					.getY()];
-
-			// notify the opponent whether it was a hit or a miss
-			if (shotAt.isEmpty()) {
-				shotAt.setAsMissPin();
-				try {
-					client.sendMessage(new Message(opponentUsername,
-							Message.MISS, msg.getX(), msg.getY()));
-				} catch (IOException e) {
-                        showError("An error occurred, check your network connection.");
-					e.printStackTrace();
+				// notify the opponent whether it was a hit or a miss
+				if (shotAt.isEmpty()) {
+					shotAt.setAsMissPin();
+					try {
+						client.sendMessage(new Message(opponentUsername, Message.MISS, msg.getX(), msg.getY()));
+					} catch (IOException e) {
+						showError("An error occurred, check your network connection.");
+						e.printStackTrace();
+					}
+				} else {
+					shotAt.explode();
+					try {
+						client.sendMessage(new Message(opponentUsername, Message.HIT, msg.getX(), msg.getY()));
+					} catch (IOException e) {
+						showError("An error occurred, check your network connection.");
+						e.printStackTrace();
+					}
 				}
-			} else {
-				shotAt.explode();
-				try {
-					client.sendMessage(new Message(opponentUsername,
-							Message.HIT, msg.getX(), msg.getY()));
-				} catch (IOException e) {
-                        showError("An error occurred, check your network connection.");
-					e.printStackTrace();
-				}
+				break;
 			}
-                //clock.start();
-			break;
-		}
 
-		// you hit the opponent
-		case Message.HIT:
-			BattleAnimationPanel hitAt = opponentBoard.getBoardCells()[msg
-					.getX()][msg.getY()];
-			hitAt.setAsHitPin();
-			opponentBoard.incDestroyedShipPieces();
+			// you hit the opponent
+			case Message.HIT:
+				BattleAnimationPanel hitAt = opponentBoard.getBoardCells()[msg.getX()][msg.getY()];
+				hitAt.setAsHitPin();
+				opponentBoard.incDestroyedShipPieces();
 
-			// A simple test that checks after each players
-			// hits if that is the last remaining ship.
-			if (opponentBoard.getDestroyedShipPieces() == opponentBoard
-					.getTotalShipPieces()) {
-				try {
-					onWin();
-					// send a message to the opponent that they have lost.
-					client.sendMessage(new Message(opponentUsername,Message.PLAYER_LOSE));
-				} catch (IOException e) {
-					// TODO handle error
-					e.printStackTrace();
+				// check if this was the winning shot
+				if (opponentBoard.getDestroyedShipPieces() == opponentBoard.getTotalShipPieces()) {
+					try {
+						onWin();
+						// send a message to the opponent that they have lost.
+						client.sendMessage(new Message(opponentUsername, Message.PLAYER_LOSE));
+					} catch (IOException e) {
+						showError("An error occurred, check your network connection.");
+						e.printStackTrace();
+					}
 				}
-			}
 				break;
 
 			// you missed the opponent
-		case Message.MISS:
-			BattleAnimationPanel missAt = opponentBoard.getBoardCells()[msg
-					.getX()][msg.getY()];
-			missAt.setAsMissPin();
-			break;
-		case Message.PLAYER_LOSE:
-			onLose();
+			case Message.MISS:
+				BattleAnimationPanel missAt = opponentBoard.getBoardCells()[msg.getX()][msg.getY()];
+				missAt.setAsMissPin();
+				break;
+
+			// you've lost
+			case Message.PLAYER_LOSE:
+				onLose();
+				break;
 		}
 	}
 
 	private void onLose() {
-		appendToLog("You have lost.");
 		// TODO: do something when the player loses.
+		appendToLog("You have lost.");
 	}
 
 	private void onWin() {
-		appendToLog("You have won.");
 		// TODO : do something when the player wins.
+		appendToLog("You have won.");
 	}
 
 	private void appendToLog(String s) {
@@ -460,25 +451,23 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 	}
 
 	private void onPlayerChanged() {
-
 		if (currentPlayer == ME) {
-            clock.start();
+			clock.start();
 		} else {
-            clock.stop();
+			clock.stop();
 		}
 
-        statusLabel.setForeground(Color.white);
-        statusLabel.setText(currentPlayer == ME ?
-                "It's your turn.Press a square on the right board to shoot →":
-                "It's the opponent's turn now.");
+		// update the status label
+		statusLabel.setForeground(Color.white);
+		statusLabel.setText(currentPlayer == ME ? "It's your turn. Press a square on the right board to shoot →" : "It's the opponent's turn now.");
 	}
 
-    private void showError(String msg){
-        statusLabel.setForeground(Color.red);
-        statusLabel.setText(msg);
-    }
+	private void showError(String msg) {
+		statusLabel.setForeground(Color.red);
+		statusLabel.setText(msg);
+	}
 
-    public static void main(String[] arr){
-        new BattleClientGui().setVisible(true);
-    }
+	public static void main(String[] arr) {
+		new BattleClientGui();
+	}
 }
