@@ -12,6 +12,7 @@ public class BattleBoard extends JPanel {
 
 	public BattleBoard() {
         setOpaque(false);
+
 		// enforce exactly the right size
 		setPreferredSize(new Dimension(Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE));
 		setSize(new Dimension(Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE));
@@ -28,8 +29,7 @@ public class BattleBoard extends JPanel {
 		// create a GRID_SIZE x GRID_SIZE grid of cells
 		for (int y = 0; y < Settings.GRID_SIZE; ++y) {
 			for (int x = 0; x < Settings.GRID_SIZE; ++x) {
-				final BattleAnimationPanel panel = new BattleAnimationPanel(Settings.IMAGE_CELL_SIZE, Settings.IMAGE_CELL_SIZE);
-				//panel.setBackground("bg", 0);
+				BattleAnimationPanel panel = new BattleAnimationPanel(Settings.IMAGE_CELL_SIZE, Settings.IMAGE_CELL_SIZE);
 				cells[x][y] = panel;
 				imageCellGrid.add(panel);
 			}
@@ -39,15 +39,16 @@ public class BattleBoard extends JPanel {
 		repaint();
 	}
 
+	// draw a white border around the board
     @Override
     public void paint(Graphics g) {
         super.paint(g);
         Graphics2D g2 = (Graphics2D) g;
         g.setColor(Color.white);
         g2.setStroke(new BasicStroke(2));
-        g.drawLine(2, 2, getWidth(), 2);
-        g.drawLine(2,2,2,getHeight());
-        g.drawLine(getWidth(),2,getWidth(),getHeight());
-        g.drawLine(2,getHeight(),getWidth(),getHeight());
+        g2.drawLine(2, 2, getWidth(), 2);
+        g2.drawLine(2,2,2,getHeight());
+        g2.drawLine(getWidth(),2,getWidth(),getHeight());
+        g2.drawLine(2,getHeight(),getWidth(),getHeight());
     }
 }

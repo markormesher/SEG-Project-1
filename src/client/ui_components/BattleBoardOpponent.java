@@ -14,18 +14,17 @@ public class BattleBoardOpponent extends JPanel {
 
 	// shot listeners for this board
 	ArrayList<ShotListener> shotListeners = new ArrayList<ShotListener>();
-	
-	// Keeps the number pieces of the ships that a player needs to destroy to win.
-	private int totalNoOfShipPiecesToDestroy = 0;
-	// Keeps the number of pieces the player has currently destroyed.
+
+	// keeps the total number of ship pieces and the number destroyed
+	private int totalShipPieces = 0;
 	private int destroyedShipPieces = 0;
-	
+
 	public BattleBoardOpponent() {
-		// initialize totalShips
-		for(int shipSize : Settings.SHIP_SIZES) {
-			totalNoOfShipPiecesToDestroy += shipSize;
+		// initialize destruction values
+		for (int shipSize : Settings.SHIP_SIZES) {
+			totalShipPieces += shipSize;
 		}
-		
+
 		// set up this panel
 		setLayout(null);
 		setPreferredSize(new Dimension(Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE));
@@ -60,8 +59,7 @@ public class BattleBoardOpponent extends JPanel {
 		// add the listener layer over the board
 		layeredPane.add(board, new Integer(0));
 		layeredPane.add(overlayPanel, new Integer(1));
-		
-		
+
 	}
 
 	// get the titles of the battle board
@@ -74,19 +72,20 @@ public class BattleBoardOpponent extends JPanel {
 		shotListeners.add(listener);
 	}
 
-	public interface ShotListener {
-		void onShotFired(int x, int y);
-	}
-	
 	public int getDestroyedShipPieces() {
 		return destroyedShipPieces;
 	}
-	
-	public void incDestroyedShipsPieces() {
+
+	public void incDestroyedShipPieces() {
 		destroyedShipPieces++;
 	}
-	
-	public int getTotalNoOfShipPiecesToDestroy() {
-		return totalNoOfShipPiecesToDestroy;
+
+	public int getTotalShipPieces() {
+		return totalShipPieces;
+	}
+
+	public interface ShotListener {
+
+		void onShotFired(int x, int y);
 	}
 }

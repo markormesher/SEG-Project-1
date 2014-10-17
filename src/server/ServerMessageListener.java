@@ -1,9 +1,9 @@
 package server;
 
 /**
- * Created by assafyossifoff on 17/10/2014.
+ * Triggered when the server has any generic message to send
  */
 public interface ServerMessageListener {
 
-    void onServerMessageReceived(String serverMessage);
+	public void onServerMessageReceived(String message);
 }
