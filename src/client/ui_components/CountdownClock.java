@@ -30,8 +30,6 @@ public class CountdownClock extends JPanel implements ActionListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-		//timer.start();
 	}
 
 	@Override

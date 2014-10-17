@@ -25,7 +25,7 @@ import java.util.Random;
 public class BattleClientGui extends JFrame implements BattleClientGuiInterface {
 
     //used for when the clock runs out
-    Random random = new Random();
+    private Random random = new Random();
 	// the client handles all communication with server
 	private BattleClient client;
 
@@ -43,15 +43,15 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 	private boolean playerReady = false;
 
 	// a list of all messages
-	ArrayList<String> messages = new ArrayList<String>();
+	private ArrayList<String> messages = new ArrayList<String>();
 
 	// messaging output
 	private JTextPane messagesPane;
 
     //the label that displays the user the current status
-    JLabel statusLabel;
+    private JLabel statusLabel;
 
-    CountdownClock clock;
+    private CountdownClock clock;
 
 	// the two boards
 	private BattleBoardLocal localBoard = new BattleBoardLocal();
@@ -64,11 +64,6 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
 
-
-        /*CountdownClock clock = new CountdownClock(30);
-		clock.setSize(300,300);
-        clock.setOpaque(false);
-        this.add(clock);*/
 
 		// collect player username and set it as title
 		playerUsername = JOptionPane.showInputDialog(this, "Enter a username");
@@ -115,7 +110,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
                         int x = random.nextInt(10);
                         int y = random.nextInt(10);
                         //if it's a valid move , shoot there
-                        if(opponentBoard.getBoardCells()[x][y].object.getIcon() ==null){
+                        if(opponentBoard.getBoardCells()[x][y].isEmpty()){
                             try {
                                 client.sendMessage(new Message(opponentUsername, Message.SHOOT, x, y));
                                 // after shooting it's their turn
@@ -173,14 +168,6 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
         localBoard.setBackground(Color.white);
 		innerPanel.add(localBoard);
 
-
-		/*JPanel clockContainer = new JPanel(new FlowLayout());
-		CountdownClock clock = new CountdownClock(60);
-		clock.setMaximumSize(new Dimension(50, 50));
-		clock.setPreferredSize(new Dimension(50, 50));*/
-		//clockContainer.add(clock);
-		//innerPanel.add(clockContainer);
-
 		// set up the opponent board
 		opponentBoard.addShotListener(new BattleBoardOpponent.ShotListener() {
 			@Override
@@ -208,7 +195,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 						onPlayerChanged();
 					} catch (IOException e) {
 						e.printStackTrace();
-						showError("An error occured  , check your network connection.");
+						showError("An error occurred, check your network connection.");
 					}
 				} else {
 					showError("It's not your turn right now");
@@ -298,7 +285,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 					try {
 						client.sendMessage(new Message(opponentUsername, Message.MISS, msg.getX(), msg.getY()));
 					} catch (IOException e) {
-                        showError("An error occured  , check your network connection.");
+                        showError("An error occurred, check your network connection.");
 						e.printStackTrace();
 					}
 				} else {
@@ -306,7 +293,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 					try {
 						client.sendMessage(new Message(opponentUsername, Message.HIT, msg.getX(), msg.getY()));
 					} catch (IOException e) {
-                        showError("An error occured  , check your network connection.");
+                        showError("An error occurred, check your network connection.");
 						e.printStackTrace();
 					}
 				}
