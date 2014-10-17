@@ -32,6 +32,7 @@ public class BattleBoardLocal extends JPanel {
 	private int lastCursorY = 0;
 	
 	public BattleBoardLocal() {
+        setOpaque(false);
 		// set up this panel
 		setLayout(null);
 		setPreferredSize(new Dimension(Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE));
