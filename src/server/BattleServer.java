@@ -106,15 +106,17 @@ public class BattleServer {
 	// removes a client thread from all server listings
 	protected synchronized void removeClientThread(int id) {
 		// scan connected clients and remove this one
-		for (BattleClientThread c : connectedClients) {
-			if (c.id == id) {
-				for (ClientDisconnectedListener listener : clientDisconnectedListeners) {
+		for( int i = connectedClients.size()-1; i >= 0; --i) {
+			BattleClientThread c =  connectedClients.get(i);
+			if(c.id == id) {
+				for(int j = clientDisconnectedListeners.size()-1; j >=0; --j) {
+					ClientDisconnectedListener listener = clientDisconnectedListeners.get(j);
 					listener.onClientDisconnected(c.username);
-				}
+			}
 				connectedClients.remove(c);
 			}
 		}
-
+		
 		// was this one waiting?
 		if (waitingClient != null && waitingClient.id == id) {
 			waitingClient = null;

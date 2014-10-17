@@ -16,7 +16,8 @@ public class Message implements Serializable {
 			MISS = 6,
 			CHAT_MESSAGE = 7,
 			SERVER_GONE = 8,
-			OPPONENT_DISCONNECTED = 9;
+			OPPONENT_DISCONNECTED = 9,
+			PLAYER_LOSE = 10;
 
 	// TODO: add types for USERNAME_OK, USERNAME_TAKEN, anything else that is needed
 

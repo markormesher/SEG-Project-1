@@ -30,7 +30,7 @@ public class BattleBoardLocal extends JPanel {
 	// last cursor position (used to prevent jump when re-drawing the active ship)
 	private int lastCursorX = 0;
 	private int lastCursorY = 0;
-
+	
 	public BattleBoardLocal() {
         setOpaque(false);
 		// set up this panel

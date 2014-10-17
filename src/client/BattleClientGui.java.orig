@@ -1,7 +1,14 @@
 package client;
 
-import client.ui_components.*;
+<<<<<<< HEAD
+import client.ui_components.BattleAnimationPanel;
+import client.ui_components.BattleBoardLocal;
 import client.ui_components.BattleBoardLocal.ShipPlacementListener;
+import client.ui_components.BattleBoardOpponent;
+import client.ui_components.CountdownClock;
+=======
+import client.ui_components.*;
+>>>>>>> master
 import global.Message;
 import global.Settings;
 
@@ -83,6 +90,13 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
         setResizable(true);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+<<<<<<< HEAD
+		// TODO: countdown clock for placing ships and taking a turn
+		/*
+		 * CountdownClock clock = new CountdownClock(30);
+		 * clock.setSize(300,300); clock.setOpaque(false); this.add(clock);
+		 */
+=======
         //The waterBackground is beneath the actual UI
         //The AnimationPanels no longer use a background but are transparent
         JPanel waterBackground = new JPanel(){
@@ -117,6 +131,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
         frameContent.setOpaque(false);
         frameContent.setSize(new Dimension(getWidth(),getHeight()-18));
         getLayeredPane().add(frameContent, new Integer(100));
+>>>>>>> master
 
 		// collect player username and set it as title
 		playerUsername = JOptionPane.showInputDialog(this, "Enter a username");
@@ -125,7 +140,9 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		// the client uses while so it must run on a separate thread
 		(new Thread() {
 			public void run() {
-				client = new BattleClient(Settings.HOST_NAME, Settings.PORT_NUMBER, playerUsername, BattleClientGui.this);
+				client = new BattleClient(Settings.HOST_NAME,
+						Settings.PORT_NUMBER, playerUsername,
+						BattleClientGui.this);
 				try {
 					client.connect();
 				} catch (IOException e) {
@@ -206,6 +223,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
 
 		// set up the local board
+<<<<<<< HEAD
 		localBoard
 				.addShipPlacementListener(new BattleBoardLocal.ShipPlacementListener() {
 					@Override
@@ -218,9 +236,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 							// first
 							if (currentPlayer == 0) {
 								currentPlayer = ME;
-                        statusLabel.setText("Your opponent is not ready yet.");
 							}
-                    else onPlayerChanged();
 							// we're ready
 							playerReady = true;
 						} catch (IOException e) {
@@ -228,10 +244,41 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 						}
 					}
 				});
+		innerPanel.add(localBoard);
+
+		// TODO: countdown clock for placing ships and taking a turn
+		/*
+		 * JPanel clockContainer = new JPanel(new FlowLayout()); CountdownClock
+		 * clock = new CountdownClock(60); clock.setMaximumSize(new
+		 * Dimension(50, 50)); clock.setPreferredSize(new Dimension(50, 50));
+		 * clockContainer.add(clock); inner.add(clockContainer);
+		 */
+
+=======
+		localBoard.addShipPlacementListener(new BattleBoardLocal.ShipPlacementListener() {
+			@Override
+			public void onFinished() {
+				try {
+					// tell the other user you're ready
+					client.sendMessage(new Message(opponentUsername, Message.READY_TO_PLAY));
+					// if the other opponent hasn't finished yet, you go first
+					if (currentPlayer == 0) {
+						currentPlayer = ME;
+                        statusLabel.setText("Your opponent is not ready yet.");
+					}
+                    else onPlayerChanged();
+					// we're ready
+					playerReady = true;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
         //localBoard.setBackground(Color.white);
         localBoard.setOpaque(false);
 		innerPanel.add(localBoard);
 
+>>>>>>> master
 		// set up the opponent board
 		opponentBoard.addShotListener(new BattleBoardOpponent.ShotListener() {
 			@Override
@@ -340,12 +387,12 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 			return;
 
 		switch (msg.getType()) {
+<<<<<<< HEAD
 		case Message.SET_OPPONENT:
 			if (msg.getMessage() == null)
 				return;
 			opponentUsername = msg.getMessage();
 			setTitle(playerUsername + " (you) vs. " + opponentUsername);
-                //chatLabel.setText("Chat with " + opponentUsername);
 			break;
 
 		case Message.CHAT_MESSAGE:
@@ -363,16 +410,14 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		case Message.READY_TO_PLAY:
 			opponentReady = true;
 			// if you haven't finished yet, they will go first
-			if (currentPlayer == 0);
-				currentPlayer = OPPONENT
-				onPlayerChanged();
-				appendToLog("\n<strong>" + opponentUsername + " has finished placing ships and is ready to play</strong>");
+			if (currentPlayer == 0)
+				currentPlayer = OPPONENT;
+			appendToLog("\n<strong>"
 					+ opponentUsername
 					+ " has finished placing ships and is ready to play</strong>");
 			break;
 
 		case Message.SHOOT: {
-
 			// you've been shot at, so it's your turn
 			currentPlayer = ME;
 			onPlayerChanged();
@@ -388,7 +433,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 					client.sendMessage(new Message(opponentUsername,
 							Message.MISS, msg.getX(), msg.getY()));
 				} catch (IOException e) {
-                        showError("An error occurred, check your network connection.");
+					// TODO: handle error
 					e.printStackTrace();
 				}
 			} else {
@@ -397,11 +442,66 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 					client.sendMessage(new Message(opponentUsername,
 							Message.HIT, msg.getX(), msg.getY()));
 				} catch (IOException e) {
-                        showError("An error occurred, check your network connection.");
+					// TODO: handle error
 					e.printStackTrace();
 				}
-			}
+=======
+			case Message.SET_OPPONENT:
+				if (msg.getMessage() == null) return;
+				opponentUsername = msg.getMessage();
+				setTitle(playerUsername + " (you) vs. " + opponentUsername);
+                //chatLabel.setText("Chat with " + opponentUsername);
+				break;
+
+			case Message.CHAT_MESSAGE:
+				if (msg.getMessage() == null) return;
+				appendToLog("\n<strong>" + opponentUsername + ":</strong> " + msg.getMessage());
+				break;
+
+			case Message.OPPONENT_DISCONNECTED:
+				appendToLog("\n<strong>-- Your opponent disconnected! --");
+				// TODO: automatically win the game here
+				break;
+
+			case Message.READY_TO_PLAY:
+				opponentReady = true;
+				// if you haven't finished yet, they will go first
+				if (currentPlayer == 0) currentPlayer = OPPONENT;
+				appendToLog("\n<strong>" + opponentUsername + " is ready to play</strong>");
+                onPlayerChanged();
+				break;
+
+			case Message.SHOOT: {
+
+				// you've been shot at, so it's your turn
+				currentPlayer = ME;
+				onPlayerChanged();
+
+				// find the tile they shop
+				BattleAnimationPanel shotAt = localBoard.getBoardCells()[msg.getX()][msg.getY()];
+
+				// notify the opponent whether it was a hit or a miss
+				if (shotAt.isEmpty()) {
+					shotAt.setAsMissPin();
+					try {
+						client.sendMessage(new Message(opponentUsername, Message.MISS, msg.getX(), msg.getY()));
+					} catch (IOException e) {
+                        showError("An error occurred, check your network connection.");
+						e.printStackTrace();
+					}
+				} else {
+					shotAt.explode();
+					try {
+						client.sendMessage(new Message(opponentUsername, Message.HIT, msg.getX(), msg.getY()));
+					} catch (IOException e) {
+                        showError("An error occurred, check your network connection.");
+						e.printStackTrace();
+					}
+				}
                 //clock.start();
+				break;
+>>>>>>> master
+			}
 			break;
 		}
 
@@ -411,7 +511,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 					.getX()][msg.getY()];
 			hitAt.setAsHitPin();
 			opponentBoard.incDestroyedShipsPieces();
-			
+
 			// A simple test that checks after each players
 			// hits if that is the last remaining ship.
 			if (opponentBoard.getDestroyedShipPieces() == opponentBoard
@@ -466,11 +566,19 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 	private void onPlayerChanged() {
 
 		if (currentPlayer == ME) {
-            clock.start();
+<<<<<<< HEAD
+			setTitle(playerUsername + " (you) vs. " + opponentUsername
 					+ " | YOUR MOVE");
 		} else {
-            clock.stop();
+			setTitle(playerUsername + " (you) vs. " + opponentUsername
 					+ " | THEIR MOVE");
+=======
+            clock.start();
+			setTitle(playerUsername + " (you) vs. " + opponentUsername + " | YOUR MOVE");
+		} else {
+            clock.stop();
+			setTitle(playerUsername + " (you) vs. " + opponentUsername + " | THEIR MOVE");
+>>>>>>> master
 		}
 
         statusLabel.setForeground(Color.white);
