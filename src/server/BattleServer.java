@@ -36,6 +36,9 @@ public class BattleServer {
 	ArrayList<ClientConnectedListener> clientConnectedListeners = new ArrayList<ClientConnectedListener>();
 	ArrayList<ClientDisconnectedListener> clientDisconnectedListeners = new ArrayList<ClientDisconnectedListener>();
 
+    // listener for server messages
+    private ServerMessageListener serverMessageListener;
+
 	// start server
 	public void startServer() throws IOException {
 		// TODO: swap all Syso.print lines for message shown on server control panel
@@ -97,7 +100,7 @@ public class BattleServer {
 					pair.clientA.sendMessage(sendToA);
 					pair.clientB.sendMessage(sendToB);
 				} catch (IOException e) {
-					System.out.println("Failed to send opponent username to " + pair.clientA.username + " and/or " + pair.clientB.username);
+					serverMessageListener.onServerMessageReceived("Failed to send opponent username to " + pair.clientA.username + " and/or " + pair.clientB.username);
 				}
 			}
 		}
@@ -141,7 +144,7 @@ public class BattleServer {
 					opponent.sendMessage(sendToOp);
 				} catch (IOException e) {
 					// TODO: handle error
-					System.out.println("Failed to notify " + opponent.username + " that their opponent disconnected");
+                    serverMessageListener.onServerMessageReceived("Failed to notify " + opponent.username + " that their opponent disconnected");
 				}
 
 				// remove this pair
@@ -198,10 +201,10 @@ public class BattleServer {
 				try {
 					msg = (Message) inputStream.readObject();
 				} catch (ClassNotFoundException e) {
-					System.out.println("Invalid message object sent");
+                    serverMessageListener.onServerMessageReceived("Invalid message object sent");
 					break;
 				} catch (IOException e) {
-					System.out.println("Client disconnected: " + username);
+                    serverMessageListener.onServerMessageReceived("Client disconnected: " + username);
 					break;
 				}
 
@@ -223,7 +226,7 @@ public class BattleServer {
 							try {
 								c.sendMessage(msg);
 							} catch (IOException e) {
-								System.out.print("Failed to send message to " + msg.getRecipient());
+                                serverMessageListener.onServerMessageReceived("Failed to send message to " + msg.getRecipient());
 							}
 						}
 					}
@@ -237,7 +240,7 @@ public class BattleServer {
 			try {
 				close();
 			} catch (IOException e) {
-				System.out.println("Failed to close client thread");
+                serverMessageListener.onServerMessageReceived("Failed to close client thread");
 			}
 		}
 	}
@@ -252,6 +255,8 @@ public class BattleServer {
 		clientDisconnectedListeners.add(listener);
 	}
 
-	// TODO: add a third listener for generic messages to be sent to the control panel
+    public void addServerMessageListener(ServerMessageListener listener) {
+        this.serverMessageListener = listener;
+    }
 
 }

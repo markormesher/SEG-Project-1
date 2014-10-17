@@ -1,14 +1,20 @@
 package server;
 
 import client.BattleClientGui;
+import global.Message;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 public class BattleServerControlPanel extends JFrame {
 
 	public static void main(String[] arr) {
+
 		// make the UI fit the OS defaults
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -42,28 +48,43 @@ public class BattleServerControlPanel extends JFrame {
 			}
 		}).start();
 
-		// list of connected users
-		// TODO: swap for an output of connections, disconnections, server status messages, etc
-		final DefaultListModel<String> users = new DefaultListModel<String>();
-		JList<String> list = new JList<String>(users);
+
+		// list of server messages
+		final DefaultListModel<String> serverMessages = new DefaultListModel<String>();
+		JList<String> list = new JList<String>(serverMessages);
+        list.setFocusable(false);
+        JScrollPane listScrollPane = new JScrollPane(list);
 		serverUI.setLayout(new BorderLayout());
-		serverUI.add(list, BorderLayout.CENTER);
+		serverUI.add(listScrollPane, BorderLayout.CENTER);
+
+        final DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
 		// when a new connection is made and is assigned a name, add the username to the list
 		server.addClientConnectedListener(new ClientConnectedListener() {
 			@Override
 			public void onClientConnected(String name) {
-				users.addElement(name);
+                Date date = new Date();
+				serverMessages.addElement(dateFormat.format(date) + " New client connected: " + name);
 			}
 		});
 
-		// when a connection dies, remove them from the list
+		// when a connection dies, add notification to list
 		server.addClientDisconnectedListener(new ClientDisconnectedListener() {
 			@Override
 			public void onClientDisconnected(String name) {
-				users.removeElement(name);
+                Date date = new Date();
+				serverMessages.addElement(dateFormat.format(date) + " Client disconnected: " + name);
 			}
 		});
+
+        // add all other messages received by server to list
+        server.addServerMessageListener(new ServerMessageListener() {
+            @Override
+            public void onServerMessageReceived(String serverMessage) {
+                Date date = new Date();
+                serverMessages.addElement(dateFormat.format(date) + " " + serverMessage);
+            }
+        });
 
 		// spawn two clients to demo with
 		BattleClientGui battleClientGui1 = new BattleClientGui();
