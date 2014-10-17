@@ -24,6 +24,7 @@ public class AnimationPanel extends JLayeredPane {
 		super();
 		setPreferredSize(new Dimension(width, height));
 
+        setOpaque(false);
 		// position labels
 		background.setLocation(0, 0);
 		background.setSize(width, height);

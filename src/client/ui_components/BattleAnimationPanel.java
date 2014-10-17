@@ -23,6 +23,7 @@ public class BattleAnimationPanel extends AnimationPanel implements ActionListen
 
 	public BattleAnimationPanel(int width, int height) {
 		super(width, height);
+        setOpaque(false);
 	}
 
 	// set this panel as a ship end section

@@ -32,6 +32,7 @@ public class CountdownClock extends JPanel implements ActionListener {
         }
 	}
 
+
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
@@ -80,6 +81,7 @@ public class CountdownClock extends JPanel implements ActionListener {
     public void stop(){
         secondsLeft = totalSeconds;
         timer.stop();
+        repaint();
     }
 
 
