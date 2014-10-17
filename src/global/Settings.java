@@ -1,5 +1,8 @@
 package global;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 public class Settings {
 
 	/*
@@ -16,5 +19,6 @@ public class Settings {
 	public static final int GRID_SIZE = 10;
 	public static final int IMAGE_CELL_SIZE = 36;
 	public static final int[] SHIP_SIZES = {5, 4, 3, 3, 2};
+	public static final DateFormat SERVER_DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
 
 }
