@@ -24,7 +24,7 @@ public class BattleServer {
 		}
 	}
 
-	// waiting to join a game
+	// client who is waiting to join a game
 	private BattleClientThread waitingClient = null;
 
 	// list of connected clients
@@ -32,12 +32,10 @@ public class BattleServer {
 	private ArrayList<BattleClientThread> connectedClients = new ArrayList<BattleClientThread>();
 	private ArrayList<ClientPair> activePairs = new ArrayList<ClientPair>();
 
-	// list of client connection/disconnection listeners
-	ArrayList<ClientConnectedListener> clientConnectedListeners = new ArrayList<ClientConnectedListener>();
-	ArrayList<ClientDisconnectedListener> clientDisconnectedListeners = new ArrayList<ClientDisconnectedListener>();
-
-    // listener for server messages
-    private ServerMessageListener serverMessageListener;
+	// list of listeners
+	private ArrayList<ClientConnectedListener> clientConnectedListeners = new ArrayList<ClientConnectedListener>();
+	private ArrayList<ClientDisconnectedListener> clientDisconnectedListeners = new ArrayList<ClientDisconnectedListener>();
+	private ServerMessageListener serverMessageListener;
 
 	// start server
 	public void startServer() throws IOException {
@@ -87,6 +85,7 @@ public class BattleServer {
 		for (ClientPair p : activePairs) {
 			if (p.clientA.id == id || p.clientB.id == id) {
 				pair = p;
+				break;
 			}
 		}
 
@@ -109,17 +108,18 @@ public class BattleServer {
 	// removes a client thread from all server listings
 	protected synchronized void removeClientThread(int id) {
 		// scan connected clients and remove this one
-		for( int i = connectedClients.size()-1; i >= 0; --i) {
-			BattleClientThread c =  connectedClients.get(i);
-			if(c.id == id) {
-				for(int j = clientDisconnectedListeners.size()-1; j >=0; --j) {
+		for (int i = connectedClients.size() - 1; i >= 0; --i) {
+			BattleClientThread c = connectedClients.get(i);
+			if (c.id == id) {
+				for (int j = clientDisconnectedListeners.size() - 1; j >= 0; --j) {
 					ClientDisconnectedListener listener = clientDisconnectedListeners.get(j);
 					listener.onClientDisconnected(c.username);
-			}
+				}
 				connectedClients.remove(c);
+				break;
 			}
 		}
-		
+
 		// was this one waiting?
 		if (waitingClient != null && waitingClient.id == id) {
 			waitingClient = null;
@@ -143,14 +143,12 @@ public class BattleServer {
 				try {
 					opponent.sendMessage(sendToOp);
 				} catch (IOException e) {
-					// TODO: handle error
-                    serverMessageListener.onServerMessageReceived("Failed to notify " + opponent.username + " that their opponent disconnected");
+					serverMessageListener.onServerMessageReceived("Failed to notify " + opponent.username + " that their opponent disconnected");
 				}
 
 				// remove this pair
 				activePairs.remove(p);
 
-				// don't waste time
 				break;
 			}
 		}
@@ -173,6 +171,7 @@ public class BattleServer {
 
 			// create IO streams
 			// IMPORTANT: create output stream first
+			// creating the input stream will block the thread if there is no output stream
 			outputStream = new ObjectOutputStream(serverSocket.getOutputStream());
 			inputStream = new ObjectInputStream(serverSocket.getInputStream());
 
@@ -201,10 +200,10 @@ public class BattleServer {
 				try {
 					msg = (Message) inputStream.readObject();
 				} catch (ClassNotFoundException e) {
-                    serverMessageListener.onServerMessageReceived("Invalid message object sent");
+					serverMessageListener.onServerMessageReceived("Invalid message object sent");
 					break;
 				} catch (IOException e) {
-                    serverMessageListener.onServerMessageReceived("Client disconnected: " + username);
+					serverMessageListener.onServerMessageReceived("Client disconnected: " + username);
 					break;
 				}
 
@@ -216,7 +215,7 @@ public class BattleServer {
 					checkBothUsernameSet(id);
 
 					// notify all clientConnectedListeners
-					for(ClientConnectedListener listener: clientConnectedListeners){
+					for (ClientConnectedListener listener : clientConnectedListeners) {
 						listener.onClientConnected(username);
 					}
 				} else {
@@ -226,7 +225,7 @@ public class BattleServer {
 							try {
 								c.sendMessage(msg);
 							} catch (IOException e) {
-                                serverMessageListener.onServerMessageReceived("Failed to send message to " + msg.getRecipient());
+								serverMessageListener.onServerMessageReceived("Failed to send message to " + msg.getRecipient());
 							}
 						}
 					}
@@ -240,23 +239,24 @@ public class BattleServer {
 			try {
 				close();
 			} catch (IOException e) {
-                serverMessageListener.onServerMessageReceived("Failed to close client thread");
+				serverMessageListener.onServerMessageReceived("Failed to close a client thread");
 			}
 		}
 	}
 
 	// register a new connection listener
-	public void addClientConnectedListener(ClientConnectedListener listener){
+	public void addClientConnectedListener(ClientConnectedListener listener) {
 		clientConnectedListeners.add(listener);
 	}
 
 	// register a new disconnection listener
-	public void addClientDisconnectedListener(ClientDisconnectedListener listener){
+	public void addClientDisconnectedListener(ClientDisconnectedListener listener) {
 		clientDisconnectedListeners.add(listener);
 	}
 
-    public void addServerMessageListener(ServerMessageListener listener) {
-        this.serverMessageListener = listener;
-    }
+	// register a new server message listener
+	public void addServerMessageListener(ServerMessageListener listener) {
+		this.serverMessageListener = listener;
+	}
 
 }
