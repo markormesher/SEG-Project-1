@@ -1,14 +1,12 @@
 package client;
 
 import client.ui_components.*;
-import client.ui_components.BattleBoardLocal.ShipPlacementListener;
 import global.Message;
 import global.Settings;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.text.BadLocationException;
@@ -19,7 +17,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
@@ -207,7 +204,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
 		// set up the local board
 		localBoard
-				.addShipPlacementListener(new BattleBoardLocal.ShipPlacementListener() {
+				.addShipPlacementListener(new BattleBoardLocal.FinishedPlacingShipsListener() {
 					@Override
 					public void onFinished() {
 						try {
@@ -409,12 +406,12 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 			BattleAnimationPanel hitAt = opponentBoard.getBoardCells()[msg
 					.getX()][msg.getY()];
 			hitAt.setAsHitPin();
-			opponentBoard.incDestroyedShipsPieces();
+			opponentBoard.incDestroyedShipPieces();
 
 			// A simple test that checks after each players
 			// hits if that is the last remaining ship.
 			if (opponentBoard.getDestroyedShipPieces() == opponentBoard
-					.getTotalNoOfShipPiecesToDestroy()) {
+					.getTotalShipPieces()) {
 				try {
 					onWin();
 					// send a message to the opponent that they have lost.

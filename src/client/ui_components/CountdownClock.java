@@ -1,8 +1,5 @@
 package client.ui_components;
 
-import server.ClientConnectedListener;
-import server.ClientDisconnectedListener;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -14,24 +11,28 @@ import java.util.ArrayList;
 
 public class CountdownClock extends JPanel implements ActionListener {
 
+	// clock info
 	int totalSeconds;
 	double secondsLeft;
 
-    BufferedImage image ;
+	// main image
+	private BufferedImage image;
 
-    // update the clock every 100 milliseconds
-    public Timer timer = new Timer(100, this);
+	// listeners
+	private ArrayList<TimeoutListener> timeoutListeners = new ArrayList<TimeoutListener>();
+
+	// update the clock every 100 milliseconds
+	private Timer timer = new Timer(100, this);
 
 	public CountdownClock(int seconds) {
 		this.totalSeconds = seconds;
 		this.secondsLeft = seconds;
-        try {
-            image= ImageIO.read(this.getClass().getResource("/images/clock.png"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+		try {
+			image = ImageIO.read(this.getClass().getResource("/images/clock.png"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
-
 
 	@Override
 	protected void paintComponent(Graphics g) {
@@ -44,56 +45,43 @@ public class CountdownClock extends JPanel implements ActionListener {
 		// 20 pixel padding
 		graphics2D.drawOval(10, 10, getWidth() - 20, getHeight() - 20);
 
-		// find centre point
-		double x1 = getWidth() / 2.0;
-		double y1 = getHeight() / 2.0;
-
-		// point on circle at the proportional angle
+		// rotate image to appropriate position
 		double angle = 360.0 * (totalSeconds - secondsLeft) / totalSeconds;
-		double x2 = Math.cos(Math.toRadians(angle)) * (getWidth() - 20) / 2.0;
-		double y2 = Math.sin(Math.toRadians(angle)) * (getHeight() - 20) / 2.0;
-
-		// paint line
-		graphics2D.setColor(Color.black);
-		graphics2D.drawLine((int) x1, (int) y1, (int) (x2 + x1), (int) (y2 + y1));
-
-        Double rotate = angle * (Math.PI / 180);
-        graphics2D.rotate(rotate, getWidth()/2.0, getHeight()/2.0);
-        graphics2D.drawImage(image, 0, 0,getWidth(),getHeight(), null);
+		Double rotate = angle * (Math.PI / 180);
+		graphics2D.rotate(rotate, getWidth() / 2.0, getHeight() / 2.0);
+		graphics2D.drawImage(image, 0, 0, getWidth(), getHeight(), null);
 	}
 
 	// triggered every 100 milliseconds (0.1 second)
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		secondsLeft -= 0.1;
-        //when it hits 0 , trigger the timeout event and stop
-        if(secondsLeft <= 0){
-            secondsLeft = totalSeconds;
-            for(TimeoutListener listener:timeoutListeners) listener.onTimeout();
-            timer.stop();
-        }
+		//when it hits 0 , trigger the timeout event and stop
+		if (secondsLeft <= 0) {
+			secondsLeft = totalSeconds;
+			for (TimeoutListener listener : timeoutListeners) listener.onTimeout();
+			timer.stop();
+		}
 		repaint();
 	}
 
-    public void start(){
-        timer.start();
-    }
-    public void stop(){
-        secondsLeft = totalSeconds;
-        timer.stop();
-        repaint();
-    }
+	public void start() {
+		timer.start();
+	}
 
+	public void stop() {
+		secondsLeft = totalSeconds;
+		timer.stop();
+		repaint();
+	}
 
-    public interface TimeoutListener{
-        void onTimeout();
-    }
+	// register a new timeout listener
+	public void addTimeoutListener(TimeoutListener listener) {
+		timeoutListeners.add(listener);
+	}
 
-    ArrayList<TimeoutListener> timeoutListeners = new ArrayList<TimeoutListener>();
+	public interface TimeoutListener {
 
-    // register a new timeout listener
-    public void addTimeoutListener(TimeoutListener listener){
-        timeoutListeners.add(listener);
-    }
-
+		void onTimeout();
+	}
 }
