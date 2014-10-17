@@ -81,8 +81,6 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
         setResizable(true);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-
-
         //The waterBackground is beneath the actual UI
         //The AnimationPanels no longer use a background but are transparent
         JPanel waterBackground = new JPanel(){

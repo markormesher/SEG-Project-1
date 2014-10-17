@@ -98,7 +98,7 @@ public class BattleBoardLocal extends JPanel {
 					// get the size of the current ship
 					int currentShipSize = Settings.SHIP_SIZES[currentShipSizeIndex];
 
-					// figure out the direction in which we are going to add ship parts
+					// figure out the direction in which we are going to add ship parts and adjust if needed
 					int orientationVectorX;
 					int orientationVectorY;
 					switch (currentOrientation) {
@@ -109,10 +109,12 @@ public class BattleBoardLocal extends JPanel {
 						case BattleAnimationPanel.EAST:
 							orientationVectorX = 1;
 							orientationVectorY = 0;
+							x -= currentShipSize - 1;
 							break;
 						case BattleAnimationPanel.SOUTH:
 							orientationVectorX = 0;
 							orientationVectorY = 1;
+							y -= currentShipSize - 1;
 							break;
 						case BattleAnimationPanel.WEST:
 							orientationVectorX = 1;
@@ -277,7 +279,14 @@ public class BattleBoardLocal extends JPanel {
 			shipWidth = activeShipContainer.getComponentCount() * Settings.IMAGE_CELL_SIZE;
 			shipHeight = Settings.IMAGE_CELL_SIZE;
 		}
-		activeShipContainer.setBounds(x, y, shipWidth, shipHeight);
+
+		if (currentOrientation == BattleAnimationPanel.NORTH || currentOrientation == BattleAnimationPanel.WEST) {
+			activeShipContainer.setBounds(x, y, shipWidth, shipHeight);
+		} else if (currentOrientation == BattleAnimationPanel.SOUTH) {
+			activeShipContainer.setBounds(x, y - shipHeight + Settings.IMAGE_CELL_SIZE, shipWidth, shipHeight);
+		} else {
+			activeShipContainer.setBounds(x - shipWidth + Settings.IMAGE_CELL_SIZE, y, shipWidth, shipHeight);
+		}
 
 		// redraw
 		layeredPane.repaint();
