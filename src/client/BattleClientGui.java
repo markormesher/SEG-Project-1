@@ -30,7 +30,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
     //the 8bit font
     private Font font;
     //used for when the clock runs out
-    Random random = new Random();
+    private Random random = new Random();
 	// the client handles all communication with server
 	private BattleClient client;
 
@@ -48,15 +48,15 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 	private boolean playerReady = false;
 
 	// a list of all messages
-	ArrayList<String> messages = new ArrayList<String>();
+	private ArrayList<String> messages = new ArrayList<String>();
 
 	// messaging output
 	private JTextPane messagesPane;
 
     //the label that displays the user the current status
-    JLabel statusLabel;
+    private JLabel statusLabel;
 
-    CountdownClock clock;
+    private CountdownClock clock;
 
 	// the two boards
 	private BattleBoardLocal localBoard = new BattleBoardLocal();
@@ -64,7 +64,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
     private JLabel chatLabel;
 
-    BufferedImage waterTile;
+    private BufferedImage waterTile;
 	public BattleClientGui() {
         //loading the font from the ttf file
         try {
