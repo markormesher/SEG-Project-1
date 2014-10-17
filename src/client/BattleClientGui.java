@@ -363,12 +363,11 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		case Message.READY_TO_PLAY:
 			opponentReady = true;
 			// if you haven't finished yet, they will go first
-			if (currentPlayer == 0);
-				currentPlayer = OPPONENT
+			if (currentPlayer == 0) {
+				currentPlayer = OPPONENT;
 				onPlayerChanged();
 				appendToLog("\n<strong>" + opponentUsername + " has finished placing ships and is ready to play</strong>");
-					+ opponentUsername
-					+ " has finished placing ships and is ready to play</strong>");
+			}
 			break;
 
 		case Message.SHOOT: {
@@ -411,7 +410,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 					.getX()][msg.getY()];
 			hitAt.setAsHitPin();
 			opponentBoard.incDestroyedShipsPieces();
-			
+
 			// A simple test that checks after each players
 			// hits if that is the last remaining ship.
 			if (opponentBoard.getDestroyedShipPieces() == opponentBoard
@@ -467,10 +466,8 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
 		if (currentPlayer == ME) {
             clock.start();
-					+ " | YOUR MOVE");
 		} else {
             clock.stop();
-					+ " | THEIR MOVE");
 		}
 
         statusLabel.setForeground(Color.white);
