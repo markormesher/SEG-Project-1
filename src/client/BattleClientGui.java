@@ -117,6 +117,8 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		playerUsername = JOptionPane.showInputDialog(this, "Enter a username");
 		setTitle(playerUsername + " (you) vs. ???");
 
+        chatLabel = new JLabel("Chat");
+
 		// the client uses while so it must run on a separate thread
 		(new Thread() {
 			public void run() {
@@ -293,7 +295,6 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		messagesPane.setFont(font.deriveFont(13f));
 		chattingArea.add(new JScrollPane(messagesPane), BorderLayout.CENTER);
 
-		chatLabel = new JLabel("Chat");
 		chatLabel.setForeground(Color.darkGray);
 		chatLabel.setBorder(standardPadding);
 		chatLabel.setFont(font.deriveFont(13f));
