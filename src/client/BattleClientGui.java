@@ -60,6 +60,12 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 	private JLabel chatLabel;
 	private JTextPane messagesPane;
 
+    // emoticons button
+    private JButton emoticonsButton;
+
+    // emoticon frame to pop up when emoticons button is clicked
+    private EmoticonsFrame emoticonsFrame;
+
 	// the label that displays the user the current status
 	private JLabel statusLabel;
 
@@ -300,8 +306,11 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		JPanel chattingContainer = new JPanel(new BorderLayout());
 		// the chattingArea is white and is inside the chattingContainer
 		JPanel chattingArea = new JPanel(new BorderLayout());
+        // the chatInputPanel contains text field and emoticons button and is inside the chattingArea
+        JPanel chatInputPanel = new JPanel(new BorderLayout());
 
 		// set up the chat area
+        chatInputPanel.setBackground(Color.white);
 		chattingArea.setBorder(new LineBorder(Color.gray, 1));
 		chattingArea.setBackground(Color.white);
 		chattingArea.setSize(new Dimension(0, 70));
@@ -310,6 +319,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		chattingContainer.setOpaque(false);
 		chattingContainer.setSize(new Dimension(0, 70));
 		chattingContainer.setPreferredSize(new Dimension(0, 200));
+        chattingArea.add(chatInputPanel, BorderLayout.SOUTH);
 		chattingContainer.add(chattingArea, BorderLayout.CENTER);
 		frameContent.add(chattingContainer, BorderLayout.SOUTH);
 
@@ -327,10 +337,22 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		chatLabel.setFont(font.deriveFont(13f));
 		chattingArea.add(chatLabel, BorderLayout.NORTH);
 
+        // emoticons frame and button
+        emoticonsButton = new JButton();
+        try {
+        emoticonsButton.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("/images/emoticons/grin.png"))));
+        } catch (IOException e) {
+            //TODO: handle exception
+        }
+        emoticonsButton.setSize(new Dimension(16,16));
+        //Border buttonBorder = new LineBorder(Color.BLACK, 1);
+        //emoticonsButton.setBorder(buttonBorder);
+
 		// messaging input
 		final JTextField messageInput = new JTextField();
 		messageInput.setBorder(standardPadding);
-		chattingArea.add(messageInput, BorderLayout.SOUTH);
+        chatInputPanel.add(messageInput, BorderLayout.CENTER);
+        chatInputPanel.add(emoticonsButton, BorderLayout.EAST);
 		messageInput.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
