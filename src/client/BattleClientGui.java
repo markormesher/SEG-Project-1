@@ -27,7 +27,10 @@ import java.util.Random;
 public class BattleClientGui extends JFrame implements BattleClientGuiInterface {
 
 	// the 8-bit font
-	private Font font;
+	public Font font;
+
+    Result result;
+    Result opponentResult;
 
 	// used for random moves when the clock runs out
 	private Random random = new Random();
@@ -132,6 +135,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
             playerUsername = askForUsername();
         }
 
+        result = new Result(playerUsername,0,0,0,false);
 		setTitle(playerUsername + " (you) vs. ???");
 
         chatLabel = new JLabel("Chat");
@@ -180,6 +184,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 						// if it's a valid move, shoot there
 						if (opponentBoard.getBoardCells()[x][y].isEmpty()) {
 							try {
+
 								client.sendMessage(new Message(opponentUsername, Message.SHOOT, x, y));
 								// after shooting it's their turn
 								currentPlayer = OPPONENT;
@@ -220,65 +225,65 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
 		// set up the local board
 		localBoard.addShipPlacementListener(new BattleBoardLocal.FinishedPlacingShipsListener() {
-			@Override
-			public void onFinished() {
-				try {
-					// tell the other user you're ready
-					client.sendMessage(new Message(opponentUsername, Message.READY_TO_PLAY));
+            @Override
+            public void onFinished() {
+                try {
+                    // tell the other user you're ready
+                    client.sendMessage(new Message(opponentUsername, Message.READY_TO_PLAY));
 
-					// if the other opponent hasn't finished yet, you go first
-					if (currentPlayer == 0) {
-						currentPlayer = ME;
-						statusLabel.setText("Your opponent is not ready yet.");
-					} else {
-						onPlayerChanged();
-					}
+                    // if the other opponent hasn't finished yet, you go first
+                    if (currentPlayer == 0) {
+                        currentPlayer = ME;
+                        statusLabel.setText("Your opponent is not ready yet.");
+                    } else {
+                        onPlayerChanged();
+                    }
 
-					// we're ready
-					playerReady = true;
-				} catch (IOException e) {
-					showError("An error occurred, check your network connection.");
-					e.printStackTrace();
-				}
-			}
-		});
+                    // we're ready
+                    playerReady = true;
+                } catch (IOException e) {
+                    showError("An error occurred, check your network connection.");
+                    e.printStackTrace();
+                }
+            }
+        });
 
 		localBoard.setOpaque(false);
 		innerPanel.add(localBoard);
 
 		// set up the opponent board
 		opponentBoard.addShotListener(new BattleBoardOpponent.ShotListener() {
-			@Override
-			public void onShotFired(int x, int y) {
-				// both sides must be ready
-				if (!playerReady || !opponentReady) {
-					showError(!playerReady ? "You haven't placed your ships yet." : "Your opponent hasn't placed their ships");
-					return;
-				}
+            @Override
+            public void onShotFired(int x, int y) {
+                // both sides must be ready
+                if (!playerReady || !opponentReady) {
+                    showError(!playerReady ? "You haven't placed your ships yet." : "Your opponent hasn't placed their ships");
+                    return;
+                }
 
-				// check that they're not re-shooting on the same spot
-				if (opponentBoard.getBoardCells()[x][y].object.getIcon() != null) {
-					showError("You already shot there.");
-					return;
-				}
+                // check that they're not re-shooting on the same spot
+                if (opponentBoard.getBoardCells()[x][y].object.getIcon() != null) {
+                    showError("You already shot there.");
+                    return;
+                }
 
-				// you must be the current player to shoot
-				if (currentPlayer == ME) {
-					try {
-						client.sendMessage(new Message(opponentUsername, Message.SHOOT, x, y));
+                // you must be the current player to shoot
+                if (currentPlayer == ME) {
+                    try {
+                        client.sendMessage(new Message(opponentUsername, Message.SHOOT, x, y));
 
-						// after shooting it's their turn
-						currentPlayer = OPPONENT;
-						onPlayerChanged();
-					} catch (IOException e) {
-						showError("An error occurred, check your network connection.");
-						e.printStackTrace();
-					}
-				} else {
-					showError("It's not your turn right now");
-				}
-			}
-		});
+                        // after shooting it's their turn
+                        currentPlayer = OPPONENT;
+                        onPlayerChanged();
+                    } catch (IOException e) {
+                        showError("An error occurred, check your network connection.");
+                        e.printStackTrace();
+                    }
+                } else {
+                    showError("It's not your turn right now");
+                }
+            }
+        });
 
 		opponentBoard.setOpaque(false);
 		innerPanel.add(opponentBoard);
@@ -363,6 +368,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 				opponentUsername = msg.getMessage();
 				setTitle(playerUsername + " (you) vs. " + opponentUsername);
 				chatLabel.setText("Chat with " + opponentUsername);
+                opponentResult = new Result(opponentUsername,0,0,0,false);
 				break;
 
 			case Message.CHAT_MESSAGE:
@@ -394,8 +400,10 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 				// find the tile they shot
 				BattleAnimationPanel shotAt = localBoard.getBoardCells()[msg.getX()][msg.getY()];
 
+                opponentResult.totalShots++;
 				// notify the opponent whether it was a hit or a miss
 				if (shotAt.isEmpty()) {
+                    opponentResult.misses++;
 					shotAt.setAsMissPin();
 					try {
 						client.sendMessage(new Message(opponentUsername, Message.MISS, msg.getX(), msg.getY()));
@@ -404,6 +412,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 						e.printStackTrace();
 					}
 				} else {
+                    opponentResult.hits++;
 					shotAt.explode();
 					try {
 						client.sendMessage(new Message(opponentUsername, Message.HIT, msg.getX(), msg.getY()));
@@ -417,6 +426,8 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
 			// you hit the opponent
 			case Message.HIT:
+                result.totalShots++;
+                result.hits++;
 				BattleAnimationPanel hitAt = opponentBoard.getBoardCells()[msg.getX()][msg.getY()];
 				hitAt.setAsHitPin();
 				opponentBoard.incDestroyedShipPieces();
@@ -436,6 +447,8 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
 			// you missed the opponent
 			case Message.MISS:
+                result.totalShots++;
+                result.misses++;
 				BattleAnimationPanel missAt = opponentBoard.getBoardCells()[msg.getX()][msg.getY()];
 				missAt.setAsMissPin();
 				break;
@@ -448,12 +461,18 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 	}
 
 	private void onLose() {
-		// TODO: do something when the player loses.
+        opponentResult.won=true;
+        ResultsWindow resultsWindow = new ResultsWindow(result,opponentResult);
+        resultsWindow.setVisible(true);
+        dispose();
 		appendToLog("You have lost.");
 	}
 
 	private void onWin() {
-		// TODO : do something when the player wins.
+        result.won = true;
+		ResultsWindow resultsWindow = new ResultsWindow(result,opponentResult);
+        resultsWindow.setVisible(true);
+        dispose();
 		appendToLog("You have won.");
 	}
 
