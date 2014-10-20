@@ -29,6 +29,7 @@ public class BattleServerControlPanel extends JFrame {
 		});
 	}
 
+
 	public static void initUi() {
 		// create a basic UI
 		final BattleServerControlPanel serverUI = new BattleServerControlPanel();
@@ -49,10 +50,34 @@ public class BattleServerControlPanel extends JFrame {
 			}
 		}).start();
 
+        //create list cell renderer to disable selection
+        DefaultListCellRenderer listCellRenderer = new DefaultListCellRenderer() {
+
+            @Override
+            public Component getListCellRendererComponent(JList list, Object value, int index,
+                                                          boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, false, false);
+
+                //set different font color for connection, disconnection and errors
+                String msg = (String) value;
+                if (msg.contains("New client")) {
+                    this.setForeground(Color.BLUE);
+                }
+                else if (msg.contains("disconnected")) {
+                    this.setForeground(Color.DARK_GRAY);
+                }
+                else {
+                    this.setForeground(Color.RED);
+                }
+
+                return this;
+            }
+        };
+
 		// list of server messages
 		final DefaultListModel<String> serverMessages = new DefaultListModel<String>();
 		JList<String> list = new JList<String>(serverMessages);
-		list.setFocusable(false);
+		list.setCellRenderer(listCellRenderer);
 		serverUI.setLayout(new BorderLayout());
 		serverUI.add(new JScrollPane(list), BorderLayout.CENTER);
 
@@ -94,4 +119,5 @@ public class BattleServerControlPanel extends JFrame {
 		// set this window as visible
 		serverUI.setVisible(true);
 	}
+
 }
