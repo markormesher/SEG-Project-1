@@ -29,7 +29,7 @@ public class BattleServer {
 
 	// list of connected clients
 	private int connectedPlayerCounter = 0;
-	private ArrayList<BattleClientThread> connectedClients = new ArrayList<BattleClientThread>();
+	private static ArrayList<BattleClientThread> connectedClients = new ArrayList<BattleClientThread>();
 	private ArrayList<ClientPair> activePairs = new ArrayList<ClientPair>();
 
 	// list of listeners
@@ -78,6 +78,17 @@ public class BattleServer {
 		}
 	}
 
+	// check if the username is taken
+	public static boolean usernameIsTaken(String username) {
+		for (BattleClientThread c : connectedClients) {
+			if(c.username.equals(username)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	// check whether both usernames are set, and if so start a game
 	protected synchronized void checkBothUsernameSet(int id) {
 		// find pair where one of the IDs match
@@ -85,7 +96,7 @@ public class BattleServer {
 		for (ClientPair p : activePairs) {
 			if (p.clientA.id == id || p.clientB.id == id) {
 				pair = p;
-				break;
+                break;
 			}
 		}
 
@@ -116,7 +127,7 @@ public class BattleServer {
 					listener.onClientDisconnected(c.username);
 				}
 				connectedClients.remove(c);
-				break;
+                break;
 			}
 		}
 
@@ -209,10 +220,9 @@ public class BattleServer {
 
 				// setting username or sending message?
 				if (msg.getType() == Message.SET_USERNAME) {
-					// TODO: enforce unique usernames (server could send reply to client, either USERNAME_OK or USERNAME_TAKEN)
 					// set username of this thread
 					username = msg.getMessage();
-					checkBothUsernameSet(id);
+                    checkBothUsernameSet(id);
 
 					// notify all clientConnectedListeners
 					for (ClientConnectedListener listener : clientConnectedListeners) {
@@ -227,6 +237,8 @@ public class BattleServer {
 							} catch (IOException e) {
 								serverMessageListener.onServerMessageReceived("Failed to send message to " + msg.getRecipient());
 							}
+
+              				break;
 						}
 					}
 				}

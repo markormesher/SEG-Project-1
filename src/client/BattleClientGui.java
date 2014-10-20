@@ -3,6 +3,7 @@ package client;
 import client.ui_components.*;
 import global.Message;
 import global.Settings;
+import server.BattleServer;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -34,7 +35,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 	// the client handles all communication with server
 	private BattleClient client;
 
-	// usernames
+	// user names
 	private String opponentUsername;
 	private String playerUsername;
 
@@ -114,7 +115,23 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		frameContent.setSize(new Dimension(getWidth(), getHeight() - 18));
 
 		// collect player username and set it as title
-		playerUsername = JOptionPane.showInputDialog(this, "Enter a username");
+		playerUsername = askForUsername();
+
+        while(BattleServer.usernameIsTaken(playerUsername) || playerUsername.equals("")) {
+            String errorMessage;
+
+            if(playerUsername.equals("")) {
+                errorMessage = "Invalid username, please try again.";
+            }
+            else {
+                errorMessage = "This username is already taken, please try again.";
+            }
+
+
+            JOptionPane.showMessageDialog(this, errorMessage);
+            playerUsername = askForUsername();
+        }
+
 		setTitle(playerUsername + " (you) vs. ???");
 
         chatLabel = new JLabel("Chat");
@@ -328,6 +345,10 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		setVisible(true);
 		getLayeredPane().repaint();
 	}
+
+    private String askForUsername() {
+        return JOptionPane.showInputDialog(this, "Enter a username");
+    }
 
 	@Override
 	public void onReceiveMessage(Message msg) {
