@@ -54,6 +54,9 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 	private JLabel chatLabel;
 	private JTextPane messagesPane;
 
+    // messaging input
+    private JTextField messageInput = new JTextField();
+
     // emoticons button
     private JButton emoticonsButton;
 
@@ -312,7 +315,8 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
         // emoticons frame and button
         emoticonsButton = new JButton();
-        emoticonsFrame = new EmoticonsFrame();
+        emoticonsFrame = new EmoticonsFrame(messageInput);
+
         try {
         emoticonsButton.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("/images/emoticons/grin.png"))));
         } catch (IOException e) {
@@ -332,8 +336,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
             }
         });
 
-		// messaging input
-		final JTextField messageInput = new JTextField();
+		// messaging input layout and listener
 		messageInput.setBorder(standardPadding);
         chatInputPanel.add(messageInput, BorderLayout.CENTER);
         chatInputPanel.add(emoticonsButton, BorderLayout.EAST);
@@ -361,6 +364,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		setVisible(true);
 		getLayeredPane().repaint();
 	}
+
 
 	@Override
 	public void onReceiveMessage(Message msg) {
