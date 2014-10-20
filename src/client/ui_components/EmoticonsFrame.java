@@ -32,11 +32,12 @@ public class EmoticonsFrame extends JFrame {
     private ArrayList<JButton> buttonArrayList;
     private String selectedEmoticon;
 
+    //create all components, set frame to currently open
     public EmoticonsFrame() {
         createComponents();
     }
 
-    //
+    //create all components
     private void createComponents() {
 
         //hide frame title bar and set size
