@@ -345,8 +345,6 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
             //TODO: handle exception
         }
         emoticonsButton.setSize(new Dimension(16,16));
-        //Border buttonBorder = new LineBorder(Color.BLACK, 1);
-        //emoticonsButton.setBorder(buttonBorder);
 
 		// messaging input
 		final JTextField messageInput = new JTextField();
