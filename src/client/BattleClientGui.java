@@ -312,12 +312,25 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
         // emoticons frame and button
         emoticonsButton = new JButton();
+        emoticonsFrame = new EmoticonsFrame();
         try {
         emoticonsButton.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("/images/emoticons/grin.png"))));
         } catch (IOException e) {
             //TODO: handle exception
         }
         emoticonsButton.setSize(new Dimension(16,16));
+        emoticonsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(!emoticonsFrame.isVisible()) {
+                    emoticonsFrame.setLocation((int) emoticonsButton.getLocationOnScreen().getX(), (int) emoticonsButton.getLocationOnScreen().getY() + -80);
+                    emoticonsFrame.setVisible(true);
+                }
+                else {
+                    emoticonsFrame.setVisible(false);
+                }
+            }
+        });
 
 		// messaging input
 		final JTextField messageInput = new JTextField();
