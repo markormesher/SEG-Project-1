@@ -228,6 +228,8 @@ public class BattleServer {
 					for (ClientConnectedListener listener : clientConnectedListeners) {
 						listener.onClientConnected(username);
 					}
+				}  else if(msg.getType() == Message.OPPONENT_DISCONNECTED) {
+					removeClientThread(id);
 				} else {
 					// find recipient by username and send the message to them
 					for (BattleClientThread c : connectedClients) {

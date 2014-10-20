@@ -17,6 +17,8 @@ import javax.swing.text.html.HTMLEditorKit;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -207,7 +209,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		// this label is used to show the game state to the user
 		JPanel statusPanel = new JPanel();
 		statusPanel.setOpaque(false);
-		statusLabel = new JLabel("← To begin, place your ships on the left board");
+		statusLabel = new JLabel("â†� To begin, place your ships on the left board");
 		statusLabel.setFont(font.deriveFont(11f));
 		statusLabel.setForeground(Color.white);
 		statusPanel.add(statusLabel);
@@ -340,6 +342,30 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 					ex.printStackTrace();
 				}
 			}
+		});
+		
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				super.windowClosing(e);
+				// give an modal prompt asking if the user wants to exit
+				int option =
+						JOptionPane.showOptionDialog(BattleClientGui.this, "Do you want to quit the game?", "Disconnect from game", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+				if(option == JOptionPane.YES_OPTION) {
+					// send message to opponent that i have disconnected.
+					try {
+						client.sendMessage(new Message(opponentUsername, Message.OPPONENT_DISCONNECTED));
+					} catch (IOException e1) {
+						// TODO: handle error
+						e1.printStackTrace();
+					} finally {
+						BattleClientGui.this.dispose();
+					}
+				}
+			}
+			
 		});
 
 		// add layers
@@ -500,7 +526,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
 		// update the status label
 		statusLabel.setForeground(Color.white);
-		statusLabel.setText(currentPlayer == ME ? "It's your turn. Press a square on the right board to shoot →" : "It's the opponent's turn now.");
+		statusLabel.setText(currentPlayer == ME ? "It's your turn. Press a square on the right board to shoot â†’" : "It's the opponent's turn now.");
 	}
 
 	private void showError(String msg) {
