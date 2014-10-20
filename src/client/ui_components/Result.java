@@ -1,7 +1,7 @@
 package client.ui_components;
 
 /**
- * Created by leo on 20/10/14.
+ * Contains stats regarding the outcome of a match for a user
  */
 public class Result {
     public String username;

@@ -17,6 +17,7 @@ public class ResultsWindow extends JFrame {
     Font font;
     public ResultsWindow(Result result , Result opponentResult){
 
+        //create the font
         try {
             font = Font.createFont(Font.TRUETYPE_FONT, getClass().getResourceAsStream("/fonts/PressStart2P.ttf"));
             font = font.deriveFont(25f);
@@ -34,6 +35,7 @@ public class ResultsWindow extends JFrame {
 
         setLayout(new BorderLayout());
 
+
         JLabel resultLabel = new JLabel(result.won ? "YOU WON" : "YOU LOST");
         resultLabel.setForeground(result.won ? Color.GREEN  : Color.RED);
         resultLabel.setFont(font.deriveFont(35f));
@@ -41,12 +43,16 @@ public class ResultsWindow extends JFrame {
         resultLabel.setHorizontalAlignment(JLabel.HORIZONTAL);
         add(resultLabel, BorderLayout.NORTH);
 
+        //3 columns wide grid
         innerGrid = new JPanel(new GridLayout(0,3,5,5));
         innerGrid.setBackground(Color.white);
+
+        //your names
         JLabel yourName = new JLabel(result.username);
         yourName.setFont(font.deriveFont(20f));
         yourName.setHorizontalAlignment(JLabel.HORIZONTAL);
         innerGrid.add(yourName);
+        //needed for the empty middle cell in the first row
         JPanel emptyPanel = new JPanel();
         emptyPanel.setOpaque(false);
         innerGrid.add(emptyPanel);
@@ -56,13 +62,16 @@ public class ResultsWindow extends JFrame {
         opponentName.setHorizontalAlignment(JLabel.HORIZONTAL);
         innerGrid.add(opponentName);
 
+
         addRow(String.valueOf(result.totalShots) , "SHOTS" , String.valueOf(opponentResult.totalShots));
         addRow(String.valueOf(result.misses) , "MISSES" , String.valueOf(opponentResult.misses));
         addRow(String.valueOf(result.hits) , "HITS" , String.valueOf(opponentResult.hits));
+        //percentages rounded up
         addRow(String.valueOf(Math.round((double) result.hits / result.totalShots * 100)) + "%" ,
                 "HIT %" , String.valueOf(Math.round((double)opponentResult.hits / opponentResult.totalShots*100)) + "%");
 
         add(innerGrid , BorderLayout.CENTER);
+
         JButton play = new JButton("Play again");
         play.setFont(font.deriveFont(25f));
         play.addActionListener(new ActionListener() {
@@ -74,8 +83,13 @@ public class ResultsWindow extends JFrame {
         add(play ,BorderLayout.SOUTH);
     }
 
+    /**
+     * Adds a new row
+     * @param left the text on the first column
+     * @param middle left the text on the second column
+     * @param right left the text on the third column
+     */
     public void addRow(String left , String middle , String right){
-
         JLabel myTotal = new JLabel(left);
         myTotal.setFont(font.deriveFont(15f));
         myTotal.setHorizontalAlignment(JLabel.HORIZONTAL);
@@ -90,6 +104,7 @@ public class ResultsWindow extends JFrame {
         innerGrid.add(opponentTotal);
     }
 
+    //for testing purposes
     public static void main(String[] arr){
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -102,13 +117,6 @@ public class ResultsWindow extends JFrame {
             }
         });
 
-    }
-
-    @Override
-    public void paintComponents(Graphics g) {
-        g.setColor(Color.white);
-        g.fillRect(0,0,getWidth(),getHeight());
-        super.paintComponents(g);
     }
 
 }
