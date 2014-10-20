@@ -54,6 +54,15 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 	private JLabel chatLabel;
 	private JTextPane messagesPane;
 
+    // messaging input
+    private JTextField messageInput = new JTextField();
+
+    // emoticons button
+    private JButton emoticonsButton;
+
+    // emoticon frame to pop up when emoticons button is clicked
+    private EmoticonsFrame emoticonsFrame;
+
 	// the label that displays the user the current status
 	private JLabel statusLabel;
 
@@ -203,65 +212,65 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
 		// set up the local board
 		localBoard.addShipPlacementListener(new BattleBoardLocal.FinishedPlacingShipsListener() {
-			@Override
-			public void onFinished() {
-				try {
-					// tell the other user you're ready
-					client.sendMessage(new Message(opponentUsername, Message.READY_TO_PLAY));
+            @Override
+            public void onFinished() {
+                try {
+                    // tell the other user you're ready
+                    client.sendMessage(new Message(opponentUsername, Message.READY_TO_PLAY));
 
-					// if the other opponent hasn't finished yet, you go first
-					if (currentPlayer == 0) {
-						currentPlayer = ME;
-						statusLabel.setText("Your opponent is not ready yet.");
-					} else {
-						onPlayerChanged();
-					}
+                    // if the other opponent hasn't finished yet, you go first
+                    if (currentPlayer == 0) {
+                        currentPlayer = ME;
+                        statusLabel.setText("Your opponent is not ready yet.");
+                    } else {
+                        onPlayerChanged();
+                    }
 
-					// we're ready
-					playerReady = true;
-				} catch (IOException e) {
-					showError("An error occurred, check your network connection.");
-					e.printStackTrace();
-				}
-			}
-		});
+                    // we're ready
+                    playerReady = true;
+                } catch (IOException e) {
+                    showError("An error occurred, check your network connection.");
+                    e.printStackTrace();
+                }
+            }
+        });
 
 		localBoard.setOpaque(false);
 		innerPanel.add(localBoard);
 
 		// set up the opponent board
 		opponentBoard.addShotListener(new BattleBoardOpponent.ShotListener() {
-			@Override
-			public void onShotFired(int x, int y) {
-				// both sides must be ready
-				if (!playerReady || !opponentReady) {
-					showError(!playerReady ? "You haven't placed your ships yet." : "Your opponent hasn't placed their ships");
-					return;
-				}
+            @Override
+            public void onShotFired(int x, int y) {
+                // both sides must be ready
+                if (!playerReady || !opponentReady) {
+                    showError(!playerReady ? "You haven't placed your ships yet." : "Your opponent hasn't placed their ships");
+                    return;
+                }
 
-				// check that they're not re-shooting on the same spot
-				if (opponentBoard.getBoardCells()[x][y].object.getIcon() != null) {
-					showError("You already shot there.");
-					return;
-				}
+                // check that they're not re-shooting on the same spot
+                if (opponentBoard.getBoardCells()[x][y].object.getIcon() != null) {
+                    showError("You already shot there.");
+                    return;
+                }
 
-				// you must be the current player to shoot
-				if (currentPlayer == ME) {
-					try {
-						client.sendMessage(new Message(opponentUsername, Message.SHOOT, x, y));
+                // you must be the current player to shoot
+                if (currentPlayer == ME) {
+                    try {
+                        client.sendMessage(new Message(opponentUsername, Message.SHOOT, x, y));
 
-						// after shooting it's their turn
-						currentPlayer = OPPONENT;
-						onPlayerChanged();
-					} catch (IOException e) {
-						showError("An error occurred, check your network connection.");
-						e.printStackTrace();
-					}
-				} else {
-					showError("It's not your turn right now");
-				}
-			}
-		});
+                        // after shooting it's their turn
+                        currentPlayer = OPPONENT;
+                        onPlayerChanged();
+                    } catch (IOException e) {
+                        showError("An error occurred, check your network connection.");
+                        e.printStackTrace();
+                    }
+                } else {
+                    showError("It's not your turn right now");
+                }
+            }
+        });
 
 		opponentBoard.setOpaque(false);
 		innerPanel.add(opponentBoard);
@@ -273,8 +282,11 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		JPanel chattingContainer = new JPanel(new BorderLayout());
 		// the chattingArea is white and is inside the chattingContainer
 		JPanel chattingArea = new JPanel(new BorderLayout());
+        // the chatInputPanel contains text field and emoticons button and is inside the chattingArea
+        JPanel chatInputPanel = new JPanel(new BorderLayout());
 
 		// set up the chat area
+        chatInputPanel.setBackground(Color.white);
 		chattingArea.setBorder(new LineBorder(Color.gray, 1));
 		chattingArea.setBackground(Color.white);
 		chattingArea.setSize(new Dimension(0, 70));
@@ -283,6 +295,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		chattingContainer.setOpaque(false);
 		chattingContainer.setSize(new Dimension(0, 70));
 		chattingContainer.setPreferredSize(new Dimension(0, 200));
+        chattingArea.add(chatInputPanel, BorderLayout.SOUTH);
 		chattingContainer.add(chattingArea, BorderLayout.CENTER);
 		frameContent.add(chattingContainer, BorderLayout.SOUTH);
 
@@ -300,10 +313,33 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		chatLabel.setFont(font.deriveFont(13f));
 		chattingArea.add(chatLabel, BorderLayout.NORTH);
 
-		// messaging input
-		final JTextField messageInput = new JTextField();
+        // emoticons frame and button
+        emoticonsButton = new JButton();
+        emoticonsFrame = new EmoticonsFrame(messageInput);
+
+        try {
+        emoticonsButton.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("/images/emoticons/grin.png"))));
+        } catch (IOException e) {
+            //TODO: handle exception
+        }
+        emoticonsButton.setSize(new Dimension(16,16));
+        emoticonsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(!emoticonsFrame.isVisible()) {
+                    emoticonsFrame.setLocation((int) emoticonsButton.getLocationOnScreen().getX(), (int) emoticonsButton.getLocationOnScreen().getY() + -80);
+                    emoticonsFrame.setVisible(true);
+                }
+                else {
+                    emoticonsFrame.setVisible(false);
+                }
+            }
+        });
+
+		// messaging input layout and listener
 		messageInput.setBorder(standardPadding);
-		chattingArea.add(messageInput, BorderLayout.SOUTH);
+        chatInputPanel.add(messageInput, BorderLayout.CENTER);
+        chatInputPanel.add(emoticonsButton, BorderLayout.EAST);
 		messageInput.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -328,6 +364,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		setVisible(true);
 		getLayeredPane().repaint();
 	}
+
 
 	@Override
 	public void onReceiveMessage(Message msg) {
