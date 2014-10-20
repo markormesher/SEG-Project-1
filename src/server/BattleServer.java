@@ -29,7 +29,7 @@ public class BattleServer {
 
 	// list of connected clients
 	private int connectedPlayerCounter = 0;
-	private ArrayList<BattleClientThread> connectedClients = new ArrayList<BattleClientThread>();
+	private static ArrayList<BattleClientThread> connectedClients = new ArrayList<BattleClientThread>();
 	private ArrayList<ClientPair> activePairs = new ArrayList<ClientPair>();
 
 	// list of listeners
@@ -79,9 +79,9 @@ public class BattleServer {
 	}
 
 	// check if the username is taken
-	protected synchronized boolean usernameIsTaken(String username, int id) {
+	public static boolean usernameIsTaken(String username) {
 		for (BattleClientThread c : connectedClients) {
-			if(c.username == username && c.getId() != id) {
+			if(c.username.equals(username)) {
 				return true;
 			}
 		}
@@ -96,7 +96,7 @@ public class BattleServer {
 		for (ClientPair p : activePairs) {
 			if (p.clientA.id == id || p.clientB.id == id) {
 				pair = p;
-        break;
+                break;
 			}
 		}
 
@@ -127,7 +127,7 @@ public class BattleServer {
 					listener.onClientDisconnected(c.username);
 				}
 				connectedClients.remove(c);
-        break;
+                break;
 			}
 		}
 
@@ -222,19 +222,7 @@ public class BattleServer {
 				if (msg.getType() == Message.SET_USERNAME) {
 					// set username of this thread
 					username = msg.getMessage();
-
-					if(usernameIsTaken(username, id)) {
-						try {
-							sendMessage(new Message(username, Message.USERNAME_TAKEN));
-						}
-						catch (IOException e) {
-							System.out.println("Client disconnected: " + username);
-							break;
-						}
-						continue;
-					}
-
-					checkBothUsernameSet(id);
+                    checkBothUsernameSet(id);
 
 					// notify all clientConnectedListeners
 					for (ClientConnectedListener listener : clientConnectedListeners) {
@@ -250,7 +238,7 @@ public class BattleServer {
 								serverMessageListener.onServerMessageReceived("Failed to send message to " + msg.getRecipient());
 							}
 
-              						break;
+              				break;
 						}
 					}
 				}
