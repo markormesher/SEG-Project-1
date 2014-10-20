@@ -7,6 +7,7 @@ import java.io.IOException;
 
 public class EmoticonButton extends JButton {
 
+    //create a new emoticon button
     public EmoticonButton(String imagePath) {
         try {
             Image newEmoticon = ImageIO.read(getClass().getResource(imagePath));
