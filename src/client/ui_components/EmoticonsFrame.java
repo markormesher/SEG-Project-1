@@ -1,5 +1,7 @@
 package client.ui_components;
 
+import client.BattleClientGui;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -32,8 +34,11 @@ public class EmoticonsFrame extends JFrame {
     private ArrayList<JButton> buttonArrayList;
     private String selectedEmoticon;
 
+    private JTextField chatInput;
+
     //create all components, set frame to currently open
-    public EmoticonsFrame() {
+    public EmoticonsFrame(JTextField chatInput) {
+        this.chatInput = chatInput;
         createComponents();
     }
 
@@ -51,26 +56,28 @@ public class EmoticonsFrame extends JFrame {
         this.setLayout(new GridLayout(3, 3));
         createButtons();
         pack();
+
     }
 
     //create all emoticon buttons, add to list and to layout
     private void createButtons() {
         for(int i = 0; i < emoticonArray.length; ++i) {
-            try {
-                //find and assign new icon image and add to new button
-                Image newEmoticon = ImageIO.read(getClass().getResource("/images/emoticons/" + emoticonArray[i][CODE] + ".png"));
-                final JButton newEmoticonButton = new JButton();
-                newEmoticonButton.setIcon(new ImageIcon(newEmoticon));
-                newEmoticonButton.setSize(16, 16);
 
-                /*final String currentEmoticon = emoticonArray[i][SHORTCUT];
 
+                //create new emoticon button
+                final EmoticonButton newEmoticonButton = new EmoticonButton("/images/emoticons/" + emoticonArray[i][CODE] + ".png");
+
+                //temporarily store the text shortcut of this emoticon
+                final String currentEmoticonShortcut = emoticonArray[i][SHORTCUT];
+
+                //when button is pressed add text shortcut of emoticon to text field
                 newEmoticonButton.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        selectedEmoticon = currentEmoticon;
+                        //TODO: make text enter where the carot is in text field
+                        chatInput.setText(chatInput.getText() + currentEmoticonShortcut);
                     }
-                });*/
+                });
 
                 //add button to array list
                 buttonArrayList.add(newEmoticonButton);
@@ -78,10 +85,11 @@ public class EmoticonsFrame extends JFrame {
                 //add button to layout
                 this.add(newEmoticonButton);
 
-            } catch (IOException e) {
-                //TODO: handle exception
-                System.out.println(e.getMessage());
-            }
+
         }
+
+        pack();
     }
+
+
 }
