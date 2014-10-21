@@ -372,10 +372,15 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// send message when the user presses enter
-				Message toSend = new Message(opponentUsername, Message.CHAT_MESSAGE, messageInput.getText().trim());
+                String messageText = messageInput.getText().trim();
+                //if message contains emoticon shortcut, convert to image html link
+                if(emoticonsFrame.containsEmoticons(messageText)) {
+                    messageText = emoticonsFrame.convertTextToHTML(messageText);
+                }
+				Message toSend = new Message(opponentUsername, Message.CHAT_MESSAGE, messageText);
 				try {
 					client.sendMessage(toSend);
-					appendToLog("\n<strong>" + playerUsername + ":</strong> " + messageInput.getText());
+					appendToLog("\n<strong>" + playerUsername + ":</strong> " + messageText);
 					messageInput.setText("");
 				} catch (IOException ex) {
 					appendToLog("\nFailed to send message");
@@ -441,12 +446,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 				if (msg.getMessage() == null) {
 					return;
 				}
-                String message = msg.getMessage();
-                //if message contains emoticon shortcut, convert to image html link
-                if(emoticonsFrame.containsEmoticons(message)) {
-                    message = emoticonsFrame.convertTextToHTML(message);
-                }
-				appendToLog("\n<strong>" + opponentUsername + ":</strong> " + message);
+				appendToLog("\n<strong>" + opponentUsername + ":</strong> " + msg.getMessage());
 				break;
 
 			case Message.OPPONENT_DISCONNECTED:
