@@ -1,10 +1,11 @@
 package client.ui_components;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
+import java.io.IOException;
 
 public class EmoticonsFrame extends JFrame {
 
@@ -25,6 +26,8 @@ public class EmoticonsFrame extends JFrame {
     private static final int SHORTCUT = 1;
     private static final int HEIGHT = 46;
     private static final int WIDTH = 46;
+    private static final String IMAGE_PATH = "/images/emoticons/";
+    private static final String HTML_PIXEL_CODE = "height=\"16\" width=\"16\"";
 
     private String selectedEmoticon;
 
@@ -57,7 +60,14 @@ public class EmoticonsFrame extends JFrame {
 
 
                 //create new emoticon button
-                final EmoticonButton newEmoticonButton = new EmoticonButton("/images/emoticons/" + emoticonArray[i][CODE] + ".png");
+                final JButton newEmoticonButton = new JButton();
+            try {
+                Image newEmoticon = ImageIO.read(getClass().getResource(IMAGE_PATH + emoticonArray[i][CODE] + ".png"));
+                newEmoticonButton.setIcon(new ImageIcon(newEmoticon));
+                this.setSize(16, 16);
+            } catch (IOException e) {
+                //TODO: handle exception
+            }
 
                 //temporarily store the text shortcut of this emoticon
                 final String currentEmoticonShortcut = emoticonArray[i][SHORTCUT];
@@ -91,5 +101,54 @@ public class EmoticonsFrame extends JFrame {
         pack();
     }
 
+    //check whether emoticons where entered in message
+    public boolean containsEmoticons(String msg) {
+        for (int i = 0; i < emoticonArray.length; ++i) {
+            if (msg.contains(emoticonArray[i][SHORTCUT])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //convert emoticon shortcuts to images
+    public String convertTextToHTML(String msg) {
+        String newMessage = "";
+        boolean emoticonFound = false;
+
+        //loop through every character
+        for (int currentIndex = 0; currentIndex < msg.length(); ++currentIndex) {
+            char currentChar = msg.charAt(currentIndex);
+            //check if character is the first character of an existing emoticon
+            if (currentChar == ':' || currentChar == '>' || currentChar == 'B' || currentChar == ';') {
+                for (int i = 0; i < emoticonArray.length; ++i) {
+                    //if the following character completes a 2 char emoticon create image link
+                    if (msg.length() - currentIndex > 1 && msg.substring(currentIndex, currentIndex + 2).equals(emoticonArray[i][SHORTCUT])) {
+                        newMessage = newMessage + "<img src=\"" + emoticonArray[i][CODE] + ".png\"/>";
+                        ++currentIndex;
+                        emoticonFound = true;
+                        break;
+                    }
+                    //if the following 2 characters complete a 3 char emoticon create image link
+                    else if (msg.length() - currentIndex > 2 && msg.substring(currentIndex, currentIndex + 3).equals(emoticonArray[i][SHORTCUT])) {
+                        newMessage = newMessage + "<img src=\"" + emoticonArray[i][CODE] + ".png\"/>";
+                        currentIndex += 2;
+                        emoticonFound = true;
+                        break;
+                    }
+                }
+            }
+            //if emoticon was found reset boolean
+            if(emoticonFound) {
+                emoticonFound = false;
+            }
+            //if emoticon was not found add the char as it is
+            else {
+                newMessage = newMessage + currentChar;
+            }
+        }
+
+        return newMessage;
+    }
 
 }

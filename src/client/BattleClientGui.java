@@ -21,6 +21,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -440,7 +441,12 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 				if (msg.getMessage() == null) {
 					return;
 				}
-				appendToLog("\n<strong>" + opponentUsername + ":</strong> " + msg.getMessage());
+                String message = msg.getMessage();
+                //if message contains emoticon shortcut, convert to image html link
+                if(emoticonsFrame.containsEmoticons(message)) {
+                    message = emoticonsFrame.convertTextToHTML(message);
+                }
+				appendToLog("\n<strong>" + opponentUsername + ":</strong> " + message);
 				break;
 
 			case Message.OPPONENT_DISCONNECTED:
@@ -547,6 +553,9 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		// this code appends a line as html
 		HTMLDocument doc = (HTMLDocument) messagesPane.getDocument();
 		HTMLEditorKit editorKit = (HTMLEditorKit) messagesPane.getEditorKit();
+        //set html base path to resources folder
+        URL resources = EmoticonsFrame.class.getResource("/images/emoticons/");
+        doc.setBase(resources);
 		try {
 			editorKit.insertHTML(doc, doc.getLength(), s, 0, 0, null);
 		} catch (BadLocationException e) {
