@@ -122,14 +122,17 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		// collect player username and set it as title
 		playerUsername = askForUsername();
 
-        while(BattleServer.usernameIsTaken(playerUsername) || playerUsername.equals("")) {
+        while(true) {
             String errorMessage;
 
-            if(playerUsername.equals("")) {
+            if(playerUsername == null || playerUsername.equals("")) {
                 errorMessage = "Invalid username, please try again.";
             }
-            else {
+            else if (BattleServer.usernameIsTaken(playerUsername)){
                 errorMessage = "This username is already taken, please try again.";
+            }
+            else {
+                break;
             }
 
 
