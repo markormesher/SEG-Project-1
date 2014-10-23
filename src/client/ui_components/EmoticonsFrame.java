@@ -11,15 +11,15 @@ public class EmoticonsFrame extends JFrame {
 
     //codes and shortcuts of emoticons
     private static final String[][] emoticonArray = {
-            {"GRIN",":)"},
-            {"WINK",";)"},
-            {"SMILE",":D"},
-            {"CRY",":'("},
-            {"SAD",":("},
-            {"TONGUE",":P"},
-            {"SHOCK",":O"},
-            {"ANGRY",">:("},
-            {"COOL","B)"}
+            {"grin",":)"},
+            {"wink",";)"},
+            {"smile",":D"},
+            {"cry",":'("},
+            {"sad",":("},
+            {"tongue",":P"},
+            {"shock",":O"},
+            {"angry",">:("},
+            {"cool","B)"}
     };
 
     private static final int CODE = 0;
@@ -27,9 +27,6 @@ public class EmoticonsFrame extends JFrame {
     private static final int HEIGHT = 46;
     private static final int WIDTH = 46;
     private static final String IMAGE_PATH = "/images/emoticons/";
-    private static final String HTML_PIXEL_CODE = "height=\"16\" width=\"16\"";
-
-    private String selectedEmoticon;
 
     //textfield sent from client
     private JTextField chatInput;
