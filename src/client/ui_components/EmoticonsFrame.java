@@ -91,11 +91,7 @@ public class EmoticonsFrame extends JFrame {
 
                 //add button to layout
                 this.add(newEmoticonButton);
-
-
         }
-
-        pack();
     }
 
     //check whether emoticons where entered in message
