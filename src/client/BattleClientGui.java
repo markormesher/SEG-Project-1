@@ -587,7 +587,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
         opponentBoard.removeShotListener();
         clock.stop();
         statusLabel.setForeground(Color.BLACK);
-        statusLabel.setText("This game is now finished");
+        statusLabel.setText(result.won ? "This game is now finished. You win !" : "This game is now finished. You lose");
     }
 
 	private void appendToLog(String s) {
