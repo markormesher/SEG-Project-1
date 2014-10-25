@@ -74,6 +74,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
 	// the countdown clock
 	private CountdownClock clock;
+    private int consecutiveTimeouts = 0;
 
 	// the two boards
 	private BattleBoardLocal localBoard = new BattleBoardLocal();
@@ -190,14 +191,24 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
             playerUsername = askForUsername();
         }*/
 
+		// the client uses while so it must run on a separate thread
+		(new Thread() {
+			public void run() {
+				client = new BattleClient(Settings.HOST_NAME, Settings.PORT_NUMBER, playerUsername, BattleClientGui.this);
+				try {
+					client.connect();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
 
-
-        // the panel containing the battleship logo
-        JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setOpaque(false);
-        JLabel title = new JLabel();
-        title.setIcon(new ImageIcon(this.getClass().getResource("/images/logo.png")));
-        topPanel.add(title, BorderLayout.NORTH);
+		// the panel containing the battleship logo
+		JPanel topPanel = new JPanel(new BorderLayout());
+		topPanel.setOpaque(false);
+		JLabel title = new JLabel();
+		title.setIcon(new ImageIcon(this.getClass().getResource("/images/logo.png")));
+		topPanel.add(title, BorderLayout.NORTH);
 
         // the panel with the clock
         JPanel clockPanel = new JPanel(new FlowLayout());
@@ -311,6 +322,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
                 if (currentPlayer == ME) {
                     try {
                         client.sendMessage(new Message(opponentUsername, Message.SHOOT, x, y));
+                        consecutiveTimeouts = 0;
 
                         // after shooting it's their turn
                         currentPlayer = OPPONENT;
@@ -475,7 +487,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
 			case Message.OPPONENT_DISCONNECTED:
 				appendToLog("\n<strong>-- Your opponent disconnected! --");
-				// TODO: automatically win the game here
+				onWin();
 				break;
 
 			case Message.READY_TO_PLAY:
