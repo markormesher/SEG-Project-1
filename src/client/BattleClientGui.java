@@ -557,7 +557,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
 	private void onLose() {
         opponentResult.won=true;
-        ResultsWindow resultsWindow = new ResultsWindow(result,opponentResult);
+        ResultsWindow resultsWindow = new ResultsWindow(result,opponentResult,this);
         resultsWindow.setVisible(true);
         gameHasEnded();
 		appendToLog("You have lost.");
@@ -565,7 +565,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
 	private void onWin() {
         result.won = true;
-		ResultsWindow resultsWindow = new ResultsWindow(result,opponentResult);
+		ResultsWindow resultsWindow = new ResultsWindow(result,opponentResult,this);
         resultsWindow.setVisible(true);
         gameHasEnded();
 		appendToLog("You have won.");
@@ -573,7 +573,6 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
     private void gameHasEnded() {
         //TODO: disable firing shots
-        setFocusable(false);
     }
 
 	private void appendToLog(String s) {

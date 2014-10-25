@@ -15,7 +15,9 @@ public class ResultsWindow extends JFrame {
 
     JPanel innerGrid;
     Font font;
-    public ResultsWindow(Result result , Result opponentResult){
+    JFrame clientFrame;
+
+    public ResultsWindow(Result result , Result opponentResult, final JFrame clientFrame){
 
         //create the font
         try {
@@ -28,6 +30,8 @@ public class ResultsWindow extends JFrame {
         }
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+        //reference to the BattleClientGui to dispose of when opening new game
+        this.clientFrame = clientFrame;
 
         setSize(350, 350);
         setResizable(false);
@@ -78,6 +82,7 @@ public class ResultsWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new BattleClientGui().setVisible(true);
+                clientFrame.dispose();
                 dispose();
             }
         });
@@ -105,7 +110,7 @@ public class ResultsWindow extends JFrame {
         innerGrid.add(opponentTotal);
     }
 
-    //for testing purposes
+/*    //for testing purposes
     public static void main(String[] arr){
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -119,5 +124,6 @@ public class ResultsWindow extends JFrame {
         });
 
     }
+    */
 
 }
