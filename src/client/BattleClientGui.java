@@ -584,7 +584,10 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
     }
 
     private void gameHasEnded() {
-        //TODO: disable firing shots
+        opponentBoard.removeShotListener();
+        clock.stop();
+        statusLabel.setForeground(Color.BLACK);
+        statusLabel.setText("This game is now finished");
     }
 
 	private void appendToLog(String s) {

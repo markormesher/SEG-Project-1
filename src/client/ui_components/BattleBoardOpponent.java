@@ -72,6 +72,10 @@ public class BattleBoardOpponent extends JPanel {
 		shotListeners.add(listener);
 	}
 
+    public void removeShotListener() {
+        shotListeners.remove(shotListeners.size()-1);
+    }
+
 	public int getDestroyedShipPieces() {
 		return destroyedShipPieces;
 	}
