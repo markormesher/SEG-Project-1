@@ -28,7 +28,7 @@ public class ResultsWindow extends JFrame {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         //reference to the BattleClientGui to dispose of when opening new game
         this.clientFrame = clientFrame;
@@ -87,6 +87,9 @@ public class ResultsWindow extends JFrame {
             }
         });
         add(play ,BorderLayout.SOUTH);
+
+        //center on screen
+        setLocationRelativeTo(null);
     }
 
     /**
