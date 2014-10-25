@@ -557,7 +557,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
 	private void onLose() {
         opponentResult.won=true;
-        ResultsWindow resultsWindow = new ResultsWindow(result,opponentResult,this);
+        ResultsWindow resultsWindow = new ResultsWindow(result,opponentResult,BattleClientGui.this);
         resultsWindow.setVisible(true);
         gameHasEnded();
 		appendToLog("You have lost.");
@@ -565,11 +565,23 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
 	private void onWin() {
         result.won = true;
-		ResultsWindow resultsWindow = new ResultsWindow(result,opponentResult,this);
+		ResultsWindow resultsWindow = new ResultsWindow(result,opponentResult,BattleClientGui.this);
         resultsWindow.setVisible(true);
         gameHasEnded();
 		appendToLog("You have won.");
 	}
+
+    public void disconnect() {
+        // send message to opponent that i have disconnected.
+        try {
+            client.sendMessage(new Message(opponentUsername, Message.OPPONENT_DISCONNECTED));
+        } catch (IOException e1) {
+            // TODO: handle error
+            e1.printStackTrace();
+        } finally {
+            this.dispose();
+        }
+    }
 
     private void gameHasEnded() {
         //TODO: disable firing shots

@@ -1,7 +1,7 @@
 package client.ui_components;
 
 import client.BattleClientGui;
-import global.Settings;
+import global.Message;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -17,7 +17,7 @@ public class ResultsWindow extends JFrame {
     Font font;
     JFrame clientFrame;
 
-    public ResultsWindow(Result result , Result opponentResult, final JFrame clientFrame){
+    public ResultsWindow(Result result , Result opponentResult, final BattleClientGui clientFrame){
 
         //create the font
         try {
@@ -82,7 +82,7 @@ public class ResultsWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new BattleClientGui().setVisible(true);
-                clientFrame.dispose();
+                clientFrame.disconnect();
                 dispose();
             }
         });
@@ -109,21 +109,5 @@ public class ResultsWindow extends JFrame {
         opponentTotal.setHorizontalAlignment(JLabel.HORIZONTAL);
         innerGrid.add(opponentTotal);
     }
-
-/*    //for testing purposes
-    public static void main(String[] arr){
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                } catch (Exception useDefault) {
-                    // use default layout
-                }
-                new ResultsWindow(new Result("JAKE",21,5,17,true), new Result("AMIR",20,8,12,false)).setVisible(true);
-            }
-        });
-
-    }
-    */
 
 }
