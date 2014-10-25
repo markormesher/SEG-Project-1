@@ -495,7 +495,9 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 				// if you haven't finished yet, they will go first
 				if (currentPlayer == 0) {
 					currentPlayer = OPPONENT;
-				}
+				} else {
+                    onPlayerChanged();
+                }
 				appendToLog("\n<strong>" + opponentUsername + " has finished placing ships and is ready to play</strong>");
 				break;
 
