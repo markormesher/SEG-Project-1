@@ -21,6 +21,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -59,6 +60,15 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 	// messaging output
 	private JLabel chatLabel;
 	private JTextPane messagesPane;
+
+    // messaging input
+    private JTextField messageInput = new JTextField();
+
+    // emoticons button
+    private JButton emoticonsButton;
+
+    // emoticon frame to pop up when emoticons button is clicked
+    private EmoticonsFrame emoticonsFrame;
 
 	// the label that displays the user the current status
 	private JLabel statusLabel;
@@ -300,8 +310,11 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		JPanel chattingContainer = new JPanel(new BorderLayout());
 		// the chattingArea is white and is inside the chattingContainer
 		JPanel chattingArea = new JPanel(new BorderLayout());
+        // the chatInputPanel contains text field and emoticons button and is inside the chattingArea
+        JPanel chatInputPanel = new JPanel(new BorderLayout());
 
 		// set up the chat area
+        chatInputPanel.setBackground(Color.white);
 		chattingArea.setBorder(new LineBorder(Color.gray, 1));
 		chattingArea.setBackground(Color.white);
 		chattingArea.setSize(new Dimension(0, 70));
@@ -310,6 +323,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		chattingContainer.setOpaque(false);
 		chattingContainer.setSize(new Dimension(0, 70));
 		chattingContainer.setPreferredSize(new Dimension(0, 200));
+        chattingArea.add(chatInputPanel, BorderLayout.SOUTH);
 		chattingContainer.add(chattingArea, BorderLayout.CENTER);
 		frameContent.add(chattingContainer, BorderLayout.SOUTH);
 
@@ -327,18 +341,46 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		chatLabel.setFont(font.deriveFont(13f));
 		chattingArea.add(chatLabel, BorderLayout.NORTH);
 
-		// messaging input
-		final JTextField messageInput = new JTextField();
+        // emoticons frame and button
+        emoticonsButton = new JButton();
+        emoticonsFrame = new EmoticonsFrame(messageInput);
+
+        try {
+        emoticonsButton.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("/images/emoticons/grin.png"))));
+        } catch (IOException e) {
+            //TODO: handle exception
+        }
+        emoticonsButton.setSize(new Dimension(16,16));
+        emoticonsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(!emoticonsFrame.isVisible()) {
+                    emoticonsFrame.setLocation((int) emoticonsButton.getLocationOnScreen().getX(), (int) emoticonsButton.getLocationOnScreen().getY() + -80);
+                    emoticonsFrame.setVisible(true);
+                }
+                else {
+                    emoticonsFrame.setVisible(false);
+                }
+            }
+        });
+
+		// messaging input layout and listener
 		messageInput.setBorder(standardPadding);
-		chattingArea.add(messageInput, BorderLayout.SOUTH);
+        chatInputPanel.add(messageInput, BorderLayout.CENTER);
+        chatInputPanel.add(emoticonsButton, BorderLayout.EAST);
 		messageInput.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// send message when the user presses enter
-				Message toSend = new Message(opponentUsername, Message.CHAT_MESSAGE, messageInput.getText().trim());
+                String messageText = messageInput.getText().trim();
+                //if message contains emoticon shortcut, convert to image html link
+                if(emoticonsFrame.containsEmoticons(messageText)) {
+                    messageText = emoticonsFrame.convertTextToHTML(messageText);
+                }
+				Message toSend = new Message(opponentUsername, Message.CHAT_MESSAGE, messageText);
 				try {
 					client.sendMessage(toSend);
-					appendToLog("\n<strong>" + playerUsername + ":</strong> " + messageInput.getText());
+					appendToLog("\n<strong>" + playerUsername + ":</strong> " + messageText);
 					messageInput.setText("");
 				} catch (IOException ex) {
 					appendToLog("\nFailed to send message");
@@ -511,6 +553,9 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		// this code appends a line as html
 		HTMLDocument doc = (HTMLDocument) messagesPane.getDocument();
 		HTMLEditorKit editorKit = (HTMLEditorKit) messagesPane.getEditorKit();
+        //set html base path to resources folder
+        URL resources = EmoticonsFrame.class.getResource("/images/emoticons/");
+        doc.setBase(resources);
 		try {
 			editorKit.insertHTML(doc, doc.getLength(), s, 0, 0, null);
 		} catch (BadLocationException e) {
