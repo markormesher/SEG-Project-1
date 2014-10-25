@@ -78,6 +78,7 @@ public class ResultsWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new BattleClientGui().setVisible(true);
+                dispose();
             }
         });
         add(play ,BorderLayout.SOUTH);

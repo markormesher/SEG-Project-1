@@ -559,7 +559,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
         opponentResult.won=true;
         ResultsWindow resultsWindow = new ResultsWindow(result,opponentResult);
         resultsWindow.setVisible(true);
-        dispose();
+        gameHasEnded();
 		appendToLog("You have lost.");
 	}
 
@@ -567,9 +567,14 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
         result.won = true;
 		ResultsWindow resultsWindow = new ResultsWindow(result,opponentResult);
         resultsWindow.setVisible(true);
-        dispose();
+        gameHasEnded();
 		appendToLog("You have won.");
 	}
+
+    private void gameHasEnded() {
+        //TODO: disable firing shots
+        setFocusable(false);
+    }
 
 	private void appendToLog(String s) {
 		messages.add(s);
