@@ -93,46 +93,79 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+        // basic setup of frame
+        setSize(Settings.GRID_SIZE * Settings.IMAGE_CELL_SIZE * 2 + Settings.IMAGE_CELL_SIZE * 3, Settings.IMAGE_CELL_SIZE * 24);
+        setResizable(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		// basic setup of frame
-		setSize(Settings.GRID_SIZE * Settings.IMAGE_CELL_SIZE * 2 + Settings.IMAGE_CELL_SIZE * 3, Settings.IMAGE_CELL_SIZE * 24);
-		setResizable(true);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		// the background is beneath the actual UI
-		JPanel backgroundImage = new JPanel() {
-			public void paint(Graphics g) {
-				super.paint(g);
-				if (backgroundTile == null) {
-					try {
-						backgroundTile = ImageIO.read(this.getClass().getResource("/images/default/bg-plain.png"));
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
+        final AuthLayer authLayer = new AuthLayer(getWidth(),getHeight());
+        getLayeredPane().add(authLayer, new Integer(10));
+        authLayer.addAuthListenr(new AuthLayer.AuthAdapter() {
+            @Override
+            public void onLogin(String username) {
+                playerUsername = username;
+                result = new Result(playerUsername,0,0,0,false);
+                setTitle(playerUsername + " (you) vs. ???");
 
-				// cover the surface with background tiles
-				for (int x = 0; x < getWidth() / 32.0; x++) {
-					for (int y = 0; y < getHeight() / 32.0; y++) {
-						g.drawImage(backgroundTile, x * Settings.IMAGE_CELL_SIZE, y * Settings.IMAGE_CELL_SIZE, Settings.IMAGE_CELL_SIZE, Settings.IMAGE_CELL_SIZE, null);
-					}
-				}
-			}
-		};
-		backgroundImage.setSize(new Dimension(getWidth(), getHeight()));
-		backgroundImage.setPreferredSize(new Dimension(getWidth(), getHeight()));
-		backgroundImage.repaint();
+                chatLabel = new JLabel("Chat");
 
-		// this panel contains the actual ui and is over the background
-		JPanel frameContent = new JPanel();
-		frameContent.setLayout(new BorderLayout());
-		frameContent.setOpaque(false);
-		frameContent.setSize(new Dimension(getWidth(), getHeight() - 18));
+                // the client uses while so it must run on a separate thread
+                (new Thread() {
+                    public void run() {
+                        client = new BattleClient(Settings.HOST_NAME, Settings.PORT_NUMBER, playerUsername, BattleClientGui.this);
+                        try {
+                            client.connect();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();
 
-		// collect player username and set it as title
-		playerUsername = askForUsername();
+                authLayer.setVisible(false);
+                initUI();
+            }
+        });
 
-        while(true) {
+	}
+
+
+    public void initUI(){
+
+        // the background is beneath the actual UI
+        JPanel backgroundImage = new JPanel() {
+            public void paint(Graphics g) {
+                super.paint(g);
+                if (backgroundTile == null) {
+                    try {
+                        backgroundTile = ImageIO.read(this.getClass().getResource("/images/default/bg-plain.png"));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                // cover the surface with background tiles
+                for (int x = 0; x < getWidth() / 32.0; x++) {
+                    for (int y = 0; y < getHeight() / 32.0; y++) {
+                        g.drawImage(backgroundTile, x * Settings.IMAGE_CELL_SIZE, y * Settings.IMAGE_CELL_SIZE, Settings.IMAGE_CELL_SIZE, Settings.IMAGE_CELL_SIZE, null);
+                    }
+                }
+            }
+        };
+        backgroundImage.setSize(new Dimension(getWidth(), getHeight()));
+        backgroundImage.setPreferredSize(new Dimension(getWidth(), getHeight()));
+        backgroundImage.repaint();
+
+        // this panel contains the actual ui and is over the background
+        JPanel frameContent = new JPanel();
+        frameContent.setLayout(new BorderLayout());
+        frameContent.setOpaque(false);
+        frameContent.setSize(new Dimension(getWidth(), getHeight() - 18));
+
+        // collect player username and set it as title
+        //playerUsername = askForUsername();
+
+        /*while(true) {
             String errorMessage;
 
             if(playerUsername == null || playerUsername.equals("")) {
@@ -148,98 +181,83 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
             JOptionPane.showMessageDialog(this, errorMessage);
             playerUsername = askForUsername();
-        }
+        }*/
 
-        result = new Result(playerUsername,0,0,0,false);
-		setTitle(playerUsername + " (you) vs. ???");
 
-        chatLabel = new JLabel("Chat");
 
-		// the client uses while so it must run on a separate thread
-		(new Thread() {
-			public void run() {
-				client = new BattleClient(Settings.HOST_NAME, Settings.PORT_NUMBER, playerUsername, BattleClientGui.this);
-				try {
-					client.connect();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
+        // the panel containing the battleship logo
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setOpaque(false);
+        JLabel title = new JLabel();
+        title.setIcon(new ImageIcon(this.getClass().getResource("/images/logo.png")));
+        topPanel.add(title, BorderLayout.NORTH);
 
-		// the panel containing the battleship logo
-		JPanel topPanel = new JPanel(new BorderLayout());
-		topPanel.setOpaque(false);
-		JLabel title = new JLabel();
-		title.setIcon(new ImageIcon(this.getClass().getResource("/images/logo.png")));
-		topPanel.add(title, BorderLayout.NORTH);
+        // the panel with the clock
+        JPanel clockPanel = new JPanel(new FlowLayout());
+        clockPanel.setOpaque(false);
+        clockPanel.setPreferredSize(new Dimension(150, 138));
+        clockPanel.setSize(new Dimension(150, 138));
 
-		// the panel with the clock
-		JPanel clockPanel = new JPanel(new FlowLayout());
-		clockPanel.setOpaque(false);
-		clockPanel.setPreferredSize(new Dimension(150, 138));
-		clockPanel.setSize(new Dimension(150, 138));
+        // set up the clock
+        clock = new CountdownClock(Settings.MOVE_TIMEOUT);
+        clock.setSize(100, 100);
+        clock.setPreferredSize(new Dimension(100, 100));
+        clock.setOpaque(false);
 
-		// set up the clock
-		clock = new CountdownClock(Settings.MOVE_TIMEOUT);
-		clock.setSize(100, 100);
-		clock.setPreferredSize(new Dimension(100, 100));
-		clock.setOpaque(false);
+        // triggered when the timer hits 0
+        clock.addTimeoutListener(new CountdownClock.TimeoutListener() {
+            @Override
+            public void onTimeout() {
+                if (currentPlayer == ME) {
+                    boolean shot = false;
+                    while (!shot) {
+                        // find random tile
+                        int x = random.nextInt(10);
+                        int y = random.nextInt(10);
+                        // if it's a valid move, shoot there
+                        if (opponentBoard.getBoardCells()[x][y].isEmpty()) {
+                            try {
 
-		// triggered when the timer hits 0
-		clock.addTimeoutListener(new CountdownClock.TimeoutListener() {
-			@Override
-			public void onTimeout() {
-				if (currentPlayer == ME) {
-					boolean shot = false;
-					while (!shot) {
-						// find random tile
-						int x = random.nextInt(10);
-						int y = random.nextInt(10);
-						// if it's a valid move, shoot there
-						if (opponentBoard.getBoardCells()[x][y].isEmpty()) {
-							try {
+                                client.sendMessage(new Message(opponentUsername, Message.SHOOT, x, y));
+                                // after shooting it's their turn
+                                currentPlayer = OPPONENT;
+                                onPlayerChanged();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                showError("An error occurred, check your network connection.");
+                            }
+                            shot = true;
+                        }
+                    }
+                }
+            }
+        });
 
-								client.sendMessage(new Message(opponentUsername, Message.SHOOT, x, y));
-								// after shooting it's their turn
-								currentPlayer = OPPONENT;
-								onPlayerChanged();
-							} catch (IOException e) {
-								e.printStackTrace();
-								showError("An error occurred, check your network connection.");
-							}
-							shot = true;
-						}
-					}
-				}
-			}
-		});
+        // add clock
+        clockPanel.add(clock);
+        topPanel.add(clockPanel, BorderLayout.CENTER);
 
-		// add clock
-		clockPanel.add(clock);
-		topPanel.add(clockPanel, BorderLayout.CENTER);
+        // this label is used to show the game state to the user
+        JPanel statusPanel = new JPanel();
+        statusPanel.setOpaque(false);
+        statusLabel = new JLabel("â†� To begin, place your ships on the left board");
+        statusLabel.setFont(font.deriveFont(11f));
+        statusLabel.setForeground(Color.white);
+        statusPanel.add(statusLabel);
+        topPanel.add(statusPanel, BorderLayout.SOUTH);
 
-		// this label is used to show the game state to the user
-		JPanel statusPanel = new JPanel();
-		statusPanel.setOpaque(false);
-		statusLabel = new JLabel("â†� To begin, place your ships on the left board");
-		statusLabel.setFont(font.deriveFont(11f));
-		statusLabel.setForeground(Color.white);
-		statusPanel.add(statusLabel);
-		topPanel.add(statusPanel, BorderLayout.SOUTH);
+        // add all of the top panel to the main layout
+        frameContent.add(topPanel, BorderLayout.NORTH);
 
-		// add all of the top panel to the main layout
-		frameContent.add(topPanel, BorderLayout.NORTH);
+        // create an inner panel to hold the two boards
+        Border boardBoarder = new EmptyBorder(new Insets(0, 36, 0, 36));
+        JPanel innerPanel = new JPanel(new GridLayout(1, 2, 0, 0));
+        innerPanel.setBorder(boardBoarder);
+        innerPanel.setOpaque(false);
+        frameContent.add(innerPanel, BorderLayout.CENTER);
 
-		// create an inner panel to hold the two boards
-		Border boardBoarder = new EmptyBorder(new Insets(0, 36, 0, 36));
-		JPanel innerPanel = new JPanel(new GridLayout(1, 2, 0, 0));
-		innerPanel.setBorder(boardBoarder);
-		innerPanel.setOpaque(false);
-		frameContent.add(innerPanel, BorderLayout.CENTER);
-
-		// set up the local board
-		localBoard.addShipPlacementListener(new BattleBoardLocal.FinishedPlacingShipsListener() {
+        // set up the local board
+        localBoard.addShipPlacementListener(new BattleBoardLocal.FinishedPlacingShipsListener() {
             @Override
             public void onFinished() {
                 try {
@@ -263,11 +281,11 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
             }
         });
 
-		localBoard.setOpaque(false);
-		innerPanel.add(localBoard);
+        localBoard.setOpaque(false);
+        innerPanel.add(localBoard);
 
-		// set up the opponent board
-		opponentBoard.addShotListener(new BattleBoardOpponent.ShotListener() {
+        // set up the opponent board
+        opponentBoard.addShotListener(new BattleBoardOpponent.ShotListener() {
             @Override
             public void onShotFired(int x, int y) {
                 // both sides must be ready
@@ -300,53 +318,53 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
             }
         });
 
-		opponentBoard.setOpaque(false);
-		innerPanel.add(opponentBoard);
+        opponentBoard.setOpaque(false);
+        innerPanel.add(opponentBoard);
 
-		// to center the chatting panel
-		Border chattingAreaPadding = new EmptyBorder(new Insets(0, 36 + 18, 0, 36 + 18));
+        // to center the chatting panel
+        Border chattingAreaPadding = new EmptyBorder(new Insets(0, 36 + 18, 0, 36 + 18));
 
-		// the chattingContainer is transparent and has a padding
-		JPanel chattingContainer = new JPanel(new BorderLayout());
-		// the chattingArea is white and is inside the chattingContainer
-		JPanel chattingArea = new JPanel(new BorderLayout());
+        // the chattingContainer is transparent and has a padding
+        JPanel chattingContainer = new JPanel(new BorderLayout());
+        // the chattingArea is white and is inside the chattingContainer
+        JPanel chattingArea = new JPanel(new BorderLayout());
         // the chatInputPanel contains text field and emoticons button and is inside the chattingArea
         JPanel chatInputPanel = new JPanel(new BorderLayout());
 
-		// set up the chat area
+        // set up the chat area
         chatInputPanel.setBackground(Color.white);
-		chattingArea.setBorder(new LineBorder(Color.gray, 1));
-		chattingArea.setBackground(Color.white);
-		chattingArea.setSize(new Dimension(0, 70));
-		chattingArea.setPreferredSize(new Dimension(0, 200));
-		chattingContainer.setBorder(chattingAreaPadding);
-		chattingContainer.setOpaque(false);
-		chattingContainer.setSize(new Dimension(0, 70));
-		chattingContainer.setPreferredSize(new Dimension(0, 200));
+        chattingArea.setBorder(new LineBorder(Color.gray, 1));
+        chattingArea.setBackground(Color.white);
+        chattingArea.setSize(new Dimension(0, 70));
+        chattingArea.setPreferredSize(new Dimension(0, 200));
+        chattingContainer.setBorder(chattingAreaPadding);
+        chattingContainer.setOpaque(false);
+        chattingContainer.setSize(new Dimension(0, 70));
+        chattingContainer.setPreferredSize(new Dimension(0, 200));
         chattingArea.add(chatInputPanel, BorderLayout.SOUTH);
-		chattingContainer.add(chattingArea, BorderLayout.CENTER);
-		frameContent.add(chattingContainer, BorderLayout.SOUTH);
+        chattingContainer.add(chattingArea, BorderLayout.CENTER);
+        frameContent.add(chattingContainer, BorderLayout.SOUTH);
 
-		// messaging output
-		Border standardPadding = new EmptyBorder(new Insets(10, 10, 10, 10));
-		messagesPane = new JTextPane();
-		messagesPane.setContentType("text/html");
-		messagesPane.setEditable(false);
-		messagesPane.setBorder(standardPadding);
-		messagesPane.setFont(font.deriveFont(13f));
-		chattingArea.add(new JScrollPane(messagesPane), BorderLayout.CENTER);
+        // messaging output
+        Border standardPadding = new EmptyBorder(new Insets(10, 10, 10, 10));
+        messagesPane = new JTextPane();
+        messagesPane.setContentType("text/html");
+        messagesPane.setEditable(false);
+        messagesPane.setBorder(standardPadding);
+        messagesPane.setFont(font.deriveFont(13f));
+        chattingArea.add(new JScrollPane(messagesPane), BorderLayout.CENTER);
 
-		chatLabel.setForeground(Color.darkGray);
-		chatLabel.setBorder(standardPadding);
-		chatLabel.setFont(font.deriveFont(13f));
-		chattingArea.add(chatLabel, BorderLayout.NORTH);
+        chatLabel.setForeground(Color.darkGray);
+        chatLabel.setBorder(standardPadding);
+        chatLabel.setFont(font.deriveFont(13f));
+        chattingArea.add(chatLabel, BorderLayout.NORTH);
 
         // emoticons frame and button
         emoticonsButton = new JButton();
         emoticonsFrame = new EmoticonsFrame(messageInput);
 
         try {
-        emoticonsButton.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("/images/emoticons/grin.png"))));
+            emoticonsButton.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("/images/emoticons/grin.png"))));
         } catch (IOException e) {
             //TODO: handle exception
         }
@@ -364,64 +382,63 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
             }
         });
 
-		// messaging input layout and listener
-		messageInput.setBorder(standardPadding);
+        // messaging input layout and listener
+        messageInput.setBorder(standardPadding);
         chatInputPanel.add(messageInput, BorderLayout.CENTER);
         chatInputPanel.add(emoticonsButton, BorderLayout.EAST);
-		messageInput.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// send message when the user presses enter
+        messageInput.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // send message when the user presses enter
                 String messageText = messageInput.getText().trim();
                 //if message contains emoticon shortcut, convert to image html link
                 if(emoticonsFrame.containsEmoticons(messageText)) {
                     messageText = emoticonsFrame.convertTextToHTML(messageText);
                 }
-				Message toSend = new Message(opponentUsername, Message.CHAT_MESSAGE, messageText);
-				try {
-					client.sendMessage(toSend);
-					appendToLog("\n<strong>" + playerUsername + ":</strong> " + messageText);
-					messageInput.setText("");
-				} catch (IOException ex) {
-					appendToLog("\nFailed to send message");
-					ex.printStackTrace();
-				}
-			}
-		});
+                Message toSend = new Message(opponentUsername, Message.CHAT_MESSAGE, messageText);
+                try {
+                    client.sendMessage(toSend);
+                    appendToLog("\n<strong>" + playerUsername + ":</strong> " + messageText);
+                    messageInput.setText("");
+                } catch (IOException ex) {
+                    appendToLog("\nFailed to send message");
+                    ex.printStackTrace();
+                }
+            }
+        });
 
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-		addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent e) {
-				super.windowClosing(e);
-				// give an modal prompt asking if the user wants to exit
-				int option =
-						JOptionPane.showOptionDialog(BattleClientGui.this, "Do you want to quit the game?", "Disconnect from game", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-				if(option == JOptionPane.YES_OPTION) {
-					// send message to opponent that i have disconnected.
-					try {
-						client.sendMessage(new Message(opponentUsername, Message.OPPONENT_DISCONNECTED));
-					} catch (IOException e1) {
-						// TODO: handle error
-						e1.printStackTrace();
-					} finally {
-						BattleClientGui.this.dispose();
-					}
-				}
-			}
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                super.windowClosing(e);
+                // give an modal prompt asking if the user wants to exit
+                int option =
+                        JOptionPane.showOptionDialog(BattleClientGui.this, "Do you want to quit the game?", "Disconnect from game", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+                if(option == JOptionPane.YES_OPTION) {
+                    // send message to opponent that i have disconnected.
+                    try {
+                        client.sendMessage(new Message(opponentUsername, Message.OPPONENT_DISCONNECTED));
+                    } catch (IOException e1) {
+                        // TODO: handle error
+                        e1.printStackTrace();
+                    } finally {
+                        BattleClientGui.this.dispose();
+                    }
+                }
+            }
 
-		});
+        });
 
-		// add layers
-		getLayeredPane().add(backgroundImage, new Integer(1));
-		getLayeredPane().add(frameContent, new Integer(2));
+        // add layers
+        getLayeredPane().add(backgroundImage, new Integer(1));
+        getLayeredPane().add(frameContent, new Integer(2));
 
-		// showtime!
-		setVisible(true);
-		getLayeredPane().repaint();
-	}
-
+        // showtime!
+        setVisible(true);
+        getLayeredPane().repaint();
+    }
     private String askForUsername() {
         return JOptionPane.showInputDialog(this, "Enter a username");
     }
