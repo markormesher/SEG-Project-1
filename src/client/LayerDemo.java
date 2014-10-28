@@ -3,6 +3,9 @@ package client;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * Used to test one or more layers without needing the client gui
+ */
 public class LayerDemo extends JFrame {
     public static void main(String[] arr){
         LayerDemo demo = new LayerDemo();

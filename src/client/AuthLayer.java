@@ -8,6 +8,7 @@ import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -19,7 +20,10 @@ public class AuthLayer extends JPanel{
     Font font;
     // the background tile
     private BufferedImage backgroundTile;
+
     public AuthLayer(int w , int h){
+
+        //load the font
         try {
             font = Font.createFont(Font.TRUETYPE_FONT, getClass().getResourceAsStream("/fonts/PressStart2P.ttf"));
             font = font.deriveFont(25f);
@@ -33,31 +37,41 @@ public class AuthLayer extends JPanel{
         setSize(w, h);
         repaint();
 
+        //this is used to center the login and signups vertically
+        setLayout(new GridBagLayout());
 
+        GridBagConstraints gbc = new GridBagConstraints ();
+
+        gbc.gridx = 0;
+        gbc.gridy = GridBagConstraints.RELATIVE;
+
+
+        //2 collumns , login on left and signup on right
+        JPanel gridHolder = new JPanel(new GridLayout(0,2));
+        gridHolder.setPreferredSize(new Dimension(600,350));
+        gridHolder.setOpaque(false);
+        add(gridHolder, gbc);
+
+
+
+
+        //the first collumn , for signup
         JPanel background = new JPanel();
-        //background.setBackground(Color.red);
+        background.setOpaque(false);
         background.setSize(new Dimension(300,300));
         background.setPreferredSize(new Dimension(300, 300));
-        background.setOpaque(false);
-        add(background);
 
-        //setBackground(new Color(30, 144, 255));
+        gridHolder.add(background);
 
         background.setLayout(new BorderLayout());
 
         EmptyBorder border = new EmptyBorder(12,12,12,12);
 
-        /*JLabel label = new JLabel("LOGIN");
-        label.setFont(font.deriveFont(30f));
-        label.setHorizontalAlignment(JLabel.CENTER);
-        background.add(label,BorderLayout.NORTH);
-        label.setBorder(border);*/
-
 
         JPanel inner = new JPanel();
         inner.setOpaque(false);
-        //inner.setLayout();
 
+        //4 rows : username label + field , password label+field
         JPanel center = new JPanel();
         center.setOpaque(false);
         center.setLayout(new GridLayout(4,0));
@@ -73,8 +87,8 @@ public class AuthLayer extends JPanel{
 
         final JTextField usernameField = new JTextField();
         usernameField.setFont(font.deriveFont(15f));
-        usernameField.setPreferredSize(new Dimension(300, 40));
-        usernameField.setSize(new Dimension(300, 40));
+        usernameField.setPreferredSize(new Dimension(280, 40));
+        usernameField.setSize(new Dimension(280, 40));
         usernameField.setBorder(new CompoundBorder(new EmptyBorder(0,12,0,12) ,  new LineBorder(Color.white , 2)));
         center.add(usernameField);
 
@@ -87,8 +101,6 @@ public class AuthLayer extends JPanel{
 
         final JPasswordField passwordField = new JPasswordField();
         passwordField.setFont(font.deriveFont(15f));
-        passwordField.setPreferredSize(new Dimension(300, 40));
-        passwordField.setSize(new Dimension(300, 40));
         passwordField.setBorder(new CompoundBorder(new EmptyBorder(0, 12, 0, 12), new LineBorder(Color.white, 2)));
         center.add(passwordField);
 
@@ -107,6 +119,7 @@ public class AuthLayer extends JPanel{
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                //test auths , jake : 123 , amir : 123
                 if((usernameField.getText().equals("jake") && String.valueOf(passwordField.getPassword()).equals("123"))
                         || (usernameField.getText().equals("amir") && String.valueOf(passwordField.getPassword()).equals("123"))){
                     for(AuthAdapter a : authListeners) a.onLogin(usernameField.getText());
@@ -117,6 +130,7 @@ public class AuthLayer extends JPanel{
                 }
             }
 
+            //for hovering effect
             @Override
             public void mouseEntered(MouseEvent e) {
                 super.mouseEntered(e);
@@ -132,6 +146,109 @@ public class AuthLayer extends JPanel{
         };
         loginButton.addMouseListener(loginAdapter);
         loginButton.addMouseMotionListener(loginAdapter);
+
+
+        //pretty much the same as above but for the signup panel on the right
+
+        JPanel backgroundSignup = new JPanel();
+        backgroundSignup.setOpaque(false);
+        backgroundSignup.setSize(new Dimension(270,300));
+        backgroundSignup.setPreferredSize(new Dimension(300, 300));
+        //background.setOpaque(false);
+
+        gridHolder.add(backgroundSignup);
+
+
+        backgroundSignup.setLayout(new BorderLayout());
+
+
+
+
+        JPanel innerSignup = new JPanel();
+        innerSignup.setOpaque(false);
+
+        JPanel centerSignup = new JPanel();
+        centerSignup.setOpaque(false);
+        centerSignup.setLayout(new GridLayout(6,0));
+        centerSignup.setBorder(border);
+        centerSignup.setMinimumSize(new Dimension(40*4,0));
+
+        JLabel usernameLabelSignup = new JLabel("Username");
+        usernameLabelSignup.setFont(font.deriveFont(15f));
+        usernameLabelSignup.setForeground(Color.white);
+        usernameLabelSignup.setHorizontalAlignment(JLabel.CENTER);
+        centerSignup.add(usernameLabelSignup);
+        usernameLabelSignup.setBorder(border);
+
+        final JTextField usernameFieldSignup = new JTextField();
+        usernameFieldSignup.setFont(font.deriveFont(15f));
+        usernameFieldSignup.setPreferredSize(new Dimension(280, 40));
+        usernameFieldSignup.setSize(new Dimension(280, 40));
+        usernameFieldSignup.setBorder(new CompoundBorder(new EmptyBorder(0,12,0,12) ,  new LineBorder(Color.white , 2)));
+        centerSignup.add(usernameFieldSignup);
+
+        JLabel passwordLabelSignup = new JLabel("Password");
+        passwordLabelSignup.setFont(font.deriveFont(15f));
+        passwordLabelSignup.setForeground(Color.white);
+        passwordLabelSignup.setHorizontalAlignment(JLabel.CENTER);
+        centerSignup.add(passwordLabelSignup);
+        passwordLabelSignup.setBorder(border);
+
+        final JPasswordField passwordFieldSignup = new JPasswordField();
+        passwordFieldSignup.setFont(font.deriveFont(15f));
+        passwordFieldSignup.setPreferredSize(new Dimension(280, 40));
+        passwordFieldSignup.setSize(new Dimension(280, 40));
+        passwordFieldSignup.setBorder(new CompoundBorder(new EmptyBorder(0, 12, 0, 12), new LineBorder(Color.white, 2)));
+        centerSignup.add(passwordFieldSignup);
+
+        JLabel passwordLabelSignup2 = new JLabel("Password");
+        passwordLabelSignup2.setFont(font.deriveFont(15f));
+        passwordLabelSignup2.setForeground(Color.white);
+        passwordLabelSignup2.setHorizontalAlignment(JLabel.CENTER);
+        centerSignup.add(passwordLabelSignup2);
+        passwordLabelSignup.setBorder(border);
+
+        final JPasswordField passwordFieldSignup2 = new JPasswordField();
+        passwordFieldSignup2.setFont(font.deriveFont(15f));
+        passwordFieldSignup2.setPreferredSize(new Dimension(280, 40));
+        passwordFieldSignup2.setSize(new Dimension(280, 40));
+        passwordFieldSignup2.setBorder(new CompoundBorder(new EmptyBorder(0, 12, 0, 12), new LineBorder(Color.white, 2)));
+        centerSignup.add(passwordFieldSignup2);
+
+        innerSignup.add(centerSignup);
+        backgroundSignup.add(innerSignup,BorderLayout.CENTER);
+
+
+
+        final JLabel loginButtonSignup = new JLabel("SIGN UP");
+        loginButtonSignup.setForeground(Color.white);
+        loginButtonSignup.setFont(font.deriveFont(24f));
+        loginButtonSignup.setHorizontalAlignment(JLabel.CENTER);
+        innerSignup.add(loginButtonSignup,BorderLayout.SOUTH);
+        loginButtonSignup.setBorder(border);
+        MouseAdapter loginAdapterSignup = new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                super.mouseEntered(e);
+                loginButtonSignup.setForeground(Color.GREEN);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                super.mouseExited(e);
+                loginButtonSignup.setForeground(Color.white);
+
+            }
+        };
+        loginButtonSignup.addMouseListener(loginAdapterSignup);
+        loginButtonSignup.addMouseMotionListener(loginAdapterSignup);
+
 
     }
 
@@ -156,7 +273,7 @@ public class AuthLayer extends JPanel{
     }
 
     ArrayList<AuthAdapter> authListeners = new ArrayList<AuthAdapter>();
-    public void addAuthListenr(AuthAdapter a){
+    public void addAuthListener(AuthAdapter a){
         authListeners.add(a);
     }
 

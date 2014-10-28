@@ -3,7 +3,6 @@ package client;
 import client.ui_components.*;
 import global.Message;
 import global.Settings;
-import server.BattleServer;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -99,13 +98,16 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 
+        //This layer is drawn on top of the game and is used to login/signup
         final AuthLayer authLayer = new AuthLayer(getWidth(),getHeight());
         getLayeredPane().add(authLayer, new Integer(10));
-        authLayer.addAuthListenr(new AuthLayer.AuthAdapter() {
+
+        //when the user logs in
+        authLayer.addAuthListener(new AuthLayer.AuthAdapter() {
             @Override
             public void onLogin(String username) {
                 playerUsername = username;
-                result = new Result(playerUsername,0,0,0,false);
+                result = new Result(playerUsername, 0, 0, 0, false);
                 setTitle(playerUsername + " (you) vs. ???");
 
                 chatLabel = new JLabel("Chat");
@@ -122,6 +124,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
                     }
                 }).start();
 
+                //we hide the auth layer to reveal the game
                 authLayer.setVisible(false);
                 initUI();
             }
@@ -130,6 +133,8 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 	}
 
 
+    //the logic that lays out the UI is now in this method
+    //is called after log in
     public void initUI(){
 
         // the background is beneath the actual UI
