@@ -1,10 +1,13 @@
 package server;
 
 import client.BattleClientGui;
+import client.MainScreen;
+import client.ScreenManager;
 import global.Message;
 import global.Settings;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -108,13 +111,6 @@ public class BattleServerControlPanel extends JFrame {
 			}
 		});
 
-		// spawn two clients to demo with
-		BattleClientGui battleClientGui1 = new BattleClientGui();
-		battleClientGui1.setLocation(serverUI.getLocation().x + serverUI.getWidth() + 10, serverUI.getLocation().y);
-		battleClientGui1.setVisible(true);
-		BattleClientGui battleClientGui2 = new BattleClientGui();
-		battleClientGui2.setLocation(serverUI.getLocation().x + serverUI.getWidth() + battleClientGui1.getWidth() + 20, serverUI.getLocation().y);
-		battleClientGui2.setVisible(true);
 
 		// set this window as visible
 		serverUI.setVisible(true);

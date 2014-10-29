@@ -1,22 +1,25 @@
 package client.ui_components;
 
 import client.BattleClientGui;
+import client.Screen;
+import client.ScreenManager;
 import global.Settings;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 
 
-public class ResultsWindow extends JFrame {
+public class ResultsWindow extends Screen {
 
     JPanel innerGrid;
     Font font;
-    public ResultsWindow(Result result , Result opponentResult){
-
+    public ResultsWindow(Result result , Result opponentResult, ScreenManager sm){
+    	super(sm);
         //create the font
         try {
             font = Font.createFont(Font.TRUETYPE_FONT, getClass().getResourceAsStream("/fonts/PressStart2P.ttf"));
@@ -26,12 +29,9 @@ public class ResultsWindow extends JFrame {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 
         setSize(350, 350);
-        setResizable(false);
-        getContentPane().setBackground(Color.white);
 
         setLayout(new BorderLayout());
 
@@ -77,7 +77,7 @@ public class ResultsWindow extends JFrame {
         play.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new BattleClientGui().setVisible(true);
+                new BattleClientGui(ResultsWindow.this.getScreenManager()).setVisible(true);
             }
         });
         add(play ,BorderLayout.SOUTH);
@@ -113,7 +113,7 @@ public class ResultsWindow extends JFrame {
                 } catch (Exception useDefault) {
                     // use default layout
                 }
-                new ResultsWindow(new Result("JAKE",21,5,17,true), new Result("AMIR",20,8,12,false)).setVisible(true);
+               // new ResultsWindow(new Result("JAKE",21,5,17,true), new Result("AMIR",20,8,12,false),Results).setVisible(true);
             }
         });
 

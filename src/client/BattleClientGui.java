@@ -27,7 +27,7 @@ import java.util.Random;
 
 // TODO: add listener for messages from the server (add them to the chat console?)
 
-public class BattleClientGui extends JFrame implements BattleClientGuiInterface {
+public class BattleClientGui extends Screen implements BattleClientGuiInterface {
 
 	// the 8-bit font
 	public Font font;
@@ -82,8 +82,12 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
 	// the background tile
 	private BufferedImage backgroundTile;
+	
+	// layered pane to display various gui components
+	private JLayeredPane layeredPane = new JLayeredPane();
 
-	public BattleClientGui() {
+	public BattleClientGui(ScreenManager sm) {
+		super(sm);
 		// loading the font from the ttf file
 		try {
 			font = Font.createFont(Font.TRUETYPE_FONT, getClass().getResourceAsStream("/fonts/PressStart2P.ttf"));
@@ -95,10 +99,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		}
 
 		// basic setup of frame
-		setSize(Settings.GRID_SIZE * Settings.IMAGE_CELL_SIZE * 2 + Settings.IMAGE_CELL_SIZE * 3, Settings.IMAGE_CELL_SIZE * 24);
-		setResizable(true);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+		setSize(Settings.RES_X,Settings.RES_Y);
 		// the background is beneath the actual UI
 		JPanel backgroundImage = new JPanel() {
 			public void paint(Graphics g) {
@@ -112,22 +113,22 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 				}
 
 				// cover the surface with background tiles
-				for (int x = 0; x < getWidth() / 32.0; x++) {
-					for (int y = 0; y < getHeight() / 32.0; y++) {
+				for (int x = 0; x <= getWidth() / Settings.IMAGE_CELL_SIZE; x++) {
+					for (int y = 0; y <= getHeight() / Settings.IMAGE_CELL_SIZE; y++) {
 						g.drawImage(backgroundTile, x * Settings.IMAGE_CELL_SIZE, y * Settings.IMAGE_CELL_SIZE, Settings.IMAGE_CELL_SIZE, Settings.IMAGE_CELL_SIZE, null);
 					}
 				}
 			}
 		};
-		backgroundImage.setSize(new Dimension(getWidth(), getHeight()));
-		backgroundImage.setPreferredSize(new Dimension(getWidth(), getHeight()));
+		backgroundImage.setSize(new Dimension(Settings.RES_X, Settings.RES_Y));
+		backgroundImage.setPreferredSize(new Dimension(Settings.RES_X, Settings.RES_Y));
 		backgroundImage.repaint();
 
 		// this panel contains the actual ui and is over the background
 		JPanel frameContent = new JPanel();
 		frameContent.setLayout(new BorderLayout());
 		frameContent.setOpaque(false);
-		frameContent.setSize(new Dimension(getWidth(), getHeight() - 18));
+		frameContent.setSize(new Dimension(Settings.RES_X, Settings.RES_Y));
 
 		// collect player username and set it as title
 		playerUsername = askForUsername();
@@ -151,7 +152,6 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
         }
 
         result = new Result(playerUsername,0,0,0,false);
-		setTitle(playerUsername + " (you) vs. ???");
 
         chatLabel = new JLabel("Chat");
 
@@ -168,11 +168,12 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		}).start();
 
 		// the panel containing the battleship logo
+		
 		JPanel topPanel = new JPanel(new BorderLayout());
 		topPanel.setOpaque(false);
-		JLabel title = new JLabel();
-		title.setIcon(new ImageIcon(this.getClass().getResource("/images/logo.png")));
-		topPanel.add(title, BorderLayout.NORTH);
+		//JLabel title = new JLabel();
+		//title.setIcon(new ImageIcon(this.getClass().getResource("/images/logo.png")));
+		//topPanel.add(title, BorderLayout.NORTH);
 
 		// the panel with the clock
 		JPanel clockPanel = new JPanel(new FlowLayout());
@@ -389,40 +390,19 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 			}
 		});
 		
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		
-		addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent e) {
-				super.windowClosing(e);
-				// give an modal prompt asking if the user wants to exit
-				int option =
-						JOptionPane.showOptionDialog(BattleClientGui.this, "Do you want to quit the game?", "Disconnect from game", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-				if(option == JOptionPane.YES_OPTION) {
-					// send message to opponent that i have disconnected.
-					try {
-						client.sendMessage(new Message(opponentUsername, Message.OPPONENT_DISCONNECTED));
-					} catch (IOException e1) {
-						// TODO: handle error
-						e1.printStackTrace();
-					} finally {
-						BattleClientGui.this.dispose();
-					}
-				}
-			}
-			
-		});
 
 		// add layers
-		getLayeredPane().add(backgroundImage, new Integer(1));
-		getLayeredPane().add(frameContent, new Integer(2));
+		layeredPane.setPreferredSize(new Dimension(Settings.RES_X, Settings.RES_Y));
+		layeredPane.add(backgroundImage, new Integer(1));
+		layeredPane.add(frameContent, new Integer(2));
+		this.add(layeredPane);
 
 		// showtime!
 		setVisible(true);
-		getLayeredPane().repaint();
+		layeredPane.repaint();
 	}
 
-    private String askForUsername() {
+	private String askForUsername() {
         return JOptionPane.showInputDialog(this, "Enter a username");
     }
 
@@ -437,7 +417,6 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 					return;
 				}
 				opponentUsername = msg.getMessage();
-				setTitle(playerUsername + " (you) vs. " + opponentUsername);
 				chatLabel.setText("Chat with " + opponentUsername);
                 opponentResult = new Result(opponentUsername,0,0,0,false);
 				break;
@@ -533,17 +512,15 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
 	private void onLose() {
         opponentResult.won=true;
-        ResultsWindow resultsWindow = new ResultsWindow(result,opponentResult);
+        ResultsWindow resultsWindow = new ResultsWindow(result,opponentResult,screenManager);
         resultsWindow.setVisible(true);
-        dispose();
 		appendToLog("You have lost.");
 	}
 
 	private void onWin() {
         result.won = true;
-		ResultsWindow resultsWindow = new ResultsWindow(result,opponentResult);
+		ResultsWindow resultsWindow = new ResultsWindow(result,opponentResult,screenManager);
         resultsWindow.setVisible(true);
-        dispose();
 		appendToLog("You have won.");
 	}
 
@@ -582,7 +559,4 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		statusLabel.setText(msg);
 	}
 
-	public static void main(String[] arr) {
-		new BattleClientGui();
-	}
 }
