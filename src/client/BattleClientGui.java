@@ -105,14 +105,16 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
         //when the user logs in
         authLayer.addAuthListener(new AuthLayer.AuthAdapter() {
             @Override
-            public void onLogin(String username) {
+            public void onLogin(BattleClient _client , String username) {
                 playerUsername = username;
                 result = new Result(playerUsername, 0, 0, 0, false);
                 setTitle(playerUsername + " (you) vs. ???");
 
                 chatLabel = new JLabel("Chat");
 
-                // the client uses while so it must run on a separate thread
+                client = _client;
+                client.gui = BattleClientGui.this;
+                /*// the client uses while so it must run on a separate thread
                 (new Thread() {
                     public void run() {
                         client = new BattleClient(Settings.HOST_NAME, Settings.PORT_NUMBER, playerUsername, BattleClientGui.this);
@@ -122,7 +124,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
                             e.printStackTrace();
                         }
                     }
-                }).start();
+                }).start();*/
 
                 //we hide the auth layer to reveal the game
                 authLayer.setVisible(false);

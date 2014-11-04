@@ -1,5 +1,6 @@
 package client;
 
+import global.Message;
 import global.Settings;
 import sun.invoke.empty.Empty;
 
@@ -16,12 +17,26 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class AuthLayer extends JPanel{
+public class AuthLayer extends JPanel implements BattleClientGuiInterface{
     Font font;
     // the background tile
     private BufferedImage backgroundTile;
+    final JTextField usernameField = new JTextField();
+    final JPasswordField passwordField = new JPasswordField();
 
+    BattleClient client;
     public AuthLayer(int w , int h){
+
+        (new Thread() {
+            public void run() {
+                client = new BattleClient(Settings.HOST_NAME, Settings.PORT_NUMBER, "", AuthLayer.this);
+                try {
+                    client.connect();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
 
         //load the font
         try {
@@ -85,7 +100,7 @@ public class AuthLayer extends JPanel{
         center.add(usernameLabel);
         usernameLabel.setBorder(border);
 
-        final JTextField usernameField = new JTextField();
+
         usernameField.setFont(font.deriveFont(15f));
         usernameField.setPreferredSize(new Dimension(280, 40));
         usernameField.setSize(new Dimension(280, 40));
@@ -99,7 +114,6 @@ public class AuthLayer extends JPanel{
         center.add(passwordLabel);
         passwordLabel.setBorder(border);
 
-        final JPasswordField passwordField = new JPasswordField();
         passwordField.setFont(font.deriveFont(15f));
         passwordField.setBorder(new CompoundBorder(new EmptyBorder(0, 12, 0, 12), new LineBorder(Color.white, 2)));
         center.add(passwordField);
@@ -120,13 +134,20 @@ public class AuthLayer extends JPanel{
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
                 //test auths , jake : 123 , amir : 123
-                if((usernameField.getText().equals("jake") && String.valueOf(passwordField.getPassword()).equals("123"))
+                /*(if((usernameField.getText().equals("jake") && String.valueOf(passwordField.getPassword()).equals("123"))
                         || (usernameField.getText().equals("amir") && String.valueOf(passwordField.getPassword()).equals("123"))){
                     for(AuthAdapter a : authListeners) a.onLogin(usernameField.getText());
                 }
                 else{
                     usernameField.setForeground(Color.red);
                     passwordField.setForeground(Color.red);
+                }*/
+
+                try {
+                    String creds = usernameField.getText()+"|" + String.valueOf(passwordField.getPassword());
+                    client.sendMessage(new Message("" , Message.LOGIN , creds));
+                } catch (IOException e1) {
+                    e1.printStackTrace();
                 }
             }
 
@@ -277,7 +298,17 @@ public class AuthLayer extends JPanel{
         authListeners.add(a);
     }
 
+    @Override
+    public void onReceiveMessage(Message msg) {
+        if(msg.getType() == Message.LOGIN_OK){
+            for(AuthAdapter a : authListeners) a.onLogin(client,usernameField.getText());
+        } else if (msg.getType() == Message.LOGIN_FAILED){
+            usernameField.setForeground(Color.red);
+            passwordField.setForeground(Color.red);
+        }
+    }
+
     interface AuthAdapter{
-        void onLogin(String username);
+        void onLogin(BattleClient client , String username);
     }
 }
