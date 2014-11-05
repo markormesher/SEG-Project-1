@@ -13,7 +13,7 @@ public class BattleClient {
 	private String username;
 
 	// front end
-	private BattleClientGuiInterface gui;
+	public BattleClientGuiInterface gui;
 
 	// server streams
 	private Socket serverSocket;
@@ -38,9 +38,9 @@ public class BattleClient {
 		// listen for incoming messages from the server
 		new ListenFromServer().start();
 
-		// send username to server
+		/*// send username to server
 		Message setUsername = new Message(null, Message.SET_USERNAME, username);
-		outputStream.writeObject(setUsername);
+		outputStream.writeObject(setUsername);*/
 	}
 
 	public void disconnect() throws IOException {
