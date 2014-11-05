@@ -105,7 +105,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 				super.paint(g);
 				if (backgroundTile == null) {
 					try {
-						backgroundTile = ImageIO.read(this.getClass().getResource("/images/default/bg.png"));
+						backgroundTile = ImageIO.read(this.getClass().getResource("/images/default/bg-plain.png"));
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -233,7 +233,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
 		// create an inner panel to hold the two boards
 		Border boardBoarder = new EmptyBorder(new Insets(0, 36, 0, 36));
-		JPanel innerPanel = new JPanel(new GridLayout(0, 2, 36, 0));
+		JPanel innerPanel = new JPanel(new GridLayout(1, 2, 0, 0));
 		innerPanel.setBorder(boardBoarder);
 		innerPanel.setOpaque(false);
 		frameContent.add(innerPanel, BorderLayout.CENTER);
@@ -388,9 +388,9 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 				}
 			}
 		});
-		
+
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		
+
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
@@ -410,7 +410,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 					}
 				}
 			}
-			
+
 		});
 
 		// add layers

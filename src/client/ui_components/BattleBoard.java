@@ -11,27 +11,24 @@ public class BattleBoard extends JPanel {
 	public BattleAnimationPanel[][] cells = new BattleAnimationPanel[Settings.GRID_SIZE][Settings.GRID_SIZE];
 
 	public BattleBoard() {
-        setOpaque(false);
+		// set up grid layout
+		super(new GridLayout(Settings.GRID_SIZE, Settings.GRID_SIZE));
+		this.setBorder(BorderFactory.createEmptyBorder());
+		this.setFocusable(true);
 
-		// enforce exactly the right size
+		// enforce exactly the right sizes
 		setPreferredSize(new Dimension(Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE));
 		setSize(new Dimension(Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE));
 		setMaximumSize(new Dimension(Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE));
 
-		// a grid that holds the cells
-		JPanel imageCellGrid = new JPanel();
-        imageCellGrid.setOpaque(false);
-		imageCellGrid.setBounds(0, 0, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE);
-		imageCellGrid.setLayout(new GridLayout(Settings.GRID_SIZE, Settings.GRID_SIZE, 0, 0));
-		add(imageCellGrid);
-		this.setFocusable(true);
 
 		// create a GRID_SIZE x GRID_SIZE grid of cells
 		for (int y = 0; y < Settings.GRID_SIZE; ++y) {
 			for (int x = 0; x < Settings.GRID_SIZE; ++x) {
 				BattleAnimationPanel panel = new BattleAnimationPanel(Settings.IMAGE_CELL_SIZE, Settings.IMAGE_CELL_SIZE);
+				panel.setBackground("bg", 0);
 				cells[x][y] = panel;
-				imageCellGrid.add(panel);
+				add(panel);
 			}
 		}
 
@@ -40,15 +37,15 @@ public class BattleBoard extends JPanel {
 	}
 
 	// draw a white border around the board
-    @Override
-    public void paint(Graphics g) {
-        super.paint(g);
-        Graphics2D g2 = (Graphics2D) g;
-        g.setColor(Color.white);
-        g2.setStroke(new BasicStroke(2));
-        g2.drawLine(2, 2, getWidth(), 2);
-        g2.drawLine(2,2,2,getHeight());
-        g2.drawLine(getWidth(),2,getWidth(),getHeight());
-        g2.drawLine(2,getHeight(),getWidth(),getHeight());
-    }
+	@Override
+	public void paint(Graphics g) {
+		super.paint(g);
+		Graphics2D g2 = (Graphics2D) g;
+		g.setColor(Color.white);
+		g2.setStroke(new BasicStroke(2));
+		g2.drawLine(0, 0, getWidth(), 0);
+		g2.drawLine(0, 0, 0, getHeight());
+		g2.drawLine(getWidth(), 0, getWidth(), getHeight());
+		g2.drawLine(0, getHeight(), getWidth(), getHeight());
+	}
 }
