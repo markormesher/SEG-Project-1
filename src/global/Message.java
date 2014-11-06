@@ -9,18 +9,18 @@ public class Message implements Serializable {
 
 	// message types that can be sent
 	public static final int SET_USERNAME = 1,
-			SET_OPPONENT = 2,
-			READY_TO_PLAY = 3,
-			SHOOT = 4,
-			HIT = 5,
-			MISS = 6,
-			CHAT_MESSAGE = 7,
-			SERVER_GONE = 8,
-			OPPONENT_DISCONNECTED = 9,
-			PLAYER_LOSE = 10,
-            LOGIN = 11,
-            LOGIN_OK = 12,
-            LOGIN_FAILED = 13;
+		SET_OPPONENT = 2,
+		READY_TO_PLAY = 3,
+		SHOOT = 4,
+		HIT = 5,
+		MISS = 6,
+		CHAT_MESSAGE = 7,
+		SERVER_GONE = 8,
+		OPPONENT_DISCONNECTED = 9,
+		PLAYER_LOSE = 10,
+		LOGIN = 11,
+		LOGIN_OK = 12,
+		LOGIN_FAILED = 13;
 
 
 	// details of this message

@@ -4,7 +4,8 @@ import global.Settings;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 public class BattleBoardLocal extends JPanel {

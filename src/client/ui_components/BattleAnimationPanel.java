@@ -8,9 +8,9 @@ public class BattleAnimationPanel extends AnimationPanel implements ActionListen
 
 	// constants
 	public static final int NORTH = 0,
-			EAST = 90,
-			SOUTH = 180,
-			WEST = 270;
+		EAST = 90,
+		SOUTH = 180,
+		WEST = 270;
 
 	// is there a ship here?
 	private boolean empty = true;

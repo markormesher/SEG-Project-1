@@ -4,7 +4,8 @@ import global.Settings;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 public class BattleBoardOpponent extends JPanel {
@@ -72,9 +73,9 @@ public class BattleBoardOpponent extends JPanel {
 		shotListeners.add(listener);
 	}
 
-    public void removeShotListener() {
-        shotListeners.remove(shotListeners.size()-1);
-    }
+	public void removeShotListener() {
+		shotListeners.remove(shotListeners.size() - 1);
+	}
 
 	public int getDestroyedShipPieces() {
 		return destroyedShipPieces;

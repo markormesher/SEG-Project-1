@@ -1,6 +1,7 @@
 package server;
 
 import global.ClientPair;
+import global.Credentials;
 import global.Message;
 import global.Settings;
 
@@ -81,7 +82,7 @@ public class BattleServer {
 	// check if the username is taken
 	public static boolean usernameIsTaken(String username) {
 		for (BattleClientThread c : connectedClients) {
-			if(c.username.equals(username)) {
+			if (c.username.equals(username)) {
 				return true;
 			}
 		}
@@ -96,7 +97,7 @@ public class BattleServer {
 		for (ClientPair p : activePairs) {
 			if (p.clientA.id == id || p.clientB.id == id) {
 				pair = p;
-                break;
+				break;
 			}
 		}
 
@@ -127,7 +128,7 @@ public class BattleServer {
 					listener.onClientDisconnected(c.username);
 				}
 				connectedClients.remove(c);
-                break;
+				break;
 			}
 		}
 
@@ -222,40 +223,37 @@ public class BattleServer {
 				if (msg.getType() == Message.SET_USERNAME) {
 					// set username of this thread
 					username = msg.getMessage();
-                    checkBothUsernameSet(id);
+					checkBothUsernameSet(id);
 
 					// notify all clientConnectedListeners
 					for (ClientConnectedListener listener : clientConnectedListeners) {
 						listener.onClientConnected(username);
 					}
-				}
-                else if(msg.getType() == Message.LOGIN){
-                    String[] parts = msg.getMessage().split("\\|");
-                    System.out.println(parts[0]);
-                    if((parts[0].equals("jake") && String.valueOf(parts[1]).equals("123"))
-                            || (parts[0].equals("amir") && String.valueOf(parts[1]).equals("123"))){
-                        try {
-                            this.sendMessage(new Message("", Message.LOGIN_OK));
-                            username = parts[0];
-                            checkBothUsernameSet(id);
+				} else if (msg.getType() == Message.LOGIN) {
+					String loginInfo = msg.getMessage();
+					Credentials credentials = new Credentials(loginInfo);
 
-                            // notify all clientConnectedListeners
-                            for (ClientConnectedListener listener : clientConnectedListeners) {
-                                listener.onClientConnected(username);
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    else{
-                        try {
-                            this.sendMessage(new Message("", Message.LOGIN_FAILED));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-                else if(msg.getType() == Message.OPPONENT_DISCONNECTED) {
+					if (credentials.isValidLogin()) {
+						try {
+							this.sendMessage(new Message("", Message.LOGIN_OK));
+							username = credentials.getUsername();
+							checkBothUsernameSet(id);
+
+							// notify all clientConnectedListeners
+							for (ClientConnectedListener listener : clientConnectedListeners) {
+								listener.onClientConnected(username);
+							}
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					} else {
+						try {
+							this.sendMessage(new Message("", Message.LOGIN_FAILED));
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				} else if (msg.getType() == Message.OPPONENT_DISCONNECTED) {
 					removeClientThread(id);
 				} else {
 					// find recipient by username and send the message to them
@@ -267,7 +265,7 @@ public class BattleServer {
 								serverMessageListener.onServerMessageReceived("Failed to send message to " + msg.getRecipient());
 							}
 
-              				break;
+							break;
 						}
 					}
 				}
