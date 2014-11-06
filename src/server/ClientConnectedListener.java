@@ -5,6 +5,6 @@ package server;
  */
 public interface ClientConnectedListener {
 
-    void onClientConnected(String name);
+	void onClientConnected(String name);
 
 }

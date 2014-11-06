@@ -1,15 +1,11 @@
 package server;
 
 import client.BattleClientGui;
-import global.Message;
 import global.Settings;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 
 public class BattleServerControlPanel extends JFrame {
@@ -50,29 +46,27 @@ public class BattleServerControlPanel extends JFrame {
 			}
 		}).start();
 
-        //create list cell renderer to disable selection
-        DefaultListCellRenderer listCellRenderer = new DefaultListCellRenderer() {
+		//create list cell renderer to disable selection
+		DefaultListCellRenderer listCellRenderer = new DefaultListCellRenderer() {
 
-            @Override
-            public Component getListCellRendererComponent(JList list, Object value, int index,
-                                                          boolean isSelected, boolean cellHasFocus) {
-                super.getListCellRendererComponent(list, value, index, false, false);
+			@Override
+			public Component getListCellRendererComponent(JList list, Object value, int index,
+														  boolean isSelected, boolean cellHasFocus) {
+				super.getListCellRendererComponent(list, value, index, false, false);
 
-                //set different font color for connection, disconnection and errors
-                String msg = (String) value;
-                if (msg.contains("New client")) {
-                    this.setForeground(Color.BLUE);
-                }
-                else if (msg.contains("disconnected")) {
-                    this.setForeground(Color.DARK_GRAY);
-                }
-                else {
-                    this.setForeground(Color.RED);
-                }
+				//set different font color for connection, disconnection and errors
+				String msg = (String) value;
+				if (msg.contains("New client")) {
+					this.setForeground(Color.BLUE);
+				} else if (msg.contains("disconnected")) {
+					this.setForeground(Color.DARK_GRAY);
+				} else {
+					this.setForeground(Color.RED);
+				}
 
-                return this;
-            }
-        };
+				return this;
+			}
+		};
 
 		// list of server messages
 		final DefaultListModel<String> serverMessages = new DefaultListModel<String>();

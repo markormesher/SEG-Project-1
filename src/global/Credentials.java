@@ -1,4 +1,5 @@
 package global;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -38,20 +39,18 @@ public class Credentials {
 		try {
 			scanner = new Scanner(new File(pathToUsersFile()));
 
-			while(scanner.hasNextLine()) {
+			while (scanner.hasNextLine()) {
 				String line = scanner.nextLine();
 				String[] info = line.split(INFO_SEPARATOR);
 
-				if(info[0].equals(username) && info[1].equals(password)) {
+				if (info[0].equals(username) && info[1].equals(password)) {
 					return true;
 				}
 			}
-		}
-		catch (FileNotFoundException e) {
+		} catch (FileNotFoundException e) {
 			return false;
-		}
-		finally {
-			if(scanner != null) {
+		} finally {
+			if (scanner != null) {
 				scanner.close();
 			}
 		}
@@ -62,7 +61,7 @@ public class Credentials {
 	private static String encryptPassword(char[] password) {
 		String stringPassword = "";
 
-		for(int i = 0; i < password.length; ++i) {
+		for (int i = 0; i < password.length; ++i) {
 			stringPassword += password[i];
 		}
 
@@ -77,8 +76,7 @@ public class Credentials {
 			}
 
 			return sb.toString();
-		}
-		catch (NoSuchAlgorithmException e) {
+		} catch (NoSuchAlgorithmException e) {
 			System.out.println("md5 missing");
 		}
 
@@ -96,20 +94,18 @@ public class Credentials {
 		try {
 			scanner = new Scanner(new File(pathToUsersFile()));
 
-			while(scanner.hasNextLine()) {
+			while (scanner.hasNextLine()) {
 				String line = scanner.nextLine();
 				String[] info = line.split(INFO_SEPARATOR);
 
-				if(info[0].equals(username)) {
+				if (info[0].equals(username)) {
 					return true;
 				}
 			}
-		}
-		catch (FileNotFoundException e) {
+		} catch (FileNotFoundException e) {
 			return false;
-		}
-		finally {
-			if(scanner != null) {
+		} finally {
+			if (scanner != null) {
 				scanner.close();
 			}
 		}
@@ -126,11 +122,9 @@ public class Credentials {
 		try {
 			writer = new PrintWriter(new FileOutputStream(new File(path), true));
 			writer.println(username + INFO_SEPARATOR + encryptedPassword);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			writer.close();
 		}
 	}

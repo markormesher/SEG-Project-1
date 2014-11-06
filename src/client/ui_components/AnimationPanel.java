@@ -22,7 +22,7 @@ public class AnimationPanel extends JLayeredPane {
 
 	public AnimationPanel(int width, int height) {
 		super();
-        setOpaque(false);
+		setOpaque(false);
 
 		// set exact size
 		setSize(new Dimension(width, height));
