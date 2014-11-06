@@ -10,6 +10,10 @@ A multi-player 8-bit battleships game built on a client/server model.
 ###Testing the Project
 Run `server/BattelServerControlPanel` to launch the server and two clients for testing.
 
+### Temporary accounts who can login:
+- username: `jake` password: `123`
+- username: `amir` password: `123`
+
 ###Contributors
 
 - Leonardo Ciocan
