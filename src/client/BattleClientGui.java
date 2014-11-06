@@ -278,24 +278,18 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
         localBoard.addShipPlacementListener(new BattleBoardLocal.FinishedPlacingShipsListener() {
             @Override
             public void onFinished() {
-                try {
-                    // tell the other user you're ready
-                    client.sendMessage(new Message(opponentUsername, Message.READY_TO_PLAY));
+			iAmReadyToPlay();
 
-                    // if the other opponent hasn't finished yet, you go first
-                    if (currentPlayer == 0) {
-                        currentPlayer = ME;
-                        statusLabel.setText("Your opponent is not ready yet.");
-                    } else {
-                        onPlayerChanged();
-                    }
+			// if the other opponent hasn't finished yet, you go first
+			if (currentPlayer == 0) {
+				currentPlayer = ME;
+				statusLabel.setText("Your opponent is not ready yet.");
+			} else {
+				onPlayerChanged();
+			}
 
-                    // we're ready
-                    playerReady = true;
-                } catch (IOException e) {
-                    showError("An error occurred, check your network connection.");
-                    e.printStackTrace();
-                }
+			// we're ready
+			playerReady = true;
             }
         });
 
@@ -462,6 +456,16 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
         return JOptionPane.showInputDialog(this, "Enter a username");
     }
 
+	private void iAmReadyToPlay() {
+		try {
+			client.sendMessage(new Message(opponentUsername, Message.READY_TO_PLAY));
+		}
+		catch (IOException e) {
+			showError("An error occurred, check your network connection.");
+			e.printStackTrace();
+		}
+	}
+
 	@Override
 	public void onReceiveMessage(Message msg) {
 		if (msg == null)
@@ -476,6 +480,10 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 				setTitle(playerUsername + " (you) vs. " + opponentUsername);
 				chatLabel.setText("Chat with " + opponentUsername);
                 opponentResult = new Result(opponentUsername,0,0,0,false);
+
+				if(localBoard.allShipsPlaced()) {
+					iAmReadyToPlay();
+				}
 				break;
 
 			case Message.CHAT_MESSAGE:
