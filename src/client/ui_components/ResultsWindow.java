@@ -1,7 +1,7 @@
 package client.ui_components;
 
 import client.BattleClientGui;
-import global.Settings;
+import global.Message;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -15,7 +15,9 @@ public class ResultsWindow extends JFrame {
 
     JPanel innerGrid;
     Font font;
-    public ResultsWindow(Result result , Result opponentResult){
+    JFrame clientFrame;
+
+    public ResultsWindow(Result result , Result opponentResult, final BattleClientGui clientFrame){
 
         //create the font
         try {
@@ -26,8 +28,10 @@ public class ResultsWindow extends JFrame {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
+        //reference to the BattleClientGui to dispose of when opening new game
+        this.clientFrame = clientFrame;
 
         setSize(350, 350);
         setResizable(false);
@@ -78,9 +82,14 @@ public class ResultsWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new BattleClientGui().setVisible(true);
+                clientFrame.disconnect();
+                dispose();
             }
         });
         add(play ,BorderLayout.SOUTH);
+
+        //center on screen
+        setLocationRelativeTo(null);
     }
 
     /**
@@ -102,21 +111,6 @@ public class ResultsWindow extends JFrame {
         opponentTotal.setFont(font.deriveFont(15f));
         opponentTotal.setHorizontalAlignment(JLabel.HORIZONTAL);
         innerGrid.add(opponentTotal);
-    }
-
-    //for testing purposes
-    public static void main(String[] arr){
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                } catch (Exception useDefault) {
-                    // use default layout
-                }
-                new ResultsWindow(new Result("JAKE",21,5,17,true), new Result("AMIR",20,8,12,false)).setVisible(true);
-            }
-        });
-
     }
 
 }

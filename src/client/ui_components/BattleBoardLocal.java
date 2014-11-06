@@ -166,7 +166,7 @@ public class BattleBoardLocal extends JPanel {
 					currentShipSizeIndex++;
 
 					// have we finished adding ships?
-					if (currentShipSizeIndex == Settings.SHIP_SIZES.length) {
+					if (allShipsPlaced()) {
 						activeShipContainer.removeAll();
 						for (FinishedPlacingShipsListener listener : finishedPlacingShipsListeners) {
 							listener.onFinished();
@@ -191,6 +191,10 @@ public class BattleBoardLocal extends JPanel {
 		// add the listener layer over the board
 		layeredPane.add(board, new Integer(0));
 		layeredPane.add(overlayPanel, new Integer(1));
+	}
+
+	public boolean allShipsPlaced() {
+		return (currentShipSizeIndex == Settings.SHIP_SIZES.length);
 	}
 
 	private void rotateActiveShip() {
