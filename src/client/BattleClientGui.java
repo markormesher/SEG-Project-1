@@ -258,7 +258,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
         // this label is used to show the game state to the user
         JPanel statusPanel = new JPanel();
         statusPanel.setOpaque(false);
-        statusLabel = new JLabel("â†� To begin, place your ships on the left board");
+        statusLabel = new JLabel("To begin, place your ships on the left board");
         statusLabel.setFont(font.deriveFont(11f));
         statusLabel.setForeground(Color.white);
         statusPanel.add(statusLabel);
@@ -639,7 +639,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
 		// update the status label
 		statusLabel.setForeground(Color.white);
-		statusLabel.setText(currentPlayer == ME ? "It's your turn. Press a square on the right board to shoot â†’" : "It's the opponent's turn now.");
+		statusLabel.setText(currentPlayer == ME ? "It's your turn. Press a square on the right board to shoot at’" : "It's the opponent's turn now.");
 	}
 
 	private void showError(String msg) {
