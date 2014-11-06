@@ -1,21 +1,20 @@
 package client;
 
+import global.Credentials;
 import global.Message;
 import global.Settings;
-import sun.invoke.empty.Empty;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
-import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class AuthLayer extends JPanel implements BattleClientGuiInterface{
     Font font;
@@ -133,19 +132,10 @@ public class AuthLayer extends JPanel implements BattleClientGuiInterface{
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                //test auths , jake : 123 , amir : 123
-                /*(if((usernameField.getText().equals("jake") && String.valueOf(passwordField.getPassword()).equals("123"))
-                        || (usernameField.getText().equals("amir") && String.valueOf(passwordField.getPassword()).equals("123"))){
-                    for(AuthAdapter a : authListeners) a.onLogin(usernameField.getText());
-                }
-                else{
-                    usernameField.setForeground(Color.red);
-                    passwordField.setForeground(Color.red);
-                }*/
 
                 try {
-                    String creds = usernameField.getText()+"|" + String.valueOf(passwordField.getPassword());
-                    client.sendMessage(new Message("" , Message.LOGIN , creds));
+					Credentials cred = new Credentials(usernameField.getText(), passwordField.getPassword());
+                    client.sendMessage(new Message("" , Message.LOGIN , cred.toString()));
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 }
@@ -222,7 +212,7 @@ public class AuthLayer extends JPanel implements BattleClientGuiInterface{
         passwordFieldSignup.setBorder(new CompoundBorder(new EmptyBorder(0, 12, 0, 12), new LineBorder(Color.white, 2)));
         centerSignup.add(passwordFieldSignup);
 
-        JLabel passwordLabelSignup2 = new JLabel("Password");
+        JLabel passwordLabelSignup2 = new JLabel("Password again");
         passwordLabelSignup2.setFont(font.deriveFont(15f));
         passwordLabelSignup2.setForeground(Color.white);
         passwordLabelSignup2.setHorizontalAlignment(JLabel.CENTER);
@@ -251,7 +241,31 @@ public class AuthLayer extends JPanel implements BattleClientGuiInterface{
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+				String username = usernameFieldSignup.getText();
+				char[] password = passwordFieldSignup.getPassword();
+				char[] passwordAgain = passwordFieldSignup2.getPassword();
 
+				if(Arrays.equals(password, passwordAgain)) {
+					if(Credentials.isUsernameValid(username)) {
+						if(!Credentials.isUsernameTaken(username)) {
+							Credentials.signUp(username, password);
+							usernameFieldSignup.setText("");
+							passwordFieldSignup.setText("");
+							passwordFieldSignup2.setText("");
+							usernameField.requestFocus();
+							JOptionPane.showMessageDialog (null, "Signed up successfully. Please login.", "Success: Sign Up", JOptionPane.INFORMATION_MESSAGE);
+						}
+						else {
+							JOptionPane.showMessageDialog (null, "Username is taken. Please try again.", "Error: Sign Up", JOptionPane.WARNING_MESSAGE);
+						}
+					}
+					else {
+						JOptionPane.showMessageDialog (null, "Invalid username. We only accept alphanumeric characters. Please try again.", "Error: Sign Up", JOptionPane.WARNING_MESSAGE);
+					}
+				}
+				else {
+					JOptionPane.showMessageDialog (null, "Both passwords do not match. Please try again.", "Error: Sign Up", JOptionPane.WARNING_MESSAGE);
+				}
             }
 
             @Override
