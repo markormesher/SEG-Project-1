@@ -3,6 +3,7 @@ package client;
 import client.ui_components.*;
 import global.Message;
 import global.Settings;
+import global.SoundClip;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -15,12 +16,15 @@ import javax.swing.text.html.HTMLEditorKit;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 
 // TODO: add listener for messages from the server (add them to the chat console?)
@@ -81,46 +85,75 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
 	// the background tile
 	private BufferedImage backgroundTile;
+	
+	// the sound on/off images
+	private ImageIcon soundOnIcon, soundOffIcon;
+	
+	// sounds
+	private HashMap<String, SoundClip> sounds = new HashMap<String, SoundClip>();
+	
+	// mute button
+	private JToggleButton muteButton;
 
 	public BattleClientGui() {
 		// loading the font from the ttf file
 		try {
 			font = Font.createFont(Font.TRUETYPE_FONT, getClass().getResourceAsStream("/fonts/PressStart2P.ttf"));
 			font = font.deriveFont(25f);
+
+			soundOnIcon = new ImageIcon(this.getClass().getResource("/images/sound_on.png"));
+			soundOffIcon = new ImageIcon(this.getClass().getResource("/images/sound_off.png"));
 		} catch (FontFormatException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		// basic setup of frame
-		setSize(Settings.GRID_SIZE * Settings.IMAGE_CELL_SIZE * 2 + Settings.IMAGE_CELL_SIZE * 3, Settings.IMAGE_CELL_SIZE * 24);
-		setResizable(true);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		sounds.put("explosion", new SoundClip("/sounds/explosion.wav"));
+		sounds.put("splash", new SoundClip("/sounds/splash.wav"));
+		sounds.put("music", new SoundClip("/sounds/remember.mid",true));
+		
+
+        // basic setup of frame
+        setSize(Settings.GRID_SIZE * Settings.IMAGE_CELL_SIZE * 2 + Settings.IMAGE_CELL_SIZE * 3, Settings.IMAGE_CELL_SIZE * 24);
+        setResizable(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 
-		//This layer is drawn on top of the game and is used to login/signup
-		final AuthLayer authLayer = new AuthLayer(getWidth(), getHeight());
-		getLayeredPane().add(authLayer, new Integer(10));
+        //This layer is drawn on top of the game and is used to login/signup
+        final AuthLayer authLayer = new AuthLayer(getWidth(),getHeight());
+        getLayeredPane().add(authLayer, new Integer(10));
 
-		//when the user logs in
-		authLayer.addAuthListener(new AuthLayer.AuthAdapter() {
-			@Override
-			public void onLogin(BattleClient _client, String username) {
-				playerUsername = username;
-				result = new Result(playerUsername, 0, 0, 0, false);
-				setTitle(playerUsername + " (you) vs. ???");
+        //when the user logs in
+        authLayer.addAuthListener(new AuthLayer.AuthAdapter() {
+            @Override
+            public void onLogin(BattleClient _client , String username) {
+                playerUsername = username;
+                result = new Result(playerUsername, 0, 0, 0, false);
+                setTitle(playerUsername + " (you) vs. ???");
 
-				chatLabel = new JLabel("Chat");
+                chatLabel = new JLabel("Chat");
 
-				client = _client;
-				client.gui = BattleClientGui.this;
+                client = _client;
+                client.gui = BattleClientGui.this;
+                /*// the client uses while so it must run on a separate thread
+                (new Thread() {
+                    public void run() {
+                        client = new BattleClient(Settings.HOST_NAME, Settings.PORT_NUMBER, playerUsername, BattleClientGui.this);
+                        try {
+                            client.connect();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();*/
 
-				//we hide the auth layer to reveal the game
-				authLayer.setVisible(false);
-				initUI();
-			}
-		});
-
+                //we hide the auth layer to reveal the game
+                authLayer.setVisible(false);
+                initUI();
+        		playSound("music");
+            }
+        });
 	}
 
 
@@ -242,166 +275,199 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 				} else {
 					onPlayerChanged();
 				}
+			// we're ready
+			playerReady = true;
+            }
+        });
 
-				// we're ready
-				playerReady = true;
-			}
-		});
+        localBoard.setOpaque(false);
+        innerPanel.add(localBoard);
 
-		localBoard.setOpaque(false);
-		innerPanel.add(localBoard);
+        // set up the opponent board
+        opponentBoard.addShotListener(new BattleBoardOpponent.ShotListener() {
+            @Override
+            public void onShotFired(int x, int y) {
+                // both sides must be ready
+                if (!playerReady || !opponentReady) {
+                    showError(!playerReady ? "You haven't placed your ships yet." : "Your opponent hasn't placed their ships");
+                    return;
+                }
 
-		// set up the opponent board
-		opponentBoard.addShotListener(new BattleBoardOpponent.ShotListener() {
+                // check that they're not re-shooting on the same spot
+                if (opponentBoard.getBoardCells()[x][y].object.getIcon() != null) {
+                    showError("You already shot there.");
+                    return;
+                }
+
+                // you must be the current player to shoot
+                if (currentPlayer == ME) {
+                    try {
+                        client.sendMessage(new Message(opponentUsername, Message.SHOOT, x, y));
+                        consecutiveTimeouts = 0;
+
+                        // after shooting it's their turn
+                        currentPlayer = OPPONENT;
+                        onPlayerChanged();
+                    } catch (IOException e) {
+                        showError("An error occurred, check your network connection.");
+                        e.printStackTrace();
+                    }
+                } else {
+                    showError("It's not your turn right now");
+                }
+            }
+        });
+
+        opponentBoard.setOpaque(false);
+        innerPanel.add(opponentBoard);
+
+        // to center the chatting panel
+        Border chattingAreaPadding = new EmptyBorder(new Insets(0, 36 + 18, 0, 36 + 18));
+
+        // the chattingContainer is transparent and has a padding
+        JPanel chattingContainer = new JPanel(new BorderLayout());
+        // the chattingArea is white and is inside the chattingContainer
+        JPanel chattingArea = new JPanel(new BorderLayout());
+        // the chatInputPanel contains text field and emoticons button and is inside the chattingArea
+        JPanel chatInputPanel = new JPanel(new BorderLayout());
+
+        // set up the chat area
+        chatInputPanel.setBackground(Color.white);
+        chattingArea.setBorder(new LineBorder(Color.gray, 1));
+        chattingArea.setBackground(Color.white);
+        chattingArea.setSize(new Dimension(0, 70));
+        chattingArea.setPreferredSize(new Dimension(0, 200));
+        chattingContainer.setBorder(chattingAreaPadding);
+        chattingContainer.setOpaque(false);
+        chattingContainer.setSize(new Dimension(0, 70));
+        chattingContainer.setPreferredSize(new Dimension(0, 200));
+        chattingArea.add(chatInputPanel, BorderLayout.SOUTH);
+        chattingContainer.add(chattingArea, BorderLayout.CENTER);
+        frameContent.add(chattingContainer, BorderLayout.SOUTH);
+
+        // messaging output
+        Border standardPadding = new EmptyBorder(new Insets(10, 10, 10, 10));
+        messagesPane = new JTextPane();
+        messagesPane.setContentType("text/html");
+        messagesPane.setEditable(false);
+        messagesPane.setBorder(standardPadding);
+        messagesPane.setFont(font.deriveFont(13f));
+        chattingArea.add(new JScrollPane(messagesPane), BorderLayout.CENTER);
+
+        chatLabel.setForeground(Color.darkGray);
+        chatLabel.setBorder(standardPadding);
+        chatLabel.setFont(font.deriveFont(13f));
+        chattingArea.add(chatLabel, BorderLayout.NORTH);
+
+        // emoticons frame and button
+        emoticonsButton = new JButton();
+        emoticonsFrame = new EmoticonsFrame(messageInput);
+
+        try {
+            emoticonsButton.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("/images/emoticons/grin.png"))));
+        } catch (IOException e) {
+            //TODO: handle exception
+        }
+        emoticonsButton.setSize(new Dimension(16,16));
+        emoticonsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(!emoticonsFrame.isVisible()) {
+                    emoticonsFrame.setLocation((int) emoticonsButton.getLocationOnScreen().getX(), (int) emoticonsButton.getLocationOnScreen().getY() + -80);
+                    emoticonsFrame.setVisible(true);
+                }
+                else {
+                    emoticonsFrame.setVisible(false);
+                }
+            }
+        });
+
+        // messaging input layout and listener
+        messageInput.setBorder(standardPadding);
+        chatInputPanel.add(messageInput, BorderLayout.CENTER);
+        chatInputPanel.add(emoticonsButton, BorderLayout.EAST);
+        messageInput.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // send message when the user presses enter
+                String messageText = messageInput.getText().trim();
+                //if message contains emoticon shortcut, convert to image html link
+                if(emoticonsFrame.containsEmoticons(messageText)) {
+                    messageText = emoticonsFrame.convertTextToHTML(messageText);
+                }
+                Message toSend = new Message(opponentUsername, Message.CHAT_MESSAGE, messageText);
+                try {
+                    client.sendMessage(toSend);
+                    appendToLog("\n<strong>" + playerUsername + ":</strong> " + messageText);
+                    messageInput.setText("");
+                } catch (IOException ex) {
+                    appendToLog("\nFailed to send message");
+                    ex.printStackTrace();
+                }
+            }
+        });
+
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                super.windowClosing(e);
+                // give an modal prompt asking if the user wants to exit
+                int option =
+                        JOptionPane.showOptionDialog(BattleClientGui.this, "Do you want to quit the game?", "Disconnect from game", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+                if(option == JOptionPane.YES_OPTION) {
+                    // send message to opponent that i have disconnected.
+                    try {
+                        client.sendMessage(new Message(opponentUsername, Message.OPPONENT_DISCONNECTED));
+                    } catch (IOException e1) {
+                        // TODO: handle error
+                        e1.printStackTrace();
+                    } finally {
+                        BattleClientGui.this.dispose();
+                    }
+                }
+            }
+
+        });
+        
+        muteButton = new JToggleButton(soundOnIcon);
+        
+        muteButton.addItemListener(new ItemListener() {
+			
 			@Override
-			public void onShotFired(int x, int y) {
-				// both sides must be ready
-				if (!playerReady || !opponentReady) {
-					showError(!playerReady ? "You haven't placed your ships yet." : "Your opponent hasn't placed their ships");
-					return;
-				}
-
-				// check that they're not re-shooting on the same spot
-				if (opponentBoard.getBoardCells()[x][y].object.getIcon() != null) {
-					showError("You already shot there.");
-					return;
-				}
-
-				// you must be the current player to shoot
-				if (currentPlayer == ME) {
-					try {
-						client.sendMessage(new Message(opponentUsername, Message.SHOOT, x, y));
-						consecutiveTimeouts = 0;
-
-						// after shooting it's their turn
-						currentPlayer = OPPONENT;
-						onPlayerChanged();
-					} catch (IOException e) {
-						showError("An error occurred, check your network connection.");
-						e.printStackTrace();
+			public void itemStateChanged(ItemEvent e) {
+				if(e.getStateChange() == ItemEvent.SELECTED) {
+					muteButton.setIcon(soundOffIcon);
+					for(SoundClip sc : BattleClientGui.this.sounds.values()) {
+						sc.setVolume(0.0f);
 					}
-				} else {
-					showError("It's not your turn right now");
+				}else {
+					muteButton.setIcon(soundOnIcon);
+					for(SoundClip sc : BattleClientGui.this.sounds.values()) {
+						sc.setVolume(Settings.VOLUME);
+					}
 				}
 			}
 		});
-
-		opponentBoard.setOpaque(false);
-		innerPanel.add(opponentBoard);
-
-		// to center the chatting panel
-		Border chattingAreaPadding = new EmptyBorder(new Insets(0, 36 + 18, 0, 36 + 18));
-
-		// the chattingContainer is transparent and has a padding
-		JPanel chattingContainer = new JPanel(new BorderLayout());
-		// the chattingArea is white and is inside the chattingContainer
-		JPanel chattingArea = new JPanel(new BorderLayout());
-		// the chatInputPanel contains text field and emoticons button and is inside the chattingArea
-		JPanel chatInputPanel = new JPanel(new BorderLayout());
-
-		// set up the chat area
-		chatInputPanel.setBackground(Color.white);
-		chattingArea.setBorder(new LineBorder(Color.gray, 1));
-		chattingArea.setBackground(Color.white);
-		chattingArea.setSize(new Dimension(0, 70));
-		chattingArea.setPreferredSize(new Dimension(0, 200));
-		chattingContainer.setBorder(chattingAreaPadding);
-		chattingContainer.setOpaque(false);
-		chattingContainer.setSize(new Dimension(0, 70));
-		chattingContainer.setPreferredSize(new Dimension(0, 200));
-		chattingArea.add(chatInputPanel, BorderLayout.SOUTH);
-		chattingContainer.add(chattingArea, BorderLayout.CENTER);
-		frameContent.add(chattingContainer, BorderLayout.SOUTH);
-
-		// messaging output
-		Border standardPadding = new EmptyBorder(new Insets(10, 10, 10, 10));
-		messagesPane = new JTextPane();
-		messagesPane.setContentType("text/html");
-		messagesPane.setEditable(false);
-		messagesPane.setBorder(standardPadding);
-		messagesPane.setFont(font.deriveFont(13f));
-		chattingArea.add(new JScrollPane(messagesPane), BorderLayout.CENTER);
-
-		chatLabel.setForeground(Color.darkGray);
-		chatLabel.setBorder(standardPadding);
-		chatLabel.setFont(font.deriveFont(13f));
-		chattingArea.add(chatLabel, BorderLayout.NORTH);
-
-		// emoticons frame and button
-		emoticonsButton = new JButton();
-		emoticonsFrame = new EmoticonsFrame(messageInput);
-
-		try {
-			emoticonsButton.setIcon(new ImageIcon(ImageIO.read(getClass().getResource("/images/emoticons/grin.png"))));
-		} catch (IOException e) {
-			//TODO: handle exception
-		}
-		emoticonsButton.setSize(new Dimension(16, 16));
-		emoticonsButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (!emoticonsFrame.isVisible()) {
-					emoticonsFrame.setLocation((int) emoticonsButton.getLocationOnScreen().getX(), (int) emoticonsButton.getLocationOnScreen().getY() + -80);
-					emoticonsFrame.setVisible(true);
-				} else {
-					emoticonsFrame.setVisible(false);
-				}
-			}
-		});
-
-		// messaging input layout and listener
-		messageInput.setBorder(standardPadding);
-		chatInputPanel.add(messageInput, BorderLayout.CENTER);
-		chatInputPanel.add(emoticonsButton, BorderLayout.EAST);
-		messageInput.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// send message when the user presses enter
-				String messageText = messageInput.getText().trim();
-				//if message contains emoticon shortcut, convert to image html link
-				if (emoticonsFrame.containsEmoticons(messageText)) {
-					messageText = emoticonsFrame.convertTextToHTML(messageText);
-				}
-				Message toSend = new Message(opponentUsername, Message.CHAT_MESSAGE, messageText);
-				try {
-					client.sendMessage(toSend);
-					appendToLog("\n<strong>" + playerUsername + ":</strong> " + messageText);
-					messageInput.setText("");
-				} catch (IOException ex) {
-					appendToLog("\nFailed to send message");
-					ex.printStackTrace();
-				}
-			}
-		});
-
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
-		addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent e) {
-				super.windowClosing(e);
-				// give an modal prompt asking if the user wants to exit
-				int option =
-					JOptionPane.showOptionDialog(BattleClientGui.this, "Do you want to quit the game?", "Disconnect from game", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-				if (option == JOptionPane.YES_OPTION) {
-					disconnect();
-				}
-			}
-
-		});
-
-		// add layers
-		getLayeredPane().add(backgroundImage, new Integer(1));
-		getLayeredPane().add(frameContent, new Integer(2));
-
-		// showtime!
-		setVisible(true);
-		getLayeredPane().repaint();
-	}
-
-	private String askForUsername() {
-		return JOptionPane.showInputDialog(this, "Enter a username");
-	}
+        
+        JPanel buttonPanel = new JPanel(new BorderLayout());
+        buttonPanel.setSize(new Dimension(50,50));
+        buttonPanel.add(muteButton, BorderLayout.CENTER);
+        buttonPanel.setLocation(getWidth() - 100, 0);
+        buttonPanel.setOpaque(false);
+        muteButton.setOpaque(false);
+      
+        
+        // add layers
+        getLayeredPane().add(backgroundImage, new Integer(1));
+        getLayeredPane().add(buttonPanel, new Integer(2));
+        getLayeredPane().add(frameContent, new Integer(3));
+        
+        // showtime!
+        setVisible(true);
+        getLayeredPane().repaint();
+    }
 
 	private void iAmReadyToPlay() {
 		try {
@@ -466,7 +532,8 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 				opponentResult.totalShots++;
 				// notify the opponent whether it was a hit or a miss
 				if (shotAt.isEmpty()) {
-					opponentResult.misses++;
+                    opponentResult.misses++;
+    				playSound("splash");
 					shotAt.setAsMissPin();
 					try {
 						client.sendMessage(new Message(opponentUsername, Message.MISS, msg.getX(), msg.getY()));
@@ -477,6 +544,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 				} else {
 					opponentResult.hits++;
 					shotAt.explode();
+					playSound("explosion");
 					try {
 						client.sendMessage(new Message(opponentUsername, Message.HIT, msg.getX(), msg.getY()));
 					} catch (IOException e) {
@@ -494,7 +562,8 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 				BattleAnimationPanel hitAt = opponentBoard.getBoardCells()[msg.getX()][msg.getY()];
 				hitAt.setAsHitPin();
 				opponentBoard.incDestroyedShipPieces();
-
+				
+				playSound("explosion");
 				// check if this was the winning shot
 				if (opponentBoard.getDestroyedShipPieces() == opponentBoard.getTotalShipPieces()) {
 					try {
@@ -514,6 +583,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 				result.misses++;
 				BattleAnimationPanel missAt = opponentBoard.getBoardCells()[msg.getX()][msg.getY()];
 				missAt.setAsMissPin();
+				playSound("splash");
 				break;
 
 			// you've lost
@@ -591,6 +661,13 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 	private void showError(String msg) {
 		statusLabel.setForeground(Color.red);
 		statusLabel.setText(msg);
+	}
+	
+	private void playSound(String name) {
+		SoundClip s = sounds.get(name);
+		if(s != null) {
+			s.play(0);
+		}
 	}
 
 	public static void main(String[] arr) {
