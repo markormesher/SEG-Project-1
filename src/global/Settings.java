@@ -21,5 +21,6 @@ public class Settings {
 	public static final int IMAGE_CELL_SIZE = 36;
 	public static final int[] SHIP_SIZES = {5, 4, 3, 3, 2};
 	public static final DateFormat SERVER_DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
+	public static final float VOLUME = 0.6f;
 
 }
