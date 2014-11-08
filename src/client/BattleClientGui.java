@@ -114,17 +114,6 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
 				client = _client;
 				client.gui = BattleClientGui.this;
-				/*// the client uses while so it must run on a separate thread
-				(new Thread() {
-                    public void run() {
-                        client = new BattleClient(Settings.HOST_NAME, Settings.PORT_NUMBER, playerUsername, BattleClientGui.this);
-                        try {
-                            client.connect();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }).start();*/
 
 				//we hide the auth layer to reveal the game
 				authLayer.setVisible(false);
@@ -168,39 +157,6 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		frameContent.setLayout(new BorderLayout());
 		frameContent.setOpaque(false);
 		frameContent.setSize(new Dimension(getWidth(), getHeight() - 18));
-
-		// collect player username and set it as title
-		//playerUsername = askForUsername();
-
-        /*while(true) {
-            String errorMessage;
-
-            if(playerUsername == null || playerUsername.equals("")) {
-                errorMessage = "Invalid username, please try again.";
-            }
-            else if (BattleServer.usernameIsTaken(playerUsername)){
-                errorMessage = "This username is already taken, please try again.";
-            }
-            else {
-                break;
-            }
-
-
-            JOptionPane.showMessageDialog(this, errorMessage);
-            playerUsername = askForUsername();
-        }*/
-
-		// the client uses while so it must run on a separate thread
-		(new Thread() {
-			public void run() {
-				client = new BattleClient(Settings.HOST_NAME, Settings.PORT_NUMBER, playerUsername, BattleClientGui.this);
-				try {
-					client.connect();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
 
 		// the panel containing the battleship logo
 		JPanel topPanel = new JPanel(new BorderLayout());
@@ -428,15 +384,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 				int option =
 					JOptionPane.showOptionDialog(BattleClientGui.this, "Do you want to quit the game?", "Disconnect from game", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 				if (option == JOptionPane.YES_OPTION) {
-					// send message to opponent that i have disconnected.
-					try {
-						client.sendMessage(new Message(opponentUsername, Message.OPPONENT_DISCONNECTED));
-					} catch (IOException e1) {
-						// TODO: handle error
-						e1.printStackTrace();
-					} finally {
-						BattleClientGui.this.dispose();
-					}
+					disconnect();
 				}
 			}
 
