@@ -136,17 +136,6 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
                 client = _client;
                 client.gui = BattleClientGui.this;
-                /*// the client uses while so it must run on a separate thread
-                (new Thread() {
-                    public void run() {
-                        client = new BattleClient(Settings.HOST_NAME, Settings.PORT_NUMBER, playerUsername, BattleClientGui.this);
-                        try {
-                            client.connect();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }).start();*/
 
                 //we hide the auth layer to reveal the game
                 authLayer.setVisible(false);
@@ -215,26 +204,32 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 			@Override
 			public void onTimeout() {
 				if (currentPlayer == ME) {
-					boolean shot = false;
-					while (!shot) {
-						// find random tile
-						int x = random.nextInt(10);
-						int y = random.nextInt(10);
-						// if it's a valid move, shoot there
-						if (opponentBoard.getBoardCells()[x][y].isEmpty()) {
-							try {
+                    //disconnect after 3 consecutive timeouts
+                    if(++consecutiveTimeouts == 3) {
+                        disconnect();
+                    }
+                    else {
+                        boolean shot = false;
+                        while (!shot) {
+                            // find random tile
+                            int x = random.nextInt(10);
+                            int y = random.nextInt(10);
+                            // if it's a valid move, shoot there
+                            if (opponentBoard.getBoardCells()[x][y].isEmpty()) {
+                                try {
 
-								client.sendMessage(new Message(opponentUsername, Message.SHOOT, x, y));
-								// after shooting it's their turn
-								currentPlayer = OPPONENT;
-								onPlayerChanged();
-							} catch (IOException e) {
-								e.printStackTrace();
-								showError("An error occurred, check your network connection.");
-							}
-							shot = true;
-						}
-					}
+                                    client.sendMessage(new Message(opponentUsername, Message.SHOOT, x, y));
+                                    // after shooting it's their turn
+                                    currentPlayer = OPPONENT;
+                                    onPlayerChanged();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                    showError("An error occurred, check your network connection.");
+                                }
+                                shot = true;
+                            }
+                        }
+                    }
 				}
 			}
 		});
