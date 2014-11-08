@@ -3,6 +3,7 @@ package client;
 import global.Credentials;
 import global.Message;
 import global.Settings;
+import server.BattleServer;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -132,12 +133,17 @@ public class AuthLayer extends JPanel implements BattleClientGuiInterface {
 			public void mouseClicked(MouseEvent e) {
 				super.mouseClicked(e);
 
-				try {
-					Credentials cred = new Credentials(usernameField.getText(), passwordField.getPassword());
-					client.sendMessage(new Message("", Message.LOGIN, cred.toString()));
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
+                if(BattleServer.usernameIsTaken(usernameField.getText())) {
+                    JOptionPane.showMessageDialog(null, "User is currently logged in", "Error: Log In", JOptionPane.WARNING_MESSAGE);
+                }
+                else {
+                    try {
+                        Credentials cred = new Credentials(usernameField.getText(), passwordField.getPassword());
+                        client.sendMessage(new Message("", Message.LOGIN, cred.toString()));
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                }
 			}
 
 			//for hovering effect
