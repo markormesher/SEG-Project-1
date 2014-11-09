@@ -31,7 +31,7 @@ public class AuthLayer extends JPanel implements BattleClientGuiInterface {
 
 		(new Thread() {
 			public void run() {
-				client = new BattleClient(Settings.HOST_NAME, Settings.PORT_NUMBER, "", AuthLayer.this);
+				client = new BattleClient(Settings.HOST_NAME, Settings.PORT_NUMBER, AuthLayer.this);
 				try {
 					client.connect();
 				} catch (IOException e) {

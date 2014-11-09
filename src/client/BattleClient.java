@@ -12,7 +12,6 @@ public class BattleClient {
 	// connection details
 	private String host;
 	private int port;
-	private String username;
 
 	// front end
 	public BattleClientGuiInterface gui;
@@ -22,10 +21,9 @@ public class BattleClient {
 	private ObjectInputStream inputStream;
 	private ObjectOutputStream outputStream;
 
-	public BattleClient(String host, int port, String username, BattleClientGuiInterface gui) {
+	public BattleClient(String host, int port, BattleClientGuiInterface gui) {
 		this.host = host;
 		this.port = port;
-		this.username = username;
 		this.gui = gui;
 	}
 
@@ -39,16 +37,6 @@ public class BattleClient {
 
 		// listen for incoming messages from the server
 		new ListenFromServer().start();
-
-		/*// send username to server
-		Message setUsername = new Message(null, Message.SET_USERNAME, username);
-		outputStream.writeObject(setUsername);*/
-	}
-
-	public void disconnect() throws IOException {
-		if (inputStream != null) inputStream.close();
-		if (outputStream != null) outputStream.close();
-		if (serverSocket != null) serverSocket.close();
 	}
 
 	public void sendMessage(Message msg) throws IOException {
@@ -74,6 +62,5 @@ public class BattleClient {
 			}
 		}
 	}
-
 
 }
