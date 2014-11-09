@@ -16,8 +16,6 @@ public class BattleClient {
 	// front end
 	public BattleClientGuiInterface gui;
 
-	// server streams
-	private Socket serverSocket;
 	private ObjectInputStream inputStream;
 	private ObjectOutputStream outputStream;
 
@@ -29,7 +27,7 @@ public class BattleClient {
 
 	public void connect() throws IOException {
 		// connect to server
-		serverSocket = new Socket(host, port);
+		Socket serverSocket = new Socket(host, port);
 
 		// get object streams
 		inputStream = new ObjectInputStream(serverSocket.getInputStream());
