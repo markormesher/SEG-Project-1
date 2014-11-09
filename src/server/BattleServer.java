@@ -40,20 +40,18 @@ public class BattleServer {
 
 	// start server
 	public void startServer() throws IOException {
-		// TODO: swap all Syso.print lines for message shown on server control panel
-		System.out.println("Starting server on localhost:" + Settings.PORT_NUMBER);
+		if (serverMessageListener != null) serverMessageListener.onServerMessageReceived("Starting server on localhost:" + Settings.PORT_NUMBER);
 		ServerSocket serverSocket = new ServerSocket(Settings.PORT_NUMBER);
 
 		// loop forever, collecting client connections
 		Socket socket;
 		while (true) {
 			// wait for a connection to arrive (blocks this thread)
-			System.out.println("Waiting for a client to connect...");
+			if (serverMessageListener != null) serverMessageListener.onServerMessageReceived("Waiting for a client to connect...");
 			socket = serverSocket.accept();
 
 			// create a new client thread
-			System.out.println("New client connected");
-			System.out.println("");
+			if (serverMessageListener != null) serverMessageListener.onServerMessageReceived("New client connected");
 			BattleClientThread thread = new BattleClientThread(socket);
 
 			// store the thread
@@ -213,10 +211,10 @@ public class BattleServer {
 				try {
 					msg = (Message) inputStream.readObject();
 				} catch (ClassNotFoundException e) {
-					serverMessageListener.onServerMessageReceived("Invalid message object sent");
+					if (serverMessageListener != null) serverMessageListener.onServerMessageReceived("Invalid message object sent");
 					break;
 				} catch (IOException e) {
-					serverMessageListener.onServerMessageReceived("Client disconnected: " + username);
+					if (serverMessageListener != null) serverMessageListener.onServerMessageReceived("Client disconnected: " + username);
 					break;
 				}
 
@@ -263,7 +261,7 @@ public class BattleServer {
 							try {
 								c.sendMessage(msg);
 							} catch (IOException e) {
-								serverMessageListener.onServerMessageReceived("Failed to send message to " + msg.getRecipient());
+								if (serverMessageListener != null) serverMessageListener.onServerMessageReceived("Failed to send message to " + msg.getRecipient());
 							}
 
 							break;
@@ -279,7 +277,7 @@ public class BattleServer {
 			try {
 				close();
 			} catch (IOException e) {
-				serverMessageListener.onServerMessageReceived("Failed to close a client thread");
+				if (serverMessageListener != null) serverMessageListener.onServerMessageReceived("Failed to close a client thread");
 			}
 		}
 	}
