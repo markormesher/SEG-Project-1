@@ -13,6 +13,7 @@ public class Credentials {
 	private String username;
 	private String password;
 	private static final String INFO_SEPARATOR = ", ";
+	private static final String PATH_TO_USERS_FILE = "res/users.txt";
 
 	public Credentials(String username, char[] password) {
 		this.username = username;
@@ -35,14 +36,11 @@ public class Credentials {
 
 	public boolean isValidLogin() {
 		Scanner scanner = null;
-
 		try {
-			scanner = new Scanner(new File(pathToUsersFile()));
-
+			scanner = new Scanner(new File(PATH_TO_USERS_FILE));
 			while (scanner.hasNextLine()) {
 				String line = scanner.nextLine();
 				String[] info = line.split(INFO_SEPARATOR);
-
 				if (info[0].equals(username) && info[1].equals(password)) {
 					return true;
 				}
@@ -50,36 +48,32 @@ public class Credentials {
 		} catch (FileNotFoundException e) {
 			return false;
 		} finally {
+			// good practise
 			if (scanner != null) {
 				scanner.close();
 			}
 		}
-
 		return false;
 	}
 
 	private static String encryptPassword(char[] password) {
 		String stringPassword = "";
-
 		for (int i = 0; i < password.length; ++i) {
 			stringPassword += password[i];
 		}
-
 		try {
 			MessageDigest md = MessageDigest.getInstance("MD5");
 			md.update(stringPassword.getBytes());
 			byte[] digest = md.digest();
-			StringBuffer sb = new StringBuffer();
-
+			StringBuilder sb = new StringBuilder();
 			for (byte b : digest) {
 				sb.append(String.format("%02x", b & 0xff));
 			}
-
 			return sb.toString();
 		} catch (NoSuchAlgorithmException e) {
-			System.out.println("md5 missing");
+			// this pretty much will never happen
+			System.out.println("MD5 missing");
 		}
-
 		return "";
 	}
 
@@ -90,14 +84,11 @@ public class Credentials {
 
 	public static boolean isUsernameTaken(String username) {
 		Scanner scanner = null;
-
 		try {
-			scanner = new Scanner(new File(pathToUsersFile()));
-
+			scanner = new Scanner(new File(PATH_TO_USERS_FILE));
 			while (scanner.hasNextLine()) {
 				String line = scanner.nextLine();
 				String[] info = line.split(INFO_SEPARATOR);
-
 				if (info[0].equals(username)) {
 					return true;
 				}
@@ -105,31 +96,24 @@ public class Credentials {
 		} catch (FileNotFoundException e) {
 			return false;
 		} finally {
+			// good practise
 			if (scanner != null) {
 				scanner.close();
 			}
 		}
-
 		return false;
 	}
 
 	public static void signUp(String username, char[] password) {
 		String encryptedPassword = encryptPassword(password);
-
 		PrintWriter writer = null;
-		String path = pathToUsersFile();
-
 		try {
-			writer = new PrintWriter(new FileOutputStream(new File(path), true));
+			writer = new PrintWriter(new FileOutputStream(new File(PATH_TO_USERS_FILE), true));
 			writer.println(username + INFO_SEPARATOR + encryptedPassword);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			writer.close();
+			if (writer != null) writer.close();
 		}
-	}
-
-	private static String pathToUsersFile() {
-		return "res/users.txt";
 	}
 }
