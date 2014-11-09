@@ -21,7 +21,6 @@ public class BattleBoard extends JPanel {
 		setSize(new Dimension(Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE));
 		setMaximumSize(new Dimension(Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE));
 
-
 		// create a GRID_SIZE x GRID_SIZE grid of cells
 		for (int y = 0; y < Settings.GRID_SIZE; ++y) {
 			for (int x = 0; x < Settings.GRID_SIZE; ++x) {
