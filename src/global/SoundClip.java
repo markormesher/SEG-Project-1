@@ -1,7 +1,5 @@
 package global;
 
-import global.Settings;
-
 import java.io.IOException;
 import java.net.URL;
 
@@ -17,9 +15,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 public class SoundClip {
 
 	private Clip audio;
-
 	private boolean loop;
-	private float volume;
 
 	public SoundClip(String filepath) {
 		try {
@@ -36,7 +32,6 @@ public class SoundClip {
 					}
 				}
 			});
-
 			setVolume(Settings.VOLUME);
 		} catch (UnsupportedAudioFileException e) {
 			System.err.println("Audio file format not recognized.");
@@ -53,11 +48,6 @@ public class SoundClip {
 		this(filepath);
 		this.loop = loop;
 	}
-	
-	public SoundClip(String filepath, boolean loop, float volume) {
-		this(filepath, loop);
-		setVolume(volume);
-	}
 
 	public void play() {
 		if (loop)
@@ -68,7 +58,7 @@ public class SoundClip {
 
 	public void play(int frame) {
 		if (frame < 0 || frame > audio.getFrameLength()) {
-			throw new IllegalArgumentException("Invalid music positon");
+			throw new IllegalArgumentException("Invalid music position");
 		}
 		audio.setFramePosition(frame);
 		play();
@@ -79,49 +69,13 @@ public class SoundClip {
 		audio.setFramePosition(0);
 	}
 
-	public void pause() {
-		audio.stop();
-	}
-
 	private float linearToGain(float linear) {
-		float gain = (float) (20.0 * Math.log(linear));
-		return gain;
+		return (float) (20.0 * Math.log(linear));
 	}
 
 	public void setVolume(float f) {
-		FloatControl v = (FloatControl) audio
-				.getControl(FloatControl.Type.MASTER_GAIN);
+		FloatControl v = (FloatControl) audio.getControl(FloatControl.Type.MASTER_GAIN);
 		v.setValue(linearToGain(f));
-		volume = f;
-
-	}
-
-	public void setFrame(int frame) {
-		if (frame < 0 || frame > audio.getFrameLength()) {
-			throw new IllegalArgumentException("Invalid music positon");
-		}
-		audio.setFramePosition(frame);
-
-	}
-
-	public boolean isRunning() {
-		return audio.isRunning();
-	}
-
-	public int getCurrentFrame() {
-		return audio.getFramePosition();
-	}
-
-	public float getVolume() {
-		return volume;
-	}
-
-	public void setLoop(boolean loop) {
-		this.loop = loop;
-		if (this.loop) {
-			pause();
-			play();
-		}
 	}
 
 }
