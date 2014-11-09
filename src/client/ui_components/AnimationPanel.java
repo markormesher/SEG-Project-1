@@ -68,11 +68,6 @@ public class AnimationPanel extends JLayeredPane {
 		}
 	}
 
-	// set the current theme
-	public void setTheme(String theme) {
-		this.theme = theme == null ? "default" : theme;
-	}
-
 	// set the background of this panel
 	public void setBackground(String newBackground, int angle) {
 		setIcon(background, newBackground, angle);
