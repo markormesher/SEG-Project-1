@@ -2,6 +2,7 @@ package client;
 
 import client.ui_components.*;
 import global.Message;
+import global.Result;
 import global.Settings;
 import global.SoundClip;
 
@@ -85,13 +86,13 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
 	// the background tile
 	private BufferedImage backgroundTile;
-	
+
 	// the sound on/off images
 	private ImageIcon soundOnIcon, soundOffIcon;
-	
+
 	// sounds
 	private HashMap<String, SoundClip> sounds = new HashMap<String, SoundClip>();
-	
+
 	// mute button
 	private JToggleButton muteButton;
 
@@ -108,11 +109,11 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		sounds.put("explosion", new SoundClip("/sounds/explosion.wav"));
 		sounds.put("splash", new SoundClip("/sounds/splash.wav"));
 		sounds.put("music", new SoundClip("/sounds/remember.mid",true));
-		
+
 
         // basic setup of frame
         setSize(Settings.GRID_SIZE * Settings.IMAGE_CELL_SIZE * 2 + Settings.IMAGE_CELL_SIZE * 3, Settings.IMAGE_CELL_SIZE * 24);
@@ -425,11 +426,11 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
             }
 
         });
-        
+
         muteButton = new JToggleButton(soundOnIcon);
-        
+
         muteButton.addItemListener(new ItemListener() {
-			
+
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				if(e.getStateChange() == ItemEvent.SELECTED) {
@@ -445,20 +446,20 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 				}
 			}
 		});
-        
+
         JPanel buttonPanel = new JPanel(new BorderLayout());
         buttonPanel.setSize(new Dimension(50,50));
         buttonPanel.add(muteButton, BorderLayout.CENTER);
         buttonPanel.setLocation(getWidth() - 100, 0);
         buttonPanel.setOpaque(false);
         muteButton.setOpaque(false);
-      
-        
+
+
         // add layers
         getLayeredPane().add(backgroundImage, new Integer(1));
         getLayeredPane().add(buttonPanel, new Integer(2));
         getLayeredPane().add(frameContent, new Integer(3));
-        
+
         // showtime!
         setVisible(true);
         getLayeredPane().repaint();
@@ -560,7 +561,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 				BattleAnimationPanel hitAt = opponentBoard.getBoardCells()[msg.getX()][msg.getY()];
 				hitAt.setAsHitPin();
 				opponentBoard.incDestroyedShipPieces();
-				
+
 				playSound("explosion");
 				// check if this was the winning shot
 				if (opponentBoard.getDestroyedShipPieces() == opponentBoard.getTotalShipPieces()) {
@@ -660,7 +661,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		statusLabel.setForeground(Color.red);
 		statusLabel.setText(msg);
 	}
-	
+
 	private void playSound(String name) {
 		SoundClip s = sounds.get(name);
 		if(s != null) {

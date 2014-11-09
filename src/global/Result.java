@@ -1,9 +1,10 @@
-package client.ui_components;
+package global;
 
 /**
  * Contains stats regarding the outcome of a match for a user
  */
 public class Result {
+
 	public String username;
 	public int totalShots;
 	public int misses;

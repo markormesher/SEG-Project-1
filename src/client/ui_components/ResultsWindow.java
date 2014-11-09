@@ -1,6 +1,7 @@
 package client.ui_components;
 
 import client.BattleClientGui;
+import global.Result;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
