@@ -19,16 +19,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class AuthLayer extends JPanel implements BattleClientGuiInterface {
-	Font font;
-	// the background tile
-	private BufferedImage backgroundTile;
-	final JTextField usernameField = new JTextField();
-	final JPasswordField passwordField = new JPasswordField();
 
-	BattleClient client;
+	// ui parts
+	private BufferedImage backgroundTile;
+	private JTextField usernameField = new JTextField();
+	private JPasswordField passwordField = new JPasswordField();
+	private Font font;
+
+	// the client this sits on top of
+	private BattleClient client;
 
 	public AuthLayer(int w, int h) {
-
 		(new Thread() {
 			public void run() {
 				client = new BattleClient(Settings.HOST_NAME, Settings.PORT_NUMBER, AuthLayer.this);
@@ -40,7 +41,7 @@ public class AuthLayer extends JPanel implements BattleClientGuiInterface {
 			}
 		}).start();
 
-		//load the font
+		// load the font
 		try {
 			font = Font.createFont(Font.TRUETYPE_FONT, getClass().getResourceAsStream("/fonts/PressStart2P.ttf"));
 			font = font.deriveFont(25f);
@@ -50,43 +51,38 @@ public class AuthLayer extends JPanel implements BattleClientGuiInterface {
 			e.printStackTrace();
 		}
 
-		//setBackground(Color.red);
+		// build the window
 		setSize(w, h);
 		repaint();
 
-		//this is used to center the login and signups vertically
+		// this is used to center the login and sign ups vertically
 		setLayout(new GridBagLayout());
-
 		GridBagConstraints gbc = new GridBagConstraints();
-
 		gbc.gridx = 0;
 		gbc.gridy = GridBagConstraints.RELATIVE;
 
-
-		//2 collumns , login on left and signup on right
+		// 2 columns, login on left and signup on right
 		JPanel gridHolder = new JPanel(new GridLayout(0, 2));
 		gridHolder.setPreferredSize(new Dimension(600, 350));
 		gridHolder.setOpaque(false);
 		add(gridHolder, gbc);
 
-
-		//the first collumn , for signup
+		// the first column, for signup
 		JPanel background = new JPanel();
 		background.setOpaque(false);
 		background.setSize(new Dimension(300, 300));
 		background.setPreferredSize(new Dimension(300, 300));
 
+		// bg
 		gridHolder.add(background);
-
 		background.setLayout(new BorderLayout());
 
+		// build inner parts
 		EmptyBorder border = new EmptyBorder(12, 12, 12, 12);
-
-
 		JPanel inner = new JPanel();
 		inner.setOpaque(false);
 
-		//4 rows : username label + field , password label+field
+		// 4 rows: username label + field , password label + field
 		JPanel center = new JPanel();
 		center.setOpaque(false);
 		center.setLayout(new GridLayout(4, 0));
@@ -99,7 +95,6 @@ public class AuthLayer extends JPanel implements BattleClientGuiInterface {
 		usernameLabel.setHorizontalAlignment(JLabel.CENTER);
 		center.add(usernameLabel);
 		usernameLabel.setBorder(border);
-
 
 		usernameField.setFont(font.deriveFont(15f));
 		usernameField.setPreferredSize(new Dimension(280, 40));
@@ -121,7 +116,6 @@ public class AuthLayer extends JPanel implements BattleClientGuiInterface {
 		inner.add(center);
 		background.add(inner, BorderLayout.CENTER);
 
-
 		final JLabel loginButton = new JLabel("LOGIN");
 		loginButton.setForeground(Color.white);
 		loginButton.setFont(font.deriveFont(24f));
@@ -132,21 +126,19 @@ public class AuthLayer extends JPanel implements BattleClientGuiInterface {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				super.mouseClicked(e);
-
-                if(BattleServer.usernameIsTaken(usernameField.getText())) {
-                    JOptionPane.showMessageDialog(null, "User is currently logged in", "Error: Log In", JOptionPane.WARNING_MESSAGE);
-                }
-                else {
-                    try {
-                        Credentials cred = new Credentials(usernameField.getText(), passwordField.getPassword());
-                        client.sendMessage(new Message("", Message.LOGIN, cred.toString()));
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
-                }
+				if (BattleServer.usernameIsTaken(usernameField.getText())) {
+					JOptionPane.showMessageDialog(null, "User is currently logged in", "Error: Log In", JOptionPane.WARNING_MESSAGE);
+				} else {
+					try {
+						Credentials cred = new Credentials(usernameField.getText(), passwordField.getPassword());
+						client.sendMessage(new Message("", Message.LOGIN, cred.toString()));
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
 			}
 
-			//for hovering effect
+			// for hovering effect
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				super.mouseEntered(e);
@@ -163,14 +155,11 @@ public class AuthLayer extends JPanel implements BattleClientGuiInterface {
 		loginButton.addMouseListener(loginAdapter);
 		loginButton.addMouseMotionListener(loginAdapter);
 
-
-		//pretty much the same as above but for the signup panel on the right
-
+		// the same as above but for the signup panel on the right
 		JPanel backgroundSignup = new JPanel();
 		backgroundSignup.setOpaque(false);
 		backgroundSignup.setSize(new Dimension(270, 300));
 		backgroundSignup.setPreferredSize(new Dimension(300, 300));
-		//background.setOpaque(false);
 
 		gridHolder.add(backgroundSignup);
 
@@ -280,20 +269,17 @@ public class AuthLayer extends JPanel implements BattleClientGuiInterface {
 		loginButtonSignup.addMouseListener(loginAdapterSignup);
 		loginButtonSignup.addMouseMotionListener(loginAdapterSignup);
 
-
 	}
 
 	public void paintComponent(Graphics g) {
-
 		super.paintComponent(g);
 		if (backgroundTile == null) {
 			try {
-				backgroundTile = ImageIO.read(this.getClass().getResource("/images/default/bg.png"));
+				backgroundTile = ImageIO.read(this.getClass().getResource("/images/default/bg-plain.png"));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-
 
 		// cover the surface with background tiles
 		for (int x = 0; x < getWidth() / 32.0; x++) {
@@ -320,6 +306,7 @@ public class AuthLayer extends JPanel implements BattleClientGuiInterface {
 	}
 
 	interface AuthAdapter {
+
 		void onLogin(BattleClient client, String username);
 	}
 }
