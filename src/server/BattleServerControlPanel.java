@@ -18,13 +18,12 @@ public class BattleServerControlPanel extends JFrame {
 				try {
 					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 				} catch (Exception useDefault) {
-					// use default layout
+					// at least we tried - use default layout
 				}
 				initUi();
 			}
 		});
 	}
-
 
 	public static void initUi() {
 		// create a basic UI
@@ -33,7 +32,7 @@ public class BattleServerControlPanel extends JFrame {
 		serverUI.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		serverUI.setTitle("Battle Server Control Panel");
 
-		//server runs on a thread
+		// server runs on a thread
 		final BattleServer server = new BattleServer();
 		(new Thread() {
 			public void run() {
@@ -46,7 +45,7 @@ public class BattleServerControlPanel extends JFrame {
 			}
 		}).start();
 
-		//create list cell renderer to disable selection
+		// create list cell renderer to disable selection
 		DefaultListCellRenderer listCellRenderer = new DefaultListCellRenderer() {
 
 			@Override
@@ -54,7 +53,7 @@ public class BattleServerControlPanel extends JFrame {
 														  boolean isSelected, boolean cellHasFocus) {
 				super.getListCellRendererComponent(list, value, index, false, false);
 
-				//set different font color for connection, disconnection and errors
+				// set different font color for connection, disconnection and errors
 				String msg = (String) value;
 				if (msg.contains("New client")) {
 					this.setForeground(Color.BLUE);
