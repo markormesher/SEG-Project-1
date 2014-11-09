@@ -502,7 +502,10 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
 			case Message.OPPONENT_DISCONNECTED:
 				appendToLog("\n<strong>-- Your opponent disconnected! --");
-				onWin();
+                // if there is no winner yet, i.e. game has not ended
+                if(!opponentResult.won && !result.won ) {
+                    onWin();
+                }
 				break;
 
 			case Message.READY_TO_PLAY:
