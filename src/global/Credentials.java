@@ -12,8 +12,6 @@ public class Credentials {
 
 	private String username;
 	private String password;
-	private static final String INFO_SEPARATOR = ", ";
-	private static final String PATH_TO_USERS_FILE = "res/users.txt";
 
 	public Credentials(String username, char[] password) {
 		this.username = username;
@@ -21,13 +19,13 @@ public class Credentials {
 	}
 
 	public Credentials(String usernameAndPassword) {
-		String[] info = usernameAndPassword.split(INFO_SEPARATOR);
+		String[] info = usernameAndPassword.split(Settings.USER_INFO_SEPARATOR);
 		this.username = info[0];
 		this.password = info[1];
 	}
 
 	public String toString() {
-		return username + INFO_SEPARATOR + password;
+		return username + Settings.USER_INFO_SEPARATOR + password;
 	}
 
 	public String getUsername() {
@@ -37,10 +35,10 @@ public class Credentials {
 	public boolean isValidLogin() {
 		Scanner scanner = null;
 		try {
-			scanner = new Scanner(new File(PATH_TO_USERS_FILE));
+			scanner = new Scanner(new File(Settings.PATH_TO_USERS_FILE));
 			while (scanner.hasNextLine()) {
 				String line = scanner.nextLine();
-				String[] info = line.split(INFO_SEPARATOR);
+				String[] info = line.split(Settings.USER_INFO_SEPARATOR);
 				if (info[0].equals(username) && info[1].equals(password)) {
 					return true;
 				}
@@ -85,10 +83,10 @@ public class Credentials {
 	public static boolean isUsernameTaken(String username) {
 		Scanner scanner = null;
 		try {
-			scanner = new Scanner(new File(PATH_TO_USERS_FILE));
+			scanner = new Scanner(new File(Settings.PATH_TO_USERS_FILE));
 			while (scanner.hasNextLine()) {
 				String line = scanner.nextLine();
-				String[] info = line.split(INFO_SEPARATOR);
+				String[] info = line.split(Settings.USER_INFO_SEPARATOR);
 				if (info[0].equals(username)) {
 					return true;
 				}
@@ -108,8 +106,8 @@ public class Credentials {
 		String encryptedPassword = encryptPassword(password);
 		PrintWriter writer = null;
 		try {
-			writer = new PrintWriter(new FileOutputStream(new File(PATH_TO_USERS_FILE), true));
-			writer.println(username + INFO_SEPARATOR + encryptedPassword);
+			writer = new PrintWriter(new FileOutputStream(new File(Settings.PATH_TO_USERS_FILE), true));
+			writer.println(username + Settings.USER_INFO_SEPARATOR + encryptedPassword);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
