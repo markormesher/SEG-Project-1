@@ -1,6 +1,5 @@
 package server;
 
-import client.BattleClientGui;
 import global.Settings;
 
 import javax.swing.*;
@@ -10,22 +9,11 @@ import java.util.Date;
 
 public class BattleServerControlPanel extends JFrame {
 
-	public static void main(String[] arr) {
-
-		// make the UI fit the OS defaults
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-				} catch (Exception useDefault) {
-					// at least we tried - use default layout
-				}
-				initUi();
-			}
-		});
+	public void init() {
+		initUi();
 	}
 
-	public static void initUi() {
+	private void initUi() {
 		// create a basic UI
 		final BattleServerControlPanel serverUI = new BattleServerControlPanel();
 		serverUI.setSize(300, 600);
@@ -100,14 +88,6 @@ public class BattleServerControlPanel extends JFrame {
 				serverMessages.addElement(Settings.SERVER_DATE_FORMAT.format(date) + " " + serverMessage);
 			}
 		});
-
-		// spawn two clients to demo with
-		BattleClientGui battleClientGui1 = new BattleClientGui();
-		battleClientGui1.setLocation(serverUI.getLocation().x + serverUI.getWidth() + 10, serverUI.getLocation().y);
-		battleClientGui1.setVisible(true);
-		BattleClientGui battleClientGui2 = new BattleClientGui();
-		battleClientGui2.setLocation(serverUI.getLocation().x + serverUI.getWidth() + battleClientGui1.getWidth() + 20, serverUI.getLocation().y);
-		battleClientGui2.setVisible(true);
 
 		// set this window as visible
 		serverUI.setVisible(true);
