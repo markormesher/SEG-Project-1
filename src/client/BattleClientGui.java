@@ -1,6 +1,7 @@
 package client;
 
 import client.ui_components.*;
+import com.sun.media.sound.InvalidFormatException;
 import global.Message;
 import global.Result;
 import global.Settings;
@@ -93,6 +94,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 	private HashMap<String, SoundClip> sounds = new HashMap<String, SoundClip>();
 
 	// mute button
+	private boolean enableSounds = true;
 	private JToggleButton muteButton;
 
 	public BattleClientGui() {
@@ -110,9 +112,18 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		}
 
 		// load sounds
-		sounds.put("explosion", new SoundClip("/sounds/explosion.wav"));
-		sounds.put("splash", new SoundClip("/sounds/splash.wav"));
-		sounds.put("music", new SoundClip("/sounds/remember.mid", true));
+		try {
+			sounds.put("explosion", new SoundClip("/sounds/explosion.wav"));
+			sounds.put("splash", new SoundClip("/sounds/splash.wav"));
+			sounds.put("music", new SoundClip("/sounds/remember.mid", true));
+		} catch (IllegalArgumentException e) {
+			/*
+			This can be caused if the host OS doesn't support the sound type
+			(e.g. a *nix machine without extra drivers)
+			In this instance, the failure method is just to disable sounds
+			 */
+			enableSounds = false;
+		}
 
 		// basic setup of frame
 		setSize(Settings.GRID_SIZE * Settings.IMAGE_CELL_SIZE * 2 + Settings.IMAGE_CELL_SIZE * 3, Settings.IMAGE_CELL_SIZE * 24);
@@ -413,30 +424,31 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 
 		});
 
-		muteButton = new JToggleButton(soundOnIcon);
-		muteButton.addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() == ItemEvent.SELECTED) {
-					muteButton.setIcon(soundOffIcon);
-					for (SoundClip sc : BattleClientGui.this.sounds.values()) {
-						sc.setVolume(0.0f);
-					}
-				} else {
-					muteButton.setIcon(soundOnIcon);
-					for (SoundClip sc : BattleClientGui.this.sounds.values()) {
-						sc.setVolume(Settings.VOLUME);
+		JPanel buttonPanel = new JPanel(new BorderLayout());
+		if (enableSounds) {
+			muteButton = new JToggleButton(soundOnIcon);
+			muteButton.addItemListener(new ItemListener() {
+				@Override
+				public void itemStateChanged(ItemEvent e) {
+					if (e.getStateChange() == ItemEvent.SELECTED) {
+						muteButton.setIcon(soundOffIcon);
+						for (SoundClip sc : BattleClientGui.this.sounds.values()) {
+							sc.setVolume(0.0f);
+						}
+					} else {
+						muteButton.setIcon(soundOnIcon);
+						for (SoundClip sc : BattleClientGui.this.sounds.values()) {
+							sc.setVolume(Settings.VOLUME);
+						}
 					}
 				}
-			}
-		});
-
-		JPanel buttonPanel = new JPanel(new BorderLayout());
-		buttonPanel.setSize(new Dimension(50, 50));
-		buttonPanel.add(muteButton, BorderLayout.CENTER);
-		buttonPanel.setLocation(getWidth() - 100, 0);
-		buttonPanel.setOpaque(false);
-		muteButton.setOpaque(false);
+			});
+			buttonPanel.setSize(new Dimension(50, 50));
+			buttonPanel.add(muteButton, BorderLayout.CENTER);
+			muteButton.setOpaque(false);
+			buttonPanel.setLocation(getWidth() - 100, 0);
+			buttonPanel.setOpaque(false);
+		}
 
 		// add layers
 		getLayeredPane().add(backgroundImage, new Integer(1));
