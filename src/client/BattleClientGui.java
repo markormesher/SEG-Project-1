@@ -1,7 +1,6 @@
 package client;
 
 import client.ui_components.*;
-import com.sun.media.sound.InvalidFormatException;
 import global.Message;
 import global.Result;
 import global.Settings;
