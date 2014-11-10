@@ -8,7 +8,7 @@ A multi-player 8-bit battleships game built on a client/server model.
 3. Right-click the `res` folder and mark it as a resource root (this is necessary for images to work).
 
 ###Testing the Project
-Run `server/BattelServerControlPanel` to launch the server and two clients for testing.
+Run `demo/StartDemo` to launch the server and two clients for testing.
 
 ###Contributors
 
