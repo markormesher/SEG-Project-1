@@ -126,16 +126,12 @@ public class AuthLayer extends JPanel implements BattleClientGuiInterface {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				super.mouseClicked(e);
-				if (BattleServer.usernameIsTaken(usernameField.getText())) {
-					JOptionPane.showMessageDialog(null, "User is currently logged in", "Error: Log In", JOptionPane.WARNING_MESSAGE);
-				} else {
 					try {
 						Credentials cred = new Credentials(usernameField.getText(), passwordField.getPassword());
 						client.sendMessage(new Message("", Message.LOGIN, cred.toString()));
 					} catch (IOException e1) {
 						e1.printStackTrace();
 					}
-				}
 			}
 
 			// for hovering effect
@@ -297,9 +293,11 @@ public class AuthLayer extends JPanel implements BattleClientGuiInterface {
 
 	@Override
 	public void onReceiveMessage(Message msg) {
-		if (msg.getType() == Message.LOGIN_OK) {
-			for (AuthAdapter a : authListeners) a.onLogin(client, usernameField.getText());
-		} else if (msg.getType() == Message.LOGIN_FAILED) {
+        if (msg.getType() == Message.LOGIN_OK) {
+            for (AuthAdapter a : authListeners) a.onLogin(client, usernameField.getText());
+        } else if (msg.getType() == Message.USER_LOGGED_IN) {
+            JOptionPane.showMessageDialog(null, "User is currently logged in", "Error: Log In", JOptionPane.WARNING_MESSAGE);
+        } else if (msg.getType() == Message.LOGIN_FAILED) {
 			usernameField.setForeground(Color.red);
 			passwordField.setForeground(Color.red);
 		}

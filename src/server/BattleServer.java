@@ -223,7 +223,14 @@ public class BattleServer {
 					String loginInfo = msg.getMessage();
 					Credentials credentials = new Credentials(loginInfo);
 
-					if (credentials.isValidLogin()) {
+                    if (usernameIsTaken(credentials.getUsername())) {
+                        try {
+                            this.sendMessage(new Message("", Message.USER_LOGGED_IN));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+					else if (credentials.isValidLogin()) {
 						try {
 							this.sendMessage(new Message("", Message.LOGIN_OK));
 							username = credentials.getUsername();
