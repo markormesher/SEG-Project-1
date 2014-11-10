@@ -661,8 +661,4 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 			s.play(0);
 		}
 	}
-
-	public static void main(String[] arr) {
-		new BattleClientGui();
-	}
 }
