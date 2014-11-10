@@ -26,7 +26,7 @@ public class BattleBoardLocal extends JPanel {
 	private JPanel activeShipContainer = new JPanel();
 
 	// layered pane to hold the board layer and listener panel
-	final JLayeredPane layeredPane = new JLayeredPane();
+	private final JLayeredPane layeredPane = new JLayeredPane();
 
 	// last cursor position (used to prevent jump when re-drawing the active ship)
 	private int lastCursorX = 0;
@@ -35,8 +35,9 @@ public class BattleBoardLocal extends JPanel {
 	public BattleBoardLocal() {
 		// set up this panel
 		setLayout(null);
-		setPreferredSize(new Dimension(Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE));
 		setSize(new Dimension(Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE));
+		setPreferredSize(new Dimension(Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE));
+		setMaximumSize(new Dimension(Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE));
 
 		// add a new layered pane to hold the board layer and listener panel
 		layeredPane.setBounds(0, 0, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE, Settings.IMAGE_CELL_SIZE * Settings.GRID_SIZE);

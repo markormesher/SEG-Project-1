@@ -23,4 +23,8 @@ public class Settings {
 	public static final DateFormat SERVER_DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
 	public static final float VOLUME = 0.6f;
 
+	// users
+	public static final String PATH_TO_USERS_FILE = "res/users.txt";
+	public static final String USER_INFO_SEPARATOR = ", ";
+
 }
