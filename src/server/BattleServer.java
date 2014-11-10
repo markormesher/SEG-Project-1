@@ -223,6 +223,7 @@ public class BattleServer {
 					String loginInfo = msg.getMessage();
 					Credentials credentials = new Credentials(loginInfo);
 
+                    // check if user is already logged in
                     if (usernameIsTaken(credentials.getUsername())) {
                         try {
                             this.sendMessage(new Message("", Message.USER_LOGGED_IN));
