@@ -20,7 +20,8 @@ public class Message implements Serializable {
 			PLAYER_LOSE = 10,
 			LOGIN = 11,
 			LOGIN_OK = 12,
-			LOGIN_FAILED = 13;
+			LOGIN_FAILED = 13,
+            USER_LOGGED_IN = 14;
 
 	// details of this message
 	private String recipient;

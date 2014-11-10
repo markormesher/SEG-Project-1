@@ -219,20 +219,19 @@ public class BattleServer {
 				}
 
 				// setting username or sending message?
-				if (msg.getType() == Message.SET_USERNAME) {
-					// set username of this thread
-					username = msg.getMessage();
-					checkBothUsernameSet(id);
-
-					// notify all clientConnectedListeners
-					for (ClientConnectedListener listener : clientConnectedListeners) {
-						listener.onClientConnected(username);
-					}
-				} else if (msg.getType() == Message.LOGIN) {
+				if (msg.getType() == Message.LOGIN) {
 					String loginInfo = msg.getMessage();
 					Credentials credentials = new Credentials(loginInfo);
 
-					if (credentials.isValidLogin()) {
+                    // check if user is already logged in
+                    if (usernameIsTaken(credentials.getUsername())) {
+                        try {
+                            this.sendMessage(new Message("", Message.USER_LOGGED_IN));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+					else if (credentials.isValidLogin()) {
 						try {
 							this.sendMessage(new Message("", Message.LOGIN_OK));
 							username = credentials.getUsername();
