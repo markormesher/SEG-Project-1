@@ -54,9 +54,6 @@ public class BattleServer {
 			if (serverMessageListener != null) serverMessageListener.onServerMessageReceived("New client connected");
 			BattleClientThread thread = new BattleClientThread(socket);
 
-			// store the thread
-			connectedClients.add(thread);
-
 			// start the thread
 			thread.start();
 		}
@@ -233,6 +230,9 @@ public class BattleServer {
                                 // store the new game
                                 activePairs.add(pair);
                                 waitingClient = null;
+
+                                // store the thread
+                                connectedClients.add(this);
                             }
 							checkBothUsernameSet(id);
 
