@@ -54,24 +54,6 @@ public class BattleServer {
 			if (serverMessageListener != null) serverMessageListener.onServerMessageReceived("New client connected");
 			BattleClientThread thread = new BattleClientThread(socket);
 
-			// store the thread
-			connectedClients.add(thread);
-
-			// set up a game, or save them in the queue
-			if (waitingClient == null) {
-				// wait in the queue
-				waitingClient = thread;
-			} else {
-				// create a new game
-				ClientPair pair = new ClientPair();
-				pair.clientA = waitingClient;
-				pair.clientB = thread;
-
-				// store the new game
-				activePairs.add(pair);
-				waitingClient = null;
-			}
-
 			// start the thread
 			thread.start();
 		}
@@ -235,6 +217,23 @@ public class BattleServer {
 						try {
 							this.sendMessage(new Message("", Message.LOGIN_OK));
 							username = credentials.getUsername();
+                            // set up a game, or save them in the queue
+                            if (waitingClient == null) {
+                                // wait in the queue
+                                waitingClient = this;
+                            } else {
+                                // create a new game
+                                ClientPair pair = new ClientPair();
+                                pair.clientA = waitingClient;
+                                pair.clientB = this;
+
+                                // store the new game
+                                activePairs.add(pair);
+                                waitingClient = null;
+
+                                // store the thread
+                                connectedClients.add(this);
+                            }
 							checkBothUsernameSet(id);
 
 							// notify all clientConnectedListeners
