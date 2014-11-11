@@ -606,6 +606,7 @@ public class BattleClientGui extends JFrame implements BattleClientGuiInterface 
 		// send message to opponent that I have disconnected.
 		try {
 			client.sendMessage(new Message(opponentUsername, Message.OPPONENT_DISCONNECTED));
+            this.dispose();
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}

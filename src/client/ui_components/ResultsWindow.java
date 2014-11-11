@@ -15,6 +15,7 @@ public class ResultsWindow extends JFrame {
 	// view components
 	private JPanel innerGrid;
 	private Font font;
+    private JFrame clientFrame;
 
 	public ResultsWindow(Result result, Result opponentResult, final BattleClientGui clientFrame) {
 		// create the font
@@ -28,7 +29,7 @@ public class ResultsWindow extends JFrame {
 		}
 
 		// reference to the BattleClientGui (don't link) to dispose of when opening new game
-		JFrame clientFrame1 = clientFrame;
+		this.clientFrame = clientFrame;
 
 		// set up window
 		setSize(350, 350);
